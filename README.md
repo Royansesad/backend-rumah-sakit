@@ -66,11 +66,11 @@ npm run dev
 
 ---
 
-## 🔑 Akun Placeholder / Demo User per Role
+## Akun Placeholder / Demo User per Role
 
 Seluruh role telah dibuatkan akun *placeholder* di database. Gunakan kredensial di bawah ini untuk testing:
 
-> 🔓 **Password untuk semua akun placeholder:** `password123`
+> **Password untuk semua akun placeholder:** `password123`
 
 | Role | Portal Login | Email Placeholder | Password | Nama / Keterangan |
 |---|---|---|---|---|
@@ -85,14 +85,14 @@ Seluruh role telah dibuatkan akun *placeholder* di database. Gunakan kredensial 
 
 ---
 
-## 🌐 Halaman Web & Panel Login
+## Halaman Web & Panel Login
 
 - **`/login`** — Portal Login khusus Tamu / Pasien (tanpa dropdown role).
 - **`/admin-login`** — Portal Login khusus Admin & Staff/Pegawai (dilengkapi Dropdown Role).
 
 ---
 
-## 📡 Dokumentasi Endpoint REST API (v1)
+## Dokumentasi Endpoint REST API (v1)
 
 Seluruh response REST API dikembalikan dalam format **JSON**.
 
@@ -162,7 +162,7 @@ Seluruh response REST API dikembalikan dalam format **JSON**.
 
 ---
 
-## 📂 Struktur Utama Direktori Backend
+## Struktur Utama Direktori Backend
 
 ```text
 backend-rumah-sakit/
