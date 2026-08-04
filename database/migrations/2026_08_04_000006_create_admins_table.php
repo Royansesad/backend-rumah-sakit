@@ -15,9 +15,8 @@ return new class extends Migration
             $table->string('password', 255);
             $table->string('no_hp', 20)->nullable();
             $table->string('foto_profil', 255)->nullable();
-            $table->string('nomor_id', 50)->unique()->nullable();
+            $table->string('jabatan', 100)->nullable();
             $table->string('level_akses', 50)->default('standard');
-            $table->enum('jk', ['Laki-laki', 'Perempuan'])->nullable();
             $table->text('keterangan')->nullable();
             $table->enum('status_akun', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamp('last_login_at')->nullable();

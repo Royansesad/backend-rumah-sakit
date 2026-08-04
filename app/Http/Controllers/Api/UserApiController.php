@@ -21,6 +21,10 @@ class UserApiController extends Controller
         'manajemen' => 'manajemen',
     ];
 
+    /**
+     * GET /api/v1/users?role={role}
+     * Returns list of staff users for specified role including all ERD columns.
+     */
     public function index(Request $request)
     {
         $selectedRole = $request->input('role', 'admin');
@@ -28,7 +32,8 @@ class UserApiController extends Controller
         if (!array_key_exists($selectedRole, $this->rolesMap)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Role tidak valid'
+                'message' => 'Role tidak valid',
+                'available_roles' => array_keys($this->rolesMap)
             ], 422);
         }
 
@@ -52,33 +57,43 @@ class UserApiController extends Controller
         ]);
     }
 
+    /**
+     * POST /api/v1/users
+     * Creates new staff user with role-specific ERD columns.
+     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'role' => 'required|string',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'password' => 'required|min:6',
-        ]);
+        $role = $request->input('role', 'admin');
 
-        if (!array_key_exists($validated['role'], $this->rolesMap)) {
+        if (!array_key_exists($role, $this->rolesMap)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Role tidak valid'
             ], 422);
         }
 
-        $table = $this->rolesMap[$validated['role']];
-        $id = Str::uuid();
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+        ]);
 
-        DB::table($table)->insert([
+        $table = $this->rolesMap[$role];
+        $id = (string) Str::uuid();
+
+        // Support both 'nama_lengkap' and 'name'
+        $namaLengkap = $request->input('nama_lengkap', $request->input('name', 'User ' . ucfirst($role)));
+
+        $insertData = array_merge($request->except(['role', 'name', '_token', '_method']), [
             'id' => $id,
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'nama_lengkap' => $namaLengkap,
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')),
+            'status_akun' => $request->input('status_akun', 'aktif'),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        DB::table($table)->insert($insertData);
 
         $currentUser = session('simrs_user');
         $currentRole = session('simrs_role');
@@ -88,22 +103,23 @@ class UserApiController extends Controller
             'pembuat_type' => $currentRole ?? 'api',
             'modul' => 'api_user_management',
             'aksi' => 'CREATE_USER',
-            'data_sesudah' => json_encode(['role' => $validated['role'], 'user_id' => $id]),
+            'data_sesudah' => json_encode(['role' => $role, 'user_id' => $id, 'nama_lengkap' => $namaLengkap]),
             'ip_address' => $request->ip(),
         ]);
 
+        unset($insertData['password']);
+
         return response()->json([
             'status' => 'success',
-            'message' => "User {$validated['role']} berhasil dibuat",
-            'data' => [
-                'id' => $id,
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'role' => $validated['role'],
-            ]
+            'message' => "User {$role} berhasil dibuat",
+            'data' => $insertData
         ], 201);
     }
 
+    /**
+     * PUT /api/v1/users/{role}/{id}
+     * Updates staff user data (supports all role-specific columns).
+     */
     public function update(Request $request, $role, $id)
     {
         if (!array_key_exists($role, $this->rolesMap)) {
@@ -114,7 +130,21 @@ class UserApiController extends Controller
         }
 
         $table = $this->rolesMap[$role];
+        $existing = DB::table($table)->where('id', $id)->first();
+
+        if (!$existing) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan'
+            ], 404);
+        }
+
         $updateData = $request->except(['id', '_token', '_method']);
+
+        if ($request->has('name') && !$request->has('nama_lengkap')) {
+            $updateData['nama_lengkap'] = $request->input('name');
+            unset($updateData['name']);
+        }
 
         if (isset($updateData['password']) && !empty($updateData['password'])) {
             $updateData['password'] = Hash::make($updateData['password']);
@@ -134,7 +164,7 @@ class UserApiController extends Controller
             'pembuat_type' => $currentRole ?? 'api',
             'modul' => 'api_user_management',
             'aksi' => 'UPDATE_USER',
-            'data_sesudah' => json_encode(['role' => $role, 'user_id' => $id]),
+            'data_sesudah' => json_encode(['role' => $role, 'user_id' => $id, 'updated_fields' => array_keys($updateData)]),
             'ip_address' => $request->ip(),
         ]);
 

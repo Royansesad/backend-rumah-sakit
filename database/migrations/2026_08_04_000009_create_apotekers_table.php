@@ -15,8 +15,8 @@ return new class extends Migration
             $table->string('password', 255);
             $table->string('no_hp', 20)->nullable();
             $table->string('foto_profil', 255)->nullable();
+            $table->string('nomor_sipa', 50)->unique()->nullable();
             $table->foreignUuid('unit_farmasi_id')->nullable()->constrained('unit_farmasi')->nullOnDelete();
-            $table->text('sertifikasi_keahlian')->nullable();
             $table->enum('status_akun', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamp('last_login_at')->nullable();
             $table->timestamps();

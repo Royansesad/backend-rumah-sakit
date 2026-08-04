@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('foto_profil', 255)->nullable();
             $table->enum('shift', ['pagi', 'siang', 'malam'])->nullable();
             $table->foreignUuid('loket_id')->nullable()->constrained('loket_kasir')->nullOnDelete();
+            $table->decimal('batas_transaksi_harian', 15, 2)->nullable()->default(0);
             $table->enum('status_akun', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamp('last_login_at')->nullable();
             $table->timestamps();

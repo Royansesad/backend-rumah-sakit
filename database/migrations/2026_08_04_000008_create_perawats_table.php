@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('nomor_str', 50)->unique();
             $table->foreignUuid('ruangan_id')->nullable()->constrained('ruangan')->nullOnDelete();
             $table->enum('shift', ['pagi', 'siang', 'malam'])->nullable();
+            $table->string('spesialisasi_tambahan', 100)->nullable();
             $table->text('sertifikasi_keahlian')->nullable();
             $table->enum('status_akun', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamp('last_login_at')->nullable();

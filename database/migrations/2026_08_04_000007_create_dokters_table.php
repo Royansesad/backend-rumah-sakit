@@ -16,9 +16,10 @@ return new class extends Migration
             $table->string('no_hp', 20)->nullable();
             $table->string('foto_profil', 255)->nullable();
             $table->string('nomor_str', 50)->unique();
+            $table->string('nomor_sip', 50)->unique()->nullable();
             $table->string('spesialisasi', 100)->nullable();
             $table->foreignUuid('poli_id')->nullable()->constrained('poli')->nullOnDelete();
-            $table->enum('jk', ['Laki-laki', 'Perempuan'])->nullable();
+            $table->string('tanda_tangan_digital', 255)->nullable();
             $table->text('kondisi_kontrak_digital')->nullable();
             $table->enum('status_praktik', ['aktif', 'cuti', 'nonaktif'])->default('aktif');
             $table->enum('status_akun', ['aktif', 'nonaktif'])->default('aktif');

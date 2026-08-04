@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('no_hp', 20)->nullable();
             $table->string('foto_profil', 255)->nullable();
             $table->string('jabatan', 100)->nullable();
-            $table->string('tingkat_laporan', 100)->nullable();
+            $table->string('lingkup_laporan', 100)->nullable();
             $table->enum('status_akun', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamp('last_login_at')->nullable();
             $table->timestamps();
