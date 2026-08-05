@@ -2,17 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasRole;
+use App\Models\Contracts\HasSimrsRole;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
-class Dokter extends Model
+class Dokter extends Authenticatable implements HasSimrsRole
 {
-    use HasUuids;
+    use HasApiTokens, HasRole, HasUuids;
+
+    public const ROLE = 'dokter';
 
     protected $table = 'dokters';
+
     protected $guarded = [];
 
-    public function poli()
+    protected $hidden = ['password'];
+
+    /** @return BelongsTo<Poli, $this> */
+    public function poli(): BelongsTo
     {
         return $this->belongsTo(Poli::class, 'poli_id');
     }

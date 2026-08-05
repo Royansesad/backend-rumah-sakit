@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\AuditLog;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AuditLogApiController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $query = AuditLog::query();
 
@@ -28,7 +29,7 @@ class AuditLogApiController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $logs
+            'data' => $logs,
         ]);
     }
 }

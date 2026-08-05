@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
+use App\Models\Pasien;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Pasien;
-use App\Models\AuditLog;
-use Illuminate\Support\Str;
+use Inertia\Response;
 
 class PatientController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $query = Pasien::query();
 
         if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('no_rm', 'like', "%{$search}%");
+            $search = trim((string) $request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('nomor_rekam_medis', 'like', "%{$search}%");
+            });
         }
 
         $patients = $query->paginate(10);
@@ -28,20 +31,32 @@ class PatientController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string',
-            // other validation
+            'nama_lengkap' => 'required|string|max:150',
+            'nik' => 'nullable|string|max:20',
+            'tanggal_lahir' => 'nullable|date',
+            'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
+            'golongan_darah' => 'nullable|in:A,B,AB,O,-',
+            'alamat' => 'nullable|string',
+            'no_hp' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:150',
         ]);
 
-        $noRm = 'RM-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        $noRm = 'RM-'.date('Y').'-'.str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT);
 
         $patient = Pasien::create([
-            'id' => Str::uuid(),
-            'no_rm' => $noRm,
-            'name' => $request->name,
-            // ...
+            'nomor_rekam_medis' => $noRm,
+            'nama_lengkap' => $request->nama_lengkap,
+            'nik' => $request->nik,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'golongan_darah' => $request->golongan_darah,
+            'alamat' => $request->alamat,
+            'no_hp' => $request->no_hp,
+            'email' => $request->email,
+            'status_aktif' => 'aktif',
         ]);
 
         $currentUser = session('simrs_user');

@@ -2,17 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasRole;
+use App\Models\Contracts\HasSimrsRole;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
-class Perawat extends Model
+class Perawat extends Authenticatable implements HasSimrsRole
 {
-    use HasUuids;
+    use HasApiTokens, HasRole, HasUuids;
+
+    public const ROLE = 'perawat';
 
     protected $table = 'perawats';
+
     protected $guarded = [];
 
-    public function ruangan()
+    protected $hidden = ['password'];
+
+    /** @return BelongsTo<Ruangan, $this> */
+    public function ruangan(): BelongsTo
     {
         return $this->belongsTo(Ruangan::class, 'ruangan_id');
     }

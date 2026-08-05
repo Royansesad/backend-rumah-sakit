@@ -2,36 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Models\AuditLog;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class UserController extends Controller
 {
-    public function index(Request $request)
+    /** @var array<string, string> */
+    protected array $rolesMap = [
+        'admin' => 'admins',
+        'dokter' => 'dokters',
+        'perawat' => 'perawats',
+        'apoteker' => 'apotekers',
+        'kasir' => 'kasirs',
+        'resepsionis' => 'resepsionis',
+        'manajemen' => 'manajemen',
+    ];
+
+    public function index(Request $request): Response
     {
         $selectedRole = $request->input('role', 'admin');
-        
-        $rolesMap = [
-            'admin' => 'admins',
-            'dokter' => 'dokters',
-            'perawat' => 'perawats',
-            'apoteker' => 'apotekers',
-            'kasir' => 'kasirs',
-            'resepsionis' => 'resepsionis',
-            'manajemen' => 'manajemen',
-        ];
 
-        if (!array_key_exists($selectedRole, $rolesMap)) {
+        if (! array_key_exists($selectedRole, $this->rolesMap)) {
             $selectedRole = 'admin';
         }
 
-        $users = DB::table($rolesMap[$selectedRole])->get();
-        
+        $users = DB::table($this->rolesMap[$selectedRole])->get();
+
         $counts = [];
-        foreach($rolesMap as $roleKey => $table) {
+        foreach ($this->rolesMap as $roleKey => $table) {
             $counts[$roleKey] = DB::table($table)->count();
         }
 
@@ -42,33 +46,28 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'role' => 'required|string',
-            'name' => 'required|string',
-            'email' => 'required|email|unique:admins|unique:dokters', // Simplified validation
+            'role' => 'required|string|in:'.implode(',', array_keys($this->rolesMap)),
+            'nama_lengkap' => 'required|string|max:150',
+            'email' => 'required|email|max:150',
             'password' => 'required|min:6',
         ]);
 
-        $rolesMap = [
-            'admin' => 'admins',
-            'dokter' => 'dokters',
-            'perawat' => 'perawats',
-            'apoteker' => 'apotekers',
-            'kasir' => 'kasirs',
-            'resepsionis' => 'resepsionis',
-            'manajemen' => 'manajemen',
-        ];
+        foreach ($this->rolesMap as $table) {
+            if (DB::table($table)->where('email', $request->email)->exists()) {
+                return back()->withErrors(['email' => 'Email sudah digunakan.']);
+            }
+        }
 
-        $table = $rolesMap[$request->role];
+        $table = $this->rolesMap[$request->role];
 
-        $id = Str::uuid();
         DB::table($table)->insert([
-            'id' => $id,
-            'name' => $request->name,
+            'id' => (string) Str::uuid(),
+            'nama_lengkap' => $request->nama_lengkap,
             'email' => $request->email,
-            'password' => \Hash::make($request->password),
+            'password' => Hash::make($request->password),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -88,24 +87,35 @@ class UserController extends Controller
         return redirect()->back();
     }
 
-    public function update(Request $request, $role, $id)
+    public function update(Request $request, string $role, string $id): RedirectResponse
     {
-        $rolesMap = [
-            'admin' => 'admins',
-            'dokter' => 'dokters',
-            'perawat' => 'perawats',
-            'apoteker' => 'apotekers',
-            'kasir' => 'kasirs',
-            'resepsionis' => 'resepsionis',
-            'manajemen' => 'manajemen',
-        ];
-
-        if (!array_key_exists($role, $rolesMap)) {
+        if (! array_key_exists($role, $this->rolesMap)) {
             return back();
         }
 
-        $table = $rolesMap[$role];
-        DB::table($table)->where('id', $id)->update($request->except(['_token', '_method']));
+        $table = $this->rolesMap[$role];
+
+        $data = $request->only(['nama_lengkap', 'email', 'password', 'status_akun', 'shift']);
+
+        if (isset($data['password']) && $data['password'] !== '') {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        if (isset($data['email'])) {
+            foreach ($this->rolesMap as $otherTable) {
+                if (
+                    DB::table($otherTable)->where('email', $data['email'])->where('id', '!=', $id)->exists()
+                ) {
+                    return back()->withErrors(['email' => 'Email sudah digunakan.']);
+                }
+            }
+        }
+
+        $data['updated_at'] = now();
+
+        DB::table($table)->where('id', $id)->update($data);
 
         $currentUser = session('simrs_user');
         $currentRole = session('simrs_role');

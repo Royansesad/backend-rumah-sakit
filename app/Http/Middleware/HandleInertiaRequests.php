@@ -41,6 +41,8 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'user' => session('simrs_user'),
+            'role' => session('simrs_role'),
         ];
     }
 }

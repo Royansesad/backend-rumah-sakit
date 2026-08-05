@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
 class RbacApiController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         $matrix = [
             'roles' => ['admin', 'dokter', 'perawat', 'apoteker', 'kasir', 'resepsionis', 'manajemen', 'pasien'],
@@ -20,12 +21,12 @@ class RbacApiController extends Controller
                 ['key' => 'registration', 'label' => 'Pendaftaran'],
                 ['key' => 'reports', 'label' => 'Laporan'],
                 ['key' => 'audit_log', 'label' => 'Audit Log'],
-            ]
+            ],
         ];
 
         return response()->json([
             'status' => 'success',
-            'data' => $matrix
+            'data' => $matrix,
         ]);
     }
 }

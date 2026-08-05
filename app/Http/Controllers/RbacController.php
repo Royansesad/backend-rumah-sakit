@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Inertia\Response;
 
 class RbacController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         $matrix = [
             'admin' => ['manage_users', 'view_reports', 'manage_settings'],

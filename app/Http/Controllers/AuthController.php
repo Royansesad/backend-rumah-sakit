@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
 use App\Models\AuditLog;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AuthController extends Controller
 {
+    /** @var array<string, string> */
     protected array $rolesMap = [
         'admin' => 'admins',
         'dokter' => 'dokters',
@@ -23,7 +26,7 @@ class AuthController extends Controller
     /**
      * Portal Login Tamu / Pasien (/login)
      */
-    public function showGuestLogin()
+    public function showGuestLogin(): Response
     {
         return Inertia::render('auth/login-pasien');
     }
@@ -31,7 +34,7 @@ class AuthController extends Controller
     /**
      * Portal Login Admin / Pegawai / Staff (/admin-login)
      */
-    public function showAdminLogin()
+    public function showAdminLogin(): Response
     {
         return Inertia::render('auth/login-staff');
     }
@@ -39,35 +42,37 @@ class AuthController extends Controller
     /**
      * Handler Login Tamu / Pasien
      */
-    public function loginGuest(Request $request)
+    public function loginGuest(Request $request): RedirectResponse
     {
         $request->merge(['role' => 'pasien']);
+
         return $this->login($request);
     }
 
     /**
      * Handler Login Admin / Pegawai / Staff (dengan Role Dropdown)
      */
-    public function loginAdmin(Request $request)
+    public function loginAdmin(Request $request): RedirectResponse
     {
         $request->validate([
             'role' => 'required|string|in:admin,dokter,perawat,apoteker,kasir,resepsionis,manajemen',
         ]);
+
         return $this->login($request);
     }
 
     /**
      * Core Login Processing
      */
-    public function login(Request $request)
+    public function login(Request $request): RedirectResponse
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => 'required|string',
             'role' => 'required|string',
         ]);
 
-        if (!array_key_exists($request->role, $this->rolesMap)) {
+        if (! array_key_exists($request->role, $this->rolesMap)) {
             return back()->withErrors(['role' => 'Role tidak valid.']);
         }
 
@@ -76,6 +81,9 @@ class AuthController extends Controller
 
         if ($user && \Hash::check($request->password, $user->password)) {
             $userArray = (array) $user;
+
+            $request->session()->regenerate();
+
             session(['simrs_user' => $userArray, 'simrs_role' => $request->role]);
 
             AuditLog::create([
@@ -96,7 +104,7 @@ class AuthController extends Controller
     /**
      * Logout Handler
      */
-    public function logout(Request $request)
+    public function logout(Request $request): RedirectResponse
     {
         $user = session('simrs_user');
         $role = session('simrs_role');
@@ -112,7 +120,12 @@ class AuthController extends Controller
             ]);
         }
 
-        session()->forget(['simrs_user', 'simrs_role']);
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        if ($role !== null && $role !== 'pasien') {
+            return redirect()->route('login.admin');
+        }
 
         return redirect()->route('login');
     }

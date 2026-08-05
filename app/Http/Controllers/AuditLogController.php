@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\AuditLog;
+use Inertia\Response;
 
 class AuditLogController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $query = AuditLog::query();
 
         if ($request->has('modul')) {
-            $query->where('aksi', 'like', "%{$request->input('modul')}%");
+            $query->where('modul', 'like', "%{$request->input('modul')}%");
         }
-        
+
         if ($request->has('pembuat_type')) {
             $query->where('pembuat_type', $request->input('pembuat_type'));
         }

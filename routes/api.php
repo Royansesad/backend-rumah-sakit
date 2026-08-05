@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuditLogApiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PatientApiController;
-use App\Http\Controllers\Api\UserApiController;
-use App\Http\Controllers\Api\AuditLogApiController;
 use App\Http\Controllers\Api\RbacApiController;
+use App\Http\Controllers\Api\UserApiController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,27 +14,35 @@ use App\Http\Controllers\Api\RbacApiController;
 */
 
 Route::prefix('v1')->group(function () {
-    // Auth REST API Endpoints
-    Route::post('/login', [AuthController::class, 'loginGuest']);          // 1. API Login Tamu / Pasien
-    Route::post('/admin-login', [AuthController::class, 'loginAdmin']);     // 2. API Login Admin / Staff (Dropdown Role)
+    // Auth REST API Endpoints (public, token issued on success)
+    Route::post('/login', [AuthController::class, 'loginGuest'])->middleware('throttle:login');          // 1. API Login Tamu / Pasien
+    Route::post('/admin-login', [AuthController::class, 'loginAdmin'])->middleware('throttle:login');     // 2. API Login Admin / Staff (Dropdown Role)
 
-    Route::post('/auth/login', [AuthController::class, 'login']);
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
-    // Pasien API
-    Route::get('/pasien', [PatientApiController::class, 'index']);
-    Route::post('/pasien', [PatientApiController::class, 'store']);
-    Route::get('/pasien/{id}', [PatientApiController::class, 'show']);
+    // Authenticated REST API Endpoints (Sanctum Bearer Token)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::get('/auth/me', [AuthController::class, 'me']);
 
-    // User Management API
-    Route::get('/users', [UserApiController::class, 'index']);
-    Route::post('/users', [UserApiController::class, 'store']);
-    Route::put('/users/{role}/{id}', [UserApiController::class, 'update']);
+        // Pasien API
+        Route::get('/pasien', [PatientApiController::class, 'index']);
+        Route::post('/pasien', [PatientApiController::class, 'store'])
+            ->middleware('role:admin,manajemen,resepsionis,dokter,perawat,kasir');
+        Route::get('/pasien/{id}', [PatientApiController::class, 'show']);
 
-    // Audit Log API
-    Route::get('/audit-logs', [AuditLogApiController::class, 'index']);
+        // User Management & Audit Log API (Management only)
+        Route::middleware('role:admin,manajemen')->group(function () {
+            Route::get('/users', [UserApiController::class, 'index']);
+            Route::post('/users', [UserApiController::class, 'store']);
+            Route::put('/users/{role}/{id}', [UserApiController::class, 'update']);
 
-    // RBAC Matrix API
-    Route::get('/rbac', [RbacApiController::class, 'index']);
+            // Audit Log API
+            Route::get('/audit-logs', [AuditLogApiController::class, 'index']);
+        });
+
+        // RBAC Matrix API (Admin only)
+        Route::get('/rbac', [RbacApiController::class, 'index'])
+            ->middleware('role:admin');
+    });
 });
