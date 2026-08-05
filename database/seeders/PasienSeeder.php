@@ -61,7 +61,7 @@ class PasienSeeder extends Seeder
                 'status_aktif' => 'aktif',
                 'created_at' => $now,
                 'updated_at' => $now,
-            ]
+            ],
         ]);
     }
 }

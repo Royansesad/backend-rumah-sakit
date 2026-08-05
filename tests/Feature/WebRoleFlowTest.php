@@ -215,7 +215,7 @@ it('filters audit logs by module', function () {
 });
 
 it('creates a patient through the web flow', function () {
-    webLogin('lina.sari@simrs.id', 'resepsionis');
+    webLogin('budi.admin@simrs.id', 'admin');
 
     $this->post('/pasien', [
         'nama_lengkap' => 'Budi Test',

@@ -30,9 +30,10 @@ Repository ini berisi **Backend Service & REST API** untuk Sistem Informasi Mana
 Proyek ini adalah backend SIMRS dengan fitur utama:
 
 - **REST API (v1)** dengan autentikasi token **Laravel Sanctum** (`Bearer` token) untuk dikonsumsi aplikasi eksternal (mobile / SPA terpisah).
+- **Pendaftaran Pasien** — API pendaftaran pasien untuk tiga jenis layanan: **Rawat Jalan**, **Rawat Inap**, dan **IGD**, dengan nomor pendaftaran otomatis, validasi kondisional per jenis layanan, dan statistik harian.
 - **Role-Based Access Control (RBAC)** — 8 role berbeda: `admin`, `dokter`, `perawat`, `apoteker`, `kasir`, `resepsionis`, `manajemen`, dan `pasien`.
 - **Satu tabel per role** — setiap role (kecuali `pasien`) disimpan di tabel tersendiri dengan kolom ERD spesifik (mis. dokter punya `nomor_str`, kasir punya `batas_transaksi_harian`).
-- **Audit Log** — setiap aktivitas login/logout/CRUD tercatat ke tabel `audit_logs` beserta IP address.
+- **Audit Log** — setiap aktivitas login/logout/CRUD/pendaftaran tercatat ke tabel `audit_logs` beserta IP address.
 - **Frontend preview berbasis Inertia + React** — berfungsi sebagai *placeholder* untuk memverifikasi alur login dan halaman.
 - **Password selalu di-hash** dengan bcrypt dan **tidak pernah diekspos** pada response API.
 
@@ -345,8 +346,10 @@ Semua endpoint di bagian ini **wajib menyertakan `Authorization: Bearer <token>`
 | Method | Endpoint | Hak Akses |
 |---|---|---|
 | GET | `/api/v1/pasien` | Semua role terautentikasi |
-| POST | `/api/v1/pasien` | `admin`, `manajemen`, `resepsionis`, `dokter`, `perawat`, `kasir` |
+| POST | `/api/v1/pasien` | `admin`, `resepsionis` |
 | GET | `/api/v1/pasien/{id}` | Semua role terautentikasi |
+| PUT | `/api/v1/pasien/{id}` | `admin`, `resepsionis`, `manajemen` |
+| DELETE | `/api/v1/pasien/{id}` | `admin`, `manajemen` |
 
 **`GET /api/v1/pasien` — Daftar & pencarian data pasien**
 
@@ -372,14 +375,143 @@ Body Request (contoh):
 
 - Kolom `nama_lengkap` **wajib** diisi (alias `name` juga diterima).
 - `nomor_rekam_medis` otomatis di-generate (`RM-<tahun>-<angka>`) jika tidak dikirim.
-- Field opsional lain sesuai ERD: `tanggal_lahir`, `email`, `password`, `nama_kontak_darurat`, `no_hp_kontak_darurat`, `alergi`, `riwayat_penyakit`, `status_akun`.
+- Field opsional lain sesuai ERD: `tanggal_lahir`, `email`, `password`, `nama_kontak_darurat`, `no_hp_kontak_darurat`, `alergi`, `riwayat_penyakit`, `status_akun`, serta pendaftaran layanan langsung: `jenis_layanan` (`rawat_jalan`, `rawat_inap`, `igd`), `penjamin`, `prioritas`, `keluhan`.
 - Response sukses: `201 Created`.
 
 **`GET /api/v1/pasien/{id}` — Detail data rekam medis pasien**
 
 - Role `pasien` hanya boleh mengakses rekam medis miliknya sendiri; selain itu mendapat `403`.
 
-#### B. Manajemen User Staff
+#### B. Pendaftaran Pasien
+
+Endpoint untuk mendaftarkan pasien ke layanan rumah sakit (rawat jalan, rawat inap, IGD). Data pendaftaran disimpan langsung di tabel `pasien`.
+
+| Method | Endpoint | Hak Akses | Deskripsi |
+|---|---|---|---|
+| GET | `/api/v1/pendaftaran` | `admin`, `manajemen`, `resepsionis` | Daftar pasien terdaftar |
+| POST | `/api/v1/pendaftaran` | `admin`, `manajemen`, `resepsionis` | Daftarkan pasien ke layanan |
+| GET | `/api/v1/pendaftaran/{id}` | `admin`, `manajemen`, `resepsionis` | Detail pendaftaran pasien |
+| PUT | `/api/v1/pendaftaran/{id}` | `admin`, `manajemen`, `resepsionis` | Update data pendaftaran |
+| PATCH | `/api/v1/pendaftaran/{id}/status` | `admin`, `manajemen`, `resepsionis` | Update status pendaftaran |
+| DELETE | `/api/v1/pendaftaran/{id}/batalkan` | `admin`, `manajemen`, `resepsionis` | Batalkan pendaftaran |
+| GET | `/api/v1/pendaftaran/statistik` | `admin`, `manajemen`, `resepsionis` | Statistik harian pendaftaran |
+
+**`POST /api/v1/pendaftaran` -- Daftarkan pasien ke layanan**
+
+Body Request (contoh rawat jalan):
+
+```json
+{
+  "pasien_id": "uuid-pasien",
+  "jenis_layanan": "rawat_jalan",
+  "poli_id": "uuid-poli",
+  "dokter_id": "uuid-dokter",
+  "penjamin": "umum",
+  "keluhan": "Demam tinggi selama 3 hari"
+}
+```
+
+Body Request (contoh rawat inap):
+
+```json
+{
+  "pasien_id": "uuid-pasien",
+  "jenis_layanan": "rawat_inap",
+  "ruangan_id": "uuid-ruangan",
+  "dokter_id": "uuid-dokter",
+  "penjamin": "bpjs",
+  "nomor_penjamin": "0001234567890",
+  "keluhan": "Pasca operasi, perlu observasi"
+}
+```
+
+Body Request (contoh IGD):
+
+```json
+{
+  "pasien_id": "uuid-pasien",
+  "jenis_layanan": "igd",
+  "prioritas": "emergency",
+  "penjamin": "umum",
+  "keluhan": "Kecelakaan lalu lintas"
+}
+```
+
+Ketentuan validasi:
+
+- `pasien_id` dan `jenis_layanan` wajib diisi.
+- `poli_id` wajib diisi jika `jenis_layanan` = `rawat_jalan`.
+- `ruangan_id` wajib diisi jika `jenis_layanan` = `rawat_inap`.
+- `prioritas` (`normal` / `urgent` / `emergency`) wajib diisi jika `jenis_layanan` = `igd`.
+- `penjamin` wajib diisi (`umum`, `bpjs`, `asuransi`). Jika bukan `umum`, `nomor_penjamin` wajib diisi.
+- `nomor_pendaftaran` di-generate otomatis: `RJ-YYYYMMDD-XXXX`, `RI-YYYYMMDD-XXXX`, atau `IGD-YYYYMMDD-XXXX`.
+- `tanggal_pendaftaran` default ke hari ini jika tidak dikirim.
+- Pasien yang sudah memiliki pendaftaran aktif (status `menunggu` atau `diperiksa`) tidak dapat didaftarkan ulang sebelum pendaftaran sebelumnya diselesaikan atau dibatalkan.
+- Response sukses: `201 Created`.
+
+**`GET /api/v1/pendaftaran` -- Daftar pasien terdaftar**
+
+Parameter query:
+
+- `jenis_layanan` -- filter berdasarkan jenis layanan (`rawat_jalan`, `rawat_inap`, `igd`).
+- `status` -- filter berdasarkan status pendaftaran (`menunggu`, `diperiksa`, `selesai`, `batal`).
+- `tanggal` -- filter berdasarkan tanggal pendaftaran (`YYYY-MM-DD`).
+- `tanggal_dari` dan `tanggal_sampai` -- filter berdasarkan rentang tanggal.
+- `poli_id` -- filter berdasarkan poli tujuan.
+- `dokter_id` -- filter berdasarkan dokter.
+- `prioritas` -- filter berdasarkan prioritas IGD.
+- `search` -- pencarian berdasarkan `nama_lengkap`, `nomor_pendaftaran`, `nomor_rekam_medis`, atau `nik`.
+- `per_page` -- jumlah data per halaman (default `15`).
+
+Response menyertakan data relasi `dokter`, `poli`, dan `ruangan`.
+
+**`PATCH /api/v1/pendaftaran/{id}/status` -- Update status pendaftaran**
+
+```json
+{
+  "status_pendaftaran": "diperiksa"
+}
+```
+
+Status yang tersedia: `menunggu`, `diperiksa`, `selesai`, `batal`.
+
+**`DELETE /api/v1/pendaftaran/{id}/batalkan` -- Batalkan pendaftaran**
+
+Membatalkan pendaftaran dan mereset seluruh kolom pendaftaran pada data pasien ke nilai awal.
+
+**`GET /api/v1/pendaftaran/statistik` -- Statistik harian**
+
+Parameter query: `tanggal` (default: hari ini).
+
+Response contoh:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "tanggal": "2026-08-05",
+    "total": 25,
+    "per_jenis_layanan": {
+      "rawat_jalan": 15,
+      "rawat_inap": 7,
+      "igd": 3
+    },
+    "per_status": {
+      "menunggu": 8,
+      "diperiksa": 10,
+      "selesai": 5,
+      "batal": 2
+    },
+    "igd_prioritas": {
+      "normal": 1,
+      "urgent": 1,
+      "emergency": 1
+    }
+  }
+}
+```
+
+#### C. Manajemen User Staff
 
 | Method | Endpoint | Hak Akses |
 |---|---|---|
@@ -437,14 +569,16 @@ Body Request (contoh):
 
 | Endpoint | pasien | admin | manajemen | resepsionis | dokter | perawat | kasir | apoteker |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| `POST /login`, `/admin-login` | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| `GET /auth/me`, `POST /auth/logout` | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| `GET /pasien` | ✔ (data sendiri) | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| `GET /pasien/{id}` | ✔ (data sendiri) | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| `POST /pasien` | ✘ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✘ |
-| `GET/POST/PUT /users` | ✘ | ✔ | ✔ | ✘ | ✘ | ✘ | ✘ | ✘ |
-| `GET /audit-logs` | ✘ | ✔ | ✔ | ✘ | ✘ | ✘ | ✘ | ✘ |
-| `GET /rbac` | ✘ | ✔ | ✘ | ✘ | ✘ | ✘ | ✘ | ✘ |
+| `POST /login`, `/admin-login` | v | v | v | v | v | v | v | v |
+| `GET /auth/me`, `POST /auth/logout` | v | v | v | v | v | v | v | v |
+| `GET /pasien` | v (data sendiri) | v | v | v | v | v | v | v |
+| `GET /pasien/{id}` | v (data sendiri) | v | v | v | v | v | v | v |
+| `POST /pasien` | x | v | v | v | v | v | v | x |
+| `GET/POST/PUT/PATCH/DELETE /pendaftaran` | x | v | v | v | x | x | x | x |
+| `GET /pendaftaran/statistik` | x | v | v | v | x | x | x | x |
+| `GET/POST/PUT /users` | x | v | v | x | x | x | x | x |
+| `GET /audit-logs` | x | v | v | x | x | x | x | x |
+| `GET /rbac` | x | v | x | x | x | x | x | x |
 
 ---
 
@@ -473,7 +607,7 @@ Seluruh tabel menggunakan **UUID** sebagai primary key (`HasUuids`). Berikut rin
 | `kasirs` | `shift`, `batas_transaksi_harian` | `loket_id → loket_kasir` |
 | `resepsionis` | `shift` | `loket_id → loket_pendaftaran` |
 | `manajemen` | `jabatan`, `lingkup_laporan` | — |
-| `pasien` | `nomor_rekam_medis` (unique), `nik` (unique), `tanggal_lahir`, `jenis_kelamin`, `golongan_darah`, `alamat`, `no_hp`, `nama_kontak_darurat`, `no_hp_kontak_darurat`, `alergi`, `riwayat_penyakit`, `status_aktif` | — |
+| `pasien` | `nomor_rekam_medis` (unique), `nik` (unique), `tanggal_lahir`, `jenis_kelamin`, `golongan_darah`, `alamat`, `no_hp`, `nama_kontak_darurat`, `no_hp_kontak_darurat`, `alergi`, `riwayat_penyakit`, `status_aktif`, `nomor_pendaftaran` (unique), `jenis_layanan`, `status_pendaftaran`, `tanggal_pendaftaran`, `keluhan`, `penjamin`, `nomor_penjamin`, `prioritas`, `catatan_pendaftaran`, `didaftarkan_oleh`, `tipe_pendaftar` | `dokter_id` -> `dokters`, `poli_id` -> `poli`, `ruangan_id` -> `ruangan` |
 
 Kolom umum di semua tabel user: `nama_lengkap`, `email` (unique), `password` (hash), `no_hp`, `foto_profil`, `status_akun` (`aktif`/`nonaktif`), `last_login_at`, timestamps.
 
@@ -497,6 +631,10 @@ Setiap aktivitas penting dicatat ke tabel `audit_logs`:
 | `LOGIN` / `LOGOUT` | `auth` | Login/logout via portal web |
 | `API_LOGIN` / `API_LOGOUT` | `api_auth` | Login/logout via REST API |
 | `CREATE_PATIENT` | `pasien` / `api_pasien` | Pembuatan pasien baru |
+| `CREATE_PENDAFTARAN` | `api_pendaftaran` | Pendaftaran pasien ke layanan |
+| `UPDATE_PENDAFTARAN` | `api_pendaftaran` | Update data pendaftaran |
+| `UPDATE_STATUS_PENDAFTARAN` | `api_pendaftaran` | Perubahan status pendaftaran |
+| `BATALKAN_PENDAFTARAN` | `api_pendaftaran` | Pembatalan pendaftaran |
 | `CREATE_USER` / `UPDATE_USER` | `user_management` / `api_user_management` | Kelola user staff |
 
 Setiap entri menyimpan identitas pembuat (`pembuat_type` = role, `pembuat_id` = UUID), `ip_address`, serta snapshot data `data_sebelum` / `data_sesudah`.
@@ -522,9 +660,10 @@ sistem-rumahsakit/
 │   ├── Http/
 │   │   ├── Controllers/
 │   │   │   ├── Api/                    # REST API Controllers (Backend Core)
-│   │   │   │   ├── AuthController.php        # Login/logout/me (Bearer token)
-│   │   │   │   ├── PatientApiController.php  # CRUD pasien
-│   │   │   │   ├── UserApiController.php     # Kelola user staff
+│   │   │   │   ├── AuthController.php             # Login/logout/me (Bearer token)
+│   │   │   │   ├── PatientApiController.php       # CRUD pasien
+│   │   │   │   ├── PendaftaranApiController.php   # Pendaftaran pasien (rawat jalan/inap/IGD)
+│   │   │   │   ├── UserApiController.php          # Kelola user staff
 │   │   │   │   ├── AuditLogApiController.php # Riwayat audit log
 │   │   │   │   └── RbacApiController.php     # Matriks RBAC
 │   │   │   ├── AuthController.php      # Web Auth Controller (session)

@@ -34,6 +34,9 @@ Route::middleware(['web.auth'])->group(function () {
 
     Route::middleware('web.role:admin,dokter,perawat,apoteker,kasir,resepsionis,manajemen')->group(function () {
         Route::get('/pasien', [PatientController::class, 'index'])->name('pasien.index');
+    });
+
+    Route::middleware('web.role:admin,resepsionis')->group(function () {
         Route::post('/pasien', [PatientController::class, 'store'])->name('pasien.store');
     });
 

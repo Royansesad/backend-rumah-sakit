@@ -113,6 +113,30 @@ it('enforces role based authorization on patient creation', function () {
         'nama_lengkap' => 'Bambang Tri',
         'nik' => '3174098765432100',
     ])->assertStatus(201)->assertJsonPath('status', 'success');
+
+    $adminToken = apiLogin('budi.admin@simrs.id', role: 'admin');
+
+    $this->withToken($adminToken)->postJson('/api/v1/pasien', [
+        'nama_lengkap' => 'Bambang Tri',
+        'nik' => '3174098765432101',
+    ])->assertStatus(201)->assertJsonPath('status', 'success');
+});
+
+it('supports specifying jenis_layanan directly during patient creation', function () {
+    $token = apiLogin('budi.admin@simrs.id', role: 'admin');
+
+    $response = $this->withToken($token)->postJson('/api/v1/pasien', [
+        'nama_lengkap' => 'Dewi Anggraini',
+        'jenis_layanan' => 'rawat_jalan',
+        'penjamin' => 'bpjs',
+    ]);
+
+    $response->assertStatus(201)
+        ->assertJsonPath('status', 'success')
+        ->assertJsonPath('data.jenis_layanan', 'rawat_jalan')
+        ->assertJsonPath('data.status_pendaftaran', 'menunggu');
+
+    expect($response->json('data.nomor_pendaftaran'))->toContain('RJ-');
 });
 
 it('restricts patients to their own records only', function () {
@@ -231,4 +255,31 @@ it('restricts the rbac matrix to admins only', function () {
     $this->withToken($adminToken)->getJson('/api/v1/rbac')
         ->assertOk()
         ->assertJsonPath('status', 'success');
+});
+
+it('allows authorized staff to update and delete patient records via API', function () {
+    $adminToken = apiLogin('budi.admin@simrs.id', role: 'admin');
+    $pasien = Pasien::first();
+
+    // Update patient
+    $this->withToken($adminToken)->putJson("/api/v1/pasien/{$pasien->id}", [
+        'nama_lengkap' => 'Nama Pasien Terupdate',
+        'no_hp' => '089988776655',
+    ])->assertOk()
+        ->assertJsonPath('status', 'success')
+        ->assertJsonPath('data.nama_lengkap', 'Nama Pasien Terupdate');
+
+    $this->assertDatabaseHas('pasien', [
+        'id' => $pasien->id,
+        'nama_lengkap' => 'Nama Pasien Terupdate',
+    ]);
+
+    // Delete patient
+    $this->withToken($adminToken)->deleteJson("/api/v1/pasien/{$pasien->id}")
+        ->assertOk()
+        ->assertJsonPath('status', 'success');
+
+    $this->assertDatabaseMissing('pasien', [
+        'id' => $pasien->id,
+    ]);
 });

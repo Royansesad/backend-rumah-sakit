@@ -42,7 +42,7 @@ class AuditLogSeeder extends Seeder
                 'data_sesudah' => json_encode(['role' => 'dokter', 'email' => 'siti.rahayu@simrs.id']),
                 'ip_address' => '127.0.0.1',
                 'created_at' => now(),
-            ]
+            ],
         ]);
     }
 }
