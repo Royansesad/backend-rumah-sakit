@@ -747,10 +747,31 @@ composer test
 
 ## Cara Pengujian API (API Testing)
 
-Anda dapat menguji seluruh endpoint API di atas menggunakan **Postman**, **Insomnia**, atau cURL.
+Anda dapat menguji seluruh endpoint API di atas menggunakan **Postman**, **Insomnia**, skrip **`php artisan test`**, atau **cURL**.
 
-**Contoh 1 — Login Admin via cURL:**
+> [!IMPORTANT]
+> **Catatan Pengujian cURL Berdasarkan Sistem Operasi (Windows vs Linux/macOS):**
+> 
+> - **Linux / macOS / Git Bash**: Gunakan format cURL dengan petik tunggal (`'`) seperti biasa.
+> - **Windows PowerShell / CMD**: Jangan gunakan petik tunggal (`'`) pada parameter `-d`. Gunakan `curl.exe` dengan escape double quote (`\"`) atau referensi file JSON (`-d "@file.json"`). Jika menggunakan petik tunggal di PowerShell, Windows akan mengirim JSON yang rusak sehingga menimbulkan error `422 Unprocessable Content` atau `401 Unauthorized`.
 
+---
+
+### Perintah Automated Testing (Rekomendasi Utama)
+
+Jalankan test suite yang memvalidasi 20 REST API secara otomatis:
+
+```bash
+php artisan test --filter=ManualApiEndpointsTest
+```
+
+---
+
+### Contoh Perintah cURL per Sistem Operasi
+
+#### A. Linux / macOS / Git Bash
+
+**1. Login Admin:**
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/admin-login \
   -H "Accept: application/json" \
@@ -758,35 +779,47 @@ curl -X POST http://127.0.0.1:8000/api/v1/admin-login \
   -d '{"email":"budi.admin@simrs.id","password":"password123","role":"admin"}'
 ```
 
-**Contoh 2 — Login Pasien & pakai token untuk mengambil data diri:**
-
+**2. Profile Check:**
 ```bash
-# 1. Login, ambil token dari data.token pada response
-curl -X POST http://127.0.0.1:8000/api/v1/login \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"agus.pasien@simrs.id","password":"password123"}'
-
-# 2. Panggil endpoint terproteksi dengan Bearer token
 curl http://127.0.0.1:8000/api/v1/auth/me \
   -H "Accept: application/json" \
-  -H "Authorization: Bearer <TOKEN_DARI_LANGKAH_1>"
+  -H "Authorization: Bearer <TOKEN_BEARER>"
 ```
 
-**Contoh 3 — Buat pasien baru (role resepsionis):**
-
+**3. Tambah Pasien + Rawat Jalan BPJS:**
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/pasien \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <TOKEN>" \
-  -d '{"nama_lengkap":"Bambang Tri","nik":"3174098765432100","jenis_kelamin":"Laki-laki"}'
+  -H "Authorization: Bearer <TOKEN_ADMIN_ATAU_RESEPSIONIS>" \
+  -d '{"nama_lengkap":"Bambang Tri","jenis_layanan":"rawat_jalan","penjamin":"bpjs","nomor_penjamin":"0001234567890"}'
 ```
 
-**Contoh 4 — Lihat audit log dengan filter (role admin):**
+#### B. Windows PowerShell / CMD
 
-```bash
-curl "http://127.0.0.1:8000/api/v1/audit-logs?modul=api_auth&per_page=10" \
-  -H "Accept: application/json" \
-  -H "Authorization: Bearer <TOKEN_ADMIN>"
+**1. Login Admin (File Payload JSON):**
+
+Buat file `login.json`:
+```json
+{
+  "email": "budi.admin@simrs.id",
+  "password": "password123",
+  "role": "admin"
+}
 ```
+
+Jalankan:
+```powershell
+curl.exe -s -X POST http://127.0.0.1:8000/api/v1/admin-login -H "Accept: application/json" -H "Content-Type: application/json" -d "@login.json"
+```
+
+**2. Profile Check:**
+```powershell
+curl.exe -s http://127.0.0.1:8000/api/v1/auth/me -H "Accept: application/json" -H "Authorization: Bearer <TOKEN_BEARER>"
+```
+
+**3. Tambah Pasien + Rawat Jalan BPJS (Escaped Double Quote):**
+```powershell
+curl.exe -s -X POST http://127.0.0.1:8000/api/v1/pasien -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" -d "{\"nama_lengkap\":\"Bambang Tri\",\"jenis_layanan\":\"rawat_jalan\",\"penjamin\":\"bpjs\",\"nomor_penjamin\":\"0001234567890\"}"
+```
+

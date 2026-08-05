@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Dokter;
 use App\Models\Pasien;
 use App\Models\Poli;
 use App\Models\Ruangan;
