@@ -41,6 +41,8 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+    'api_security' => (bool) env('API_SECURITY_ENABLED', env('API_SECURITY', true)),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL

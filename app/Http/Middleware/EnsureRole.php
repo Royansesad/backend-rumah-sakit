@@ -14,6 +14,10 @@ class EnsureRole
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
+        if (! config('app.api_security', true)) {
+            return $next($request);
+        }
+
         $user = $request->user();
 
         if (! $user instanceof HasSimrsRole || ! in_array($user->getRoleAttribute(), $roles, true)) {

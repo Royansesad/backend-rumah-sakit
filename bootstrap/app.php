@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureApiAuthenticated;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\EnsureWebAuth;
 use App\Http\Middleware\EnsureWebRole;
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
+            'auth.api' => EnsureApiAuthenticated::class,
             'role' => EnsureRole::class,
             'web.auth' => EnsureWebAuth::class,
             'web.role' => EnsureWebRole::class,

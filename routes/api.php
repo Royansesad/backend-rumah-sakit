@@ -21,8 +21,8 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
-    // Authenticated REST API Endpoints (Sanctum Bearer Token)
-    Route::middleware('auth:sanctum')->group(function () {
+    // Authenticated REST API Endpoints (Sanctum Bearer Token or Toggleable Security)
+    Route::middleware('auth.api:sanctum')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/auth/me', [AuthController::class, 'me']);
 
