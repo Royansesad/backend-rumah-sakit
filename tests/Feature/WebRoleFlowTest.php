@@ -209,7 +209,8 @@ it('filters audit logs by module', function () {
     webLogin('budi.admin@simrs.id', 'admin');
 
     $this->get('/audit-logs?modul=auth')->assertInertia(fn (Assert $page) => $page
-        ->component('audit-logs/index')
+        ->component('admin-menu')
+        ->where('menu', 'audit-logs')
         ->has('logs.data')
         ->where('logs.data.0.modul', 'auth'));
 });

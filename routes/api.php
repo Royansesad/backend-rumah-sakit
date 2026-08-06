@@ -2,9 +2,13 @@
 
 use App\Http\Controllers\Api\AuditLogApiController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Icd10CodeApiController;
+use App\Http\Controllers\Api\ObatApiController;
 use App\Http\Controllers\Api\PatientApiController;
 use App\Http\Controllers\Api\PendaftaranApiController;
 use App\Http\Controllers\Api\RbacApiController;
+use App\Http\Controllers\Api\RekamMedisApiController;
+use App\Http\Controllers\Api\ResepApiController;
 use App\Http\Controllers\Api\UserApiController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,10 +25,42 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
+    // Public Read-Only TV Board Display Antrian Pasien
+    Route::get('/public/tv-board', [App\Http\Controllers\Api\AntrianApiController::class, 'tvBoard']);
+
     // Authenticated REST API Endpoints (Sanctum Bearer Token or Toggleable Security)
     Route::middleware('auth.api:sanctum')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/auth/me', [AuthController::class, 'me']);
+
+        // =====================================================================
+        // Modul Manajemen Jadwal Praktik Dokter & Shift Perawat
+        // =====================================================================
+        Route::get('/dokter/jadwal-mandiri', [App\Http\Controllers\Api\JadwalDokterApiController::class, 'mandiri']);
+        Route::get('/admin/jadwal-dokter/grid', [App\Http\Controllers\Api\JadwalDokterApiController::class, 'gridAdmin']);
+        Route::post('/admin/jadwal-dokter', [App\Http\Controllers\Api\JadwalDokterApiController::class, 'store']);
+
+        Route::get('/perawat/shift-schedules', [App\Http\Controllers\Api\JadwalShiftPerawatApiController::class, 'index']);
+        Route::post('/admin/shift-schedules', [App\Http\Controllers\Api\JadwalShiftPerawatApiController::class, 'store']);
+
+        // =====================================================================
+        // Modul Pengajuan Cuti & Tukar Shift (2-Level Approval)
+        // =====================================================================
+        Route::post('/pengajuan-cuti', [App\Http\Controllers\Api\PengajuanCutiApiController::class, 'store']);
+        Route::get('/pengajuan-cuti/mandiri', [App\Http\Controllers\Api\PengajuanCutiApiController::class, 'riwayatMandiri']);
+        Route::patch('/admin/pengajuan-cuti/{id}/persetujuan', [App\Http\Controllers\Api\PengajuanCutiApiController::class, 'persetujuanAdmin']);
+
+        Route::post('/pengajuan-tukar-jadwal', [App\Http\Controllers\Api\PengajuanTukarJadwalApiController::class, 'store']);
+        Route::get('/pengajuan-tukar-jadwal/mandiri', [App\Http\Controllers\Api\PengajuanTukarJadwalApiController::class, 'riwayatMandiri']);
+        Route::patch('/pengajuan-tukar-jadwal/{id}/persetujuan-target', [App\Http\Controllers\Api\PengajuanTukarJadwalApiController::class, 'persetujuanTarget']);
+        Route::patch('/admin/pengajuan-tukar-jadwal/{id}/persetujuan-admin', [App\Http\Controllers\Api\PengajuanTukarJadwalApiController::class, 'persetujuanAdmin']);
+
+        // =====================================================================
+        // Modul Manajemen Antrian Pasien
+        // =====================================================================
+        Route::post('/antrian/ambil', [App\Http\Controllers\Api\AntrianApiController::class, 'ambilAntrian']);
+        Route::get('/antrian/hari-ini', [App\Http\Controllers\Api\AntrianApiController::class, 'indexHariIni']);
+        Route::patch('/antrian/{id}/status', [App\Http\Controllers\Api\AntrianApiController::class, 'updateStatus']);
 
         // Pasien API
         Route::get('/pasien', [PatientApiController::class, 'index']);
@@ -60,5 +96,48 @@ Route::prefix('v1')->group(function () {
         // RBAC Matrix API (Admin only)
         Route::get('/rbac', [RbacApiController::class, 'index'])
             ->middleware('role:admin');
+
+        // =====================================================================
+        // Modul RME Lokal (Rekam Medis Elektronik)
+        // =====================================================================
+
+        // ICD-10 Lookup (semua role medis)
+        Route::get('/icd10', [Icd10CodeApiController::class, 'index']);
+
+        // Obat / Master Farmasi (Admin, Apoteker, Dokter)
+        Route::prefix('obat')->group(function () {
+            Route::get('/', [ObatApiController::class, 'index']);
+            Route::get('/{id}', [ObatApiController::class, 'show']);
+            Route::post('/', [ObatApiController::class, 'store'])
+                ->middleware('role:admin,apoteker');
+            Route::put('/{id}', [ObatApiController::class, 'update'])
+                ->middleware('role:admin,apoteker');
+            Route::delete('/{id}', [ObatApiController::class, 'destroy'])
+                ->middleware('role:admin,apoteker');
+        });
+
+        // Rekam Medis (Dokter, Perawat, Admin)
+        Route::prefix('rekam-medis')->group(function () {
+            Route::get('/', [RekamMedisApiController::class, 'index']);
+            Route::get('/{id}', [RekamMedisApiController::class, 'show']);
+            Route::get('/{pasienId}/monitoring', [RekamMedisApiController::class, 'monitoring']);
+            Route::post('/', [RekamMedisApiController::class, 'store'])
+                ->middleware('role:admin,dokter,perawat');
+            Route::put('/{id}', [RekamMedisApiController::class, 'update'])
+                ->middleware('role:admin,dokter,perawat');
+            Route::patch('/{id}/finalize', [RekamMedisApiController::class, 'finalize'])
+                ->middleware('role:admin,dokter');
+        });
+
+        // Resep Digital (Dokter, Apoteker, Admin)
+        Route::prefix('resep')->group(function () {
+            Route::get('/', [ResepApiController::class, 'index']);
+            Route::get('/{id}', [ResepApiController::class, 'show']);
+            Route::post('/', [ResepApiController::class, 'store'])
+                ->middleware('role:admin,dokter');
+            Route::patch('/{id}/tebus', [ResepApiController::class, 'tebus'])
+                ->middleware('role:admin,apoteker');
+        });
     });
 });
+

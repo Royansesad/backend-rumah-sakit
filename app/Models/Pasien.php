@@ -7,6 +7,7 @@ use App\Models\Contracts\HasSimrsRole;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -48,6 +49,20 @@ class Pasien extends Authenticatable implements HasSimrsRole
     public function ruangan(): BelongsTo
     {
         return $this->belongsTo(Ruangan::class, 'ruangan_id');
+    }
+
+    // --- Relasi RME ---
+
+    /** @return HasMany<RekamMedis, $this> */
+    public function rekamMedis(): HasMany
+    {
+        return $this->hasMany(RekamMedis::class, 'pasien_id');
+    }
+
+    /** @return HasMany<Resep, $this> */
+    public function reseps(): HasMany
+    {
+        return $this->hasMany(Resep::class, 'pasien_id');
     }
 
     // --- Query Scopes ---

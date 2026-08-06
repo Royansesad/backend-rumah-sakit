@@ -39,7 +39,10 @@ class UserController extends Controller
             $counts[$roleKey] = DB::table($table)->count();
         }
 
-        return Inertia::render('users/index', [
+        $menuComponent = (string) session('simrs_role', 'admin').'-menu';
+
+        return Inertia::render($menuComponent, [
+            'menu' => 'users',
             'users' => $users,
             'selectedRole' => $selectedRole,
             'counts' => $counts,

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             UserStaffSeeder::class,
             PasienSeeder::class,
             AuditLogSeeder::class,
+            RmeSeeder::class,
         ]);
     }
 }

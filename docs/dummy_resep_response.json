@@ -1,0 +1,115 @@
+{
+    "success": true,
+    "message": "Daftar resep berhasil diambil.",
+    "data": [
+        {
+            "id": "e5f6a7b8-c9d0-1234-efab-456789012345",
+            "no_resep": "RSP-20260806-001",
+            "tanggal_resep": "2026-08-06T10:00:00+07:00",
+            "status": "menunggu_ditebus",
+            "pasien": {
+                "id": "9c3f1a2e-4b5d-6e7f-8a9b-0c1d2e3f4a5b",
+                "nomor_rekam_medis": "RM-20260001",
+                "nama_lengkap": "Ahmad Fauzi"
+            },
+            "dokter": {
+                "id": "f6a7b8c9-d0e1-2345-fabc-567890123456",
+                "nama_lengkap": "dr. Budi Santoso, Sp.PD",
+                "spesialisasi": "Penyakit Dalam"
+            },
+            "rekam_medis_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "details": [
+                {
+                    "id": 1,
+                    "obat": {
+                        "id": 1,
+                        "kode_obat": "OBT-001",
+                        "nama_obat": "Amoxicillin 500mg",
+                        "bentuk_sediaan": "Kapsul",
+                        "harga": 5000.00
+                    },
+                    "aturan_pakai": "3x1 sesudah makan",
+                    "jumlah_dosis": 21,
+                    "catatan": "Habiskan antibiotik"
+                },
+                {
+                    "id": 2,
+                    "obat": {
+                        "id": 2,
+                        "kode_obat": "OBT-002",
+                        "nama_obat": "Paracetamol 500mg",
+                        "bentuk_sediaan": "Tablet",
+                        "harga": 2500.00
+                    },
+                    "aturan_pakai": "3x1 jika demam",
+                    "jumlah_dosis": 10,
+                    "catatan": null
+                },
+                {
+                    "id": 3,
+                    "obat": {
+                        "id": 5,
+                        "kode_obat": "OBT-005",
+                        "nama_obat": "Omeprazole 20mg",
+                        "bentuk_sediaan": "Kapsul",
+                        "harga": 8000.00
+                    },
+                    "aturan_pakai": "1x1 sebelum makan pagi",
+                    "jumlah_dosis": 14,
+                    "catatan": "Diminum 30 menit sebelum makan"
+                }
+            ]
+        },
+        {
+            "id": "a7b8c9d0-e1f2-3456-abcd-678901234567",
+            "no_resep": "RSP-20260730-003",
+            "tanggal_resep": "2026-07-30T11:30:00+07:00",
+            "status": "sudah_ditebus",
+            "pasien": {
+                "id": "9c3f1a2e-4b5d-6e7f-8a9b-0c1d2e3f4a5b",
+                "nomor_rekam_medis": "RM-20260001",
+                "nama_lengkap": "Ahmad Fauzi"
+            },
+            "dokter": {
+                "id": "f6a7b8c9-d0e1-2345-fabc-567890123456",
+                "nama_lengkap": "dr. Budi Santoso, Sp.PD",
+                "spesialisasi": "Penyakit Dalam"
+            },
+            "rekam_medis_id": "c3d4e5f6-a7b8-9012-cdef-234567890123",
+            "details": [
+                {
+                    "id": 4,
+                    "obat": {
+                        "id": 3,
+                        "kode_obat": "OBT-003",
+                        "nama_obat": "Amlodipine 5mg",
+                        "bentuk_sediaan": "Tablet",
+                        "harga": 6500.00
+                    },
+                    "aturan_pakai": "1x1 pagi hari",
+                    "jumlah_dosis": 30,
+                    "catatan": "Obat rutin hipertensi"
+                },
+                {
+                    "id": 5,
+                    "obat": {
+                        "id": 4,
+                        "kode_obat": "OBT-004",
+                        "nama_obat": "Metformin 500mg",
+                        "bentuk_sediaan": "Tablet",
+                        "harga": 4000.00
+                    },
+                    "aturan_pakai": "2x1 sesudah makan",
+                    "jumlah_dosis": 60,
+                    "catatan": null
+                }
+            ]
+        }
+    ],
+    "meta": {
+        "current_page": 1,
+        "per_page": 15,
+        "total": 2,
+        "last_page": 1
+    }
+}

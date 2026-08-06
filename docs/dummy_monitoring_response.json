@@ -1,0 +1,84 @@
+{
+    "success": true,
+    "message": "Data monitoring vitals pasien berhasil diambil.",
+    "data": {
+        "pasien": {
+            "id": "9c3f1a2e-4b5d-6e7f-8a9b-0c1d2e3f4a5b",
+            "nomor_rekam_medis": "RM-20260001",
+            "nama_lengkap": "Ahmad Fauzi",
+            "tanggal_lahir": "1985-03-15",
+            "jenis_kelamin": "Laki-laki",
+            "golongan_darah": "O",
+            "alergi": "Penisilin, Sulfonamid",
+            "kondisi_terakhir": "stabil"
+        },
+        "monitoring_terkini": {
+            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "tanggal_pemeriksaan": "2026-08-06T09:30:00+07:00",
+            "vital_signs": {
+                "sistol": 120,
+                "diastol": 80,
+                "suhu_tubuh": 36.5,
+                "denyut_nadi": 78,
+                "spo2": 98
+            },
+            "kondisi_pasien": "stabil",
+            "perawat": {
+                "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                "nama_lengkap": "Siti Nurhaliza"
+            },
+            "catatan_keperawatan": "Pasien dalam kondisi stabil. Vital signs normal. Tidak ada keluhan baru."
+        },
+        "riwayat_monitoring": [
+            {
+                "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "tanggal_pemeriksaan": "2026-08-06T09:30:00+07:00",
+                "vital_signs": {
+                    "sistol": 120,
+                    "diastol": 80,
+                    "suhu_tubuh": 36.5,
+                    "denyut_nadi": 78,
+                    "spo2": 98
+                },
+                "kondisi_pasien": "stabil",
+                "perawat": {
+                    "nama_lengkap": "Siti Nurhaliza"
+                }
+            },
+            {
+                "id": "c3d4e5f6-a7b8-9012-cdef-234567890123",
+                "tanggal_pemeriksaan": "2026-08-05T14:15:00+07:00",
+                "vital_signs": {
+                    "sistol": 135,
+                    "diastol": 88,
+                    "suhu_tubuh": 37.2,
+                    "denyut_nadi": 92,
+                    "spo2": 96
+                },
+                "kondisi_pasien": "perlu_perhatian",
+                "perawat": {
+                    "nama_lengkap": "Dewi Ratnasari"
+                }
+            },
+            {
+                "id": "d4e5f6a7-b8c9-0123-defa-345678901234",
+                "tanggal_pemeriksaan": "2026-08-04T08:00:00+07:00",
+                "vital_signs": {
+                    "sistol": 140,
+                    "diastol": 95,
+                    "suhu_tubuh": 38.1,
+                    "denyut_nadi": 105,
+                    "spo2": 93
+                },
+                "kondisi_pasien": "kritis",
+                "perawat": {
+                    "nama_lengkap": "Dewi Ratnasari"
+                }
+            }
+        ],
+        "alert": {
+            "has_alert": false,
+            "message": null
+        }
+    }
+}

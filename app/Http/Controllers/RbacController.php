@@ -15,7 +15,8 @@ class RbacController extends Controller
             // etc...
         ];
 
-        return Inertia::render('rbac/index', [
+        return Inertia::render('admin-menu', [
+            'menu' => 'rbac',
             'matrix' => $matrix,
         ]);
     }

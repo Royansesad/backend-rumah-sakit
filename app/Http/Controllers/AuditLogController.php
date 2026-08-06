@@ -27,7 +27,10 @@ class AuditLogController extends Controller
 
         $logs = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        return Inertia::render('audit-logs/index', [
+        $menuComponent = (string) session('simrs_role', 'admin').'-menu';
+
+        return Inertia::render($menuComponent, [
+            'menu' => 'audit-logs',
             'logs' => $logs,
         ]);
     }

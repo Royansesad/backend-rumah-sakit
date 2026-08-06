@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('no_hp_kontak_darurat', 20)->nullable();
             $table->text('alergi')->nullable();
             $table->text('riwayat_penyakit')->nullable();
+            $table->string('kondisi_terakhir')->nullable();
             $table->enum('status_akun', ['aktif', 'nonaktif'])->default('aktif');
             $table->string('status_aktif', 20)->default('aktif');
 
