@@ -18,18 +18,28 @@ class Icd10CodeApiController extends Controller
         $query = Icd10Code::query();
 
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $search = trim($request->input('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('name_en', 'like', "%{$search}%");
             });
+
+            // Order prefix matches on code first, then exact matches
+            $query->orderByRaw("CASE WHEN code LIKE ? THEN 1 WHEN code LIKE ? THEN 2 ELSE 3 END", [
+                "{$search}",
+                "{$search}%"
+            ]);
         }
 
         if ($request->filled('category')) {
             $query->where('category', $request->input('category'));
         }
 
-        $data = $query->orderBy('code')->paginate($request->input('per_page', 50));
+        $perPage = (int) $request->input('per_page', 25);
+        $perPage = min(max($perPage, 5), 100);
+
+        $data = $query->orderBy('code')->paginate($perPage);
 
         return response()->json([
             'status' => 'success',

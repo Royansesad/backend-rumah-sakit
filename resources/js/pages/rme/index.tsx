@@ -1,6 +1,6 @@
 import { Layout } from '@/components/layout';
 import { Head, router } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Patient {
     id: string;
@@ -39,6 +39,7 @@ interface Icd10Code {
     id: number;
     code: string;
     description: string;
+    name_en?: string;
     category?: string;
 }
 
@@ -158,6 +159,123 @@ export default function RmeIndex({
     const [searchIcd, setSearchIcd] = useState('');
     const [searchObat, setSearchObat] = useState('');
 
+    // States for ICD-10 Search Combobox in Input RME Form
+    const comboboxRef = useRef<HTMLDivElement>(null);
+    const [icdSearchInput, setIcdSearchInput] = useState('');
+    const [icdSearchResults, setIcdSearchResults] = useState<Icd10Code[]>(icd10Codes);
+    const [icdSearching, setIcdSearching] = useState(false);
+    const [icdDropdownOpen, setIcdDropdownOpen] = useState(false);
+    const [dropdownDirection, setDropdownDirection] = useState<'up' | 'down'>('down');
+
+    // States for Master ICD-10 Catalogue Tab
+    const [masterIcdPage, setMasterIcdPage] = useState(1);
+    const [masterIcdData, setMasterIcdData] = useState<{
+        data: Icd10Code[];
+        current_page: number;
+        last_page: number;
+        total: number;
+    }>({ data: icd10Codes, current_page: 1, last_page: 1, total: icd10Codes.length });
+    const [masterIcdLoading, setMasterIcdLoading] = useState(false);
+
+    // Live API search for ICD-10 Combobox in Input RME Form
+    React.useEffect(() => {
+        if (!icdSearchInput.trim()) {
+            setIcdSearchResults(icd10Codes);
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            setIcdSearching(true);
+            try {
+                const res = await fetch(`/api/v1/icd10?search=${encodeURIComponent(icdSearchInput.trim())}&per_page=30`);
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.status === 'success' && json.data?.data) {
+                        setIcdSearchResults(json.data.data);
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching ICD-10 codes:', err);
+            } finally {
+                setIcdSearching(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [icdSearchInput, icd10Codes]);
+
+    // Live API search & pagination for Katalog ICD-10 Tab
+    React.useEffect(() => {
+        if (activeTab !== 'master') return;
+
+        const timer = setTimeout(async () => {
+            setMasterIcdLoading(true);
+            try {
+                const res = await fetch(`/api/v1/icd10?search=${encodeURIComponent(searchIcd.trim())}&page=${masterIcdPage}&per_page=15`);
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.status === 'success' && json.data) {
+                        setMasterIcdData({
+                            data: json.data.data,
+                            current_page: json.data.current_page,
+                            last_page: json.data.last_page,
+                            total: json.data.total,
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching master ICD-10:', err);
+            } finally {
+                setMasterIcdLoading(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchIcd, masterIcdPage, activeTab]);
+
+    // Detect available space (Up vs Down) and handle outside click
+    const updateDropdownDirection = () => {
+        if (comboboxRef.current) {
+            const rect = comboboxRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            if (spaceBelow < 280 && spaceAbove > spaceBelow) {
+                setDropdownDirection('up');
+            } else {
+                setDropdownDirection('down');
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (!icdDropdownOpen) return;
+
+        updateDropdownDirection();
+
+        const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+            if (comboboxRef.current && !comboboxRef.current.contains(event.target as Node)) {
+                setIcdDropdownOpen(false);
+            }
+        };
+
+        const handleScrollOrResize = () => {
+            updateDropdownDirection();
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside);
+        window.addEventListener('resize', handleScrollOrResize);
+        window.addEventListener('scroll', handleScrollOrResize, true);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+            window.removeEventListener('resize', handleScrollOrResize);
+            window.removeEventListener('scroll', handleScrollOrResize, true);
+        };
+    }, [icdDropdownOpen]);
+
     const selectedPasien = pasiens.find((p) => p.id === selectedPasienId) || pasiens[0];
     const pasienRmeHistory = rekamMedisList.filter((r) => r.pasien?.id === selectedPasienId);
     const latestMonitoring = pasienRmeHistory[0];
@@ -191,13 +309,13 @@ export default function RmeIndex({
             });
             const result = await response.json();
             if (response.ok && result.status === 'success') {
-                showNotification('✅ Rekam Medis Elektronik (RME) berhasil dibuat!');
+                showNotification('Rekam Medis Elektronik (RME) berhasil dibuat!');
                 router.reload();
             } else {
-                showNotification(`❌ Error: ${result.message || 'Gagal menyimpan RME'}`, true);
+                showNotification(`Error: ${result.message || 'Gagal menyimpan RME'}`, true);
             }
         } catch (err: any) {
-            showNotification(`❌ Connection Error: ${err.message}`, true);
+            showNotification(`Connection Error: ${err.message}`, true);
         } finally {
             setLoading(false);
         }
@@ -213,13 +331,13 @@ export default function RmeIndex({
             });
             const result = await response.json();
             if (response.ok && result.status === 'success') {
-                showNotification('🔒 Rekam Medis berhasil difinalisasi!');
+                showNotification('Rekam Medis berhasil difinalisasi!');
                 router.reload();
             } else {
-                showNotification(`❌ Error: ${result.message}`, true);
+                showNotification(`Error: ${result.message}`, true);
             }
         } catch (err: any) {
-            showNotification(`❌ Error: ${err.message}`, true);
+            showNotification(`Error: ${err.message}`, true);
         } finally {
             setLoading(false);
         }
@@ -240,13 +358,13 @@ export default function RmeIndex({
             });
             const result = await response.json();
             if (response.ok && result.status === 'success') {
-                showNotification('✅ Resep Digital berhasil diterbitkan!');
+                showNotification('Resep Digital berhasil diterbitkan!');
                 router.reload();
             } else {
-                showNotification(`❌ Error: ${result.message}`, true);
+                showNotification(`Error: ${result.message}`, true);
             }
         } catch (err: any) {
-            showNotification(`❌ Connection Error: ${err.message}`, true);
+            showNotification(`Connection Error: ${err.message}`, true);
         } finally {
             setLoading(false);
         }
@@ -262,13 +380,13 @@ export default function RmeIndex({
             });
             const result = await response.json();
             if (response.ok && result.status === 'success') {
-                showNotification('💊 Resep berhasil ditebus! Stok obat otomatis berkurang.');
+                showNotification('Resep berhasil ditebus! Stok obat otomatis berkurang.');
                 router.reload();
             } else {
-                showNotification(`❌ Gagal Tebus Resep: ${result.message}`, true);
+                showNotification(`Gagal Tebus Resep: ${result.message}`, true);
             }
         } catch (err: any) {
-            showNotification(`❌ Error: ${err.message}`, true);
+            showNotification(`Error: ${err.message}`, true);
         } finally {
             setLoading(false);
         }
@@ -333,13 +451,15 @@ export default function RmeIndex({
 
                 {/* Toast Notification */}
                 {apiSuccess && (
-                    <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-800 shadow-sm animate-fade-in">
-                        <div className="flex items-center gap-2 text-sm font-semibold">{apiSuccess}</div>
+                    <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-800 shadow-sm animate-fade-in flex items-center gap-2">
+                        <i className="fa-solid fa-circle-check text-emerald-600"></i>
+                        <div className="text-sm font-semibold">{apiSuccess}</div>
                     </div>
                 )}
                 {apiError && (
-                    <div className="rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-800 shadow-sm animate-fade-in">
-                        <div className="flex items-center gap-2 text-sm font-semibold">{apiError}</div>
+                    <div className="rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-800 shadow-sm animate-fade-in flex items-center gap-2">
+                        <i className="fa-solid fa-circle-xmark text-rose-600"></i>
+                        <div className="text-sm font-semibold">{apiError}</div>
                     </div>
                 )}
 
@@ -353,7 +473,7 @@ export default function RmeIndex({
                                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                         }`}
                     >
-                        📊 <span>Monitoring Vitals</span>
+                        <i className="fa-solid fa-chart-line"></i> <span>Monitoring Vitals</span>
                     </button>
 
                     {canInputRme && (
@@ -365,7 +485,7 @@ export default function RmeIndex({
                                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                             }`}
                         >
-                            🩺 <span>Input RME Baru</span>
+                            <i className="fa-solid fa-stethoscope"></i> <span>Input RME Baru</span>
                         </button>
                     )}
 
@@ -377,7 +497,7 @@ export default function RmeIndex({
                                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                         }`}
                     >
-                        💊 <span>Resep Digital & Tebus</span>
+                        <i className="fa-solid fa-pills"></i> <span>Resep Digital & Tebus</span>
                     </button>
 
                     <button
@@ -388,7 +508,7 @@ export default function RmeIndex({
                                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                         }`}
                     >
-                        📖 <span>Katalog Obat & ICD-10</span>
+                        <i className="fa-solid fa-book-medical"></i> <span>Katalog Obat & ICD-10</span>
                     </button>
                 </div>
 
@@ -465,7 +585,9 @@ export default function RmeIndex({
                                     {/* Alert Banner if needed */}
                                     {latestMonitoring.kondisi_pasien === 'kritis' && (
                                         <div className="rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-800 shadow-sm animate-bounce">
-                                            <div className="font-bold">⚠️ PERINGATAN KRITIS: Pasien memerlukan penanganan medis darurat!</div>
+                                            <div className="font-bold flex items-center gap-2">
+                                                <i className="fa-solid fa-triangle-exclamation text-rose-600"></i> PERINGATAN KRITIS: Pasien memerlukan penanganan medis darurat!
+                                            </div>
                                         </div>
                                     )}
 
@@ -726,27 +848,101 @@ export default function RmeIndex({
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-700">Kode ICD-10 Diagnosa</label>
-                                    <select
-                                        value={formData.icd10_code}
-                                        onChange={(e) => {
-                                            const code = e.target.value;
-                                            const icd = icd10Codes.find((i) => i.code === code);
-                                            setFormData({
-                                                ...formData,
-                                                icd10_code: code,
-                                                diagnosis_deskripsi: icd ? icd.description : formData.diagnosis_deskripsi,
-                                            });
-                                        }}
-                                        className="mt-1 w-full rounded-lg border p-2 text-xs text-gray-900 font-semibold"
-                                    >
-                                        {icd10Codes.map((i) => (
-                                            <option key={i.id} value={i.code}>
-                                                {i.code} - {i.description}
-                                            </option>
-                                        ))}
-                                    </select>
+                                <div className="space-y-1">
+                                    <label className="block text-xs font-semibold text-gray-700">
+                                        Pencarian & Kode ICD-10 Diagnosa Pasien *
+                                    </label>
+                                    <div ref={comboboxRef} className="relative">
+                                        {/* Input Box Combobox */}
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                placeholder="Cari kode (mis: A01.0, J06.9) atau nama penyakit (mis: tifoid, batuk, diare)..."
+                                                value={icdSearchInput}
+                                                onChange={(e) => {
+                                                    setIcdSearchInput(e.target.value);
+                                                    setIcdDropdownOpen(true);
+                                                }}
+                                                onFocus={() => {
+                                                    updateDropdownDirection();
+                                                    setIcdDropdownOpen(true);
+                                                }}
+                                                className="w-full rounded-lg border border-gray-300 bg-white p-2.5 pr-16 text-xs text-gray-900 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-medium shadow-sm"
+                                            />
+                                            {icdSearching ? (
+                                                <div className="absolute right-3 top-2.5 text-[11px] font-semibold text-teal-600 animate-pulse">
+                                                    Mencari...
+                                                </div>
+                                            ) : (
+                                                <div className="absolute right-3 top-2.5 text-xs text-gray-400">
+                                                    <i className="fa-solid fa-magnifying-glass"></i>
+                                                </div>
+                                            )}
+                                        </div>
+
+
+                                        {/* Dropdown Results (Smart position: up vs down) */}
+                                        {icdDropdownOpen && (
+                                            <div
+                                                className={`absolute z-50 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-2xl transition-all ${
+                                                    dropdownDirection === 'up'
+                                                        ? 'bottom-full mb-2'
+                                                        : 'top-full mt-2'
+                                                }`}
+                                            >
+                                                <div className="flex justify-between border-b bg-gray-50 px-3 py-2 text-[11px] font-semibold text-gray-500 sticky top-0 backdrop-blur">
+                                                    <span>Hasil ICD-10 ({icdSearchResults.length} data)</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setIcdDropdownOpen(false)}
+                                                        className="text-teal-700 hover:underline font-bold flex items-center gap-1"
+                                                    >
+                                                        <i className="fa-solid fa-xmark"></i> Tutup
+                                                    </button>
+                                                </div>
+                                                {icdSearchResults.length > 0 ? (
+                                                    <div className="divide-y divide-gray-100">
+                                                        {icdSearchResults.map((i) => (
+                                                            <button
+                                                                key={i.id || i.code}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setFormData({
+                                                                        ...formData,
+                                                                        icd10_code: i.code,
+                                                                        diagnosis_deskripsi: i.description,
+                                                                    });
+                                                                    setIcdSearchInput(`${i.code} - ${i.description}`);
+                                                                    setIcdDropdownOpen(false);
+                                                                }}
+                                                                className={`w-full p-2.5 text-left transition-colors hover:bg-teal-50/80 ${
+                                                                    formData.icd10_code === i.code ? 'bg-teal-50 font-bold' : ''
+                                                                }`}
+                                                            >
+                                                                <div className="flex items-center justify-between">
+                                                                    <span className="font-mono text-xs font-bold text-teal-700">
+                                                                        {i.code}
+                                                                    </span>
+                                                                    {i.name_en && (
+                                                                        <span className="text-[10px] text-gray-400 italic">
+                                                                            {i.name_en}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="text-xs text-gray-800 font-medium mt-0.5">
+                                                                    {i.description}
+                                                                </div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="p-4 text-center text-xs text-gray-500">
+                                                        Tidak ada kode ICD-10 yang cocok.
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700">Deskripsi Diagnosa Detail</label>
@@ -968,9 +1164,9 @@ export default function RmeIndex({
                                             <button
                                                 onClick={() => handleTebusResep(r.id)}
                                                 disabled={loading}
-                                                className="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm"
+                                                className="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm flex items-center justify-center gap-1.5"
                                             >
-                                                💊 Tebus Resep Sekarang (Kurangi Stok Obat)
+                                                <i className="fa-solid fa-prescription-bottle-medical"></i> Tebus Resep Sekarang (Kurangi Stok Obat)
                                             </button>
                                         )}
                                     </div>
@@ -1027,42 +1223,77 @@ export default function RmeIndex({
                             </div>
                         </div>
 
-                        {/* Kode ICD-10 */}
+                        {/* Kode ICD-10 Master */}
                         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b pb-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b pb-3">
                                 <div>
-                                    <h2 className="text-base font-bold text-gray-900">Referensi Kode ICD-10</h2>
-                                    <p className="text-xs text-gray-500">Standar pengkodean penyakit internasional.</p>
+                                    <h2 className="text-base font-bold text-gray-900">
+                                        Referensi Master ICD-10 ({masterIcdData.total.toLocaleString('id-ID')} Kode)
+                                    </h2>
+                                    <p className="text-xs text-gray-500">Katalog standar internasional pengkodean penyakit pasien.</p>
                                 </div>
-                                <input
-                                    type="text"
-                                    placeholder="Cari kode/deskripsi..."
-                                    value={searchIcd}
-                                    onChange={(e) => setSearchIcd(e.target.value)}
-                                    className="rounded-lg border px-3 py-1 text-xs"
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Cari kode/penyakit..."
+                                        value={searchIcd}
+                                        onChange={(e) => {
+                                            setSearchIcd(e.target.value);
+                                            setMasterIcdPage(1);
+                                        }}
+                                        className="rounded-lg border px-3 py-1.5 text-xs focus:border-teal-500 focus:outline-none pr-8"
+                                    />
+                                    {masterIcdLoading && (
+                                        <span className="absolute right-2.5 top-2 text-[10px] text-teal-600 font-semibold animate-pulse">...</span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left text-xs text-gray-700">
                                     <thead className="bg-gray-50 text-[11px] uppercase text-gray-500">
                                         <tr>
-                                            <th className="p-2">Kode ICD-10</th>
-                                            <th className="p-2">Deskripsi Diagnosa</th>
-                                            <th className="p-2">Kategori</th>
+                                            <th className="p-2.5">Kode ICD-10</th>
+                                            <th className="p-2.5">Deskripsi Diagnosa (Bahasa Indonesia)</th>
+                                            <th className="p-2.5">Nama Inggris</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y">
-                                        {filteredIcd.map((i) => (
-                                            <tr key={i.id} className="hover:bg-gray-50">
-                                                <td className="p-2 font-mono font-bold text-indigo-700">{i.code}</td>
-                                                <td className="p-2 font-medium text-gray-900">{i.description}</td>
-                                                <td className="p-2 text-gray-500">{i.category || '-'}</td>
+                                        {masterIcdData.data.map((i) => (
+                                            <tr key={i.id || i.code} className="hover:bg-teal-50/40 transition-colors">
+                                                <td className="p-2.5 font-mono font-bold text-indigo-700 whitespace-nowrap">{i.code}</td>
+                                                <td className="p-2.5 font-medium text-gray-900">{i.description}</td>
+                                                <td className="p-2.5 text-gray-500 italic text-[11px]">{i.name_en || '-'}</td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
                             </div>
+
+                            {/* Pagination Controls */}
+                            {masterIcdData.last_page > 1 && (
+                                <div className="flex items-center justify-between border-t pt-3 text-xs text-gray-600">
+                                    <div>
+                                        Halaman <span className="font-bold">{masterIcdData.current_page}</span> dari <span className="font-bold">{masterIcdData.last_page}</span> ({masterIcdData.total.toLocaleString('id-ID')} Total)
+                                    </div>
+                                    <div className="flex gap-1">
+                                        <button
+                                            disabled={masterIcdData.current_page <= 1 || masterIcdLoading}
+                                            onClick={() => setMasterIcdPage((p) => Math.max(1, p - 1))}
+                                            className="rounded-lg border bg-white px-3 py-1 text-xs font-medium hover:bg-gray-50 disabled:opacity-50 flex items-center gap-1"
+                                        >
+                                            <i className="fa-solid fa-chevron-left"></i> Prev
+                                        </button>
+                                        <button
+                                            disabled={masterIcdData.current_page >= masterIcdData.last_page || masterIcdLoading}
+                                            onClick={() => setMasterIcdPage((p) => Math.min(masterIcdData.last_page, p + 1))}
+                                            className="rounded-lg border bg-white px-3 py-1 text-xs font-medium hover:bg-gray-50 disabled:opacity-50 flex items-center gap-1"
+                                        >
+                                            Next <i className="fa-solid fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

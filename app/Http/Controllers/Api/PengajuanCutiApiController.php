@@ -106,10 +106,26 @@ class PengajuanCutiApiController extends Controller
         }
 
         DB::transaction(function () use ($pengajuan, $validated, $request) {
+            $adminUser = $request->user();
+            $adminId = null;
+
+            if ($adminUser instanceof \App\Models\Admin) {
+                $adminId = $adminUser->id;
+            } elseif ($adminUser && \App\Models\Admin::where('id', $adminUser->id)->exists()) {
+                $adminId = $adminUser->id;
+            } else {
+                $sessionUser = session('simrs_user');
+                if ($sessionUser && isset($sessionUser['id']) && \App\Models\Admin::where('id', $sessionUser['id'])->exists()) {
+                    $adminId = $sessionUser['id'];
+                } else {
+                    $adminId = \App\Models\Admin::first()?->id;
+                }
+            }
+
             if ($validated['setuju']) {
                 $pengajuan->update([
                     'status' => 'disetujui',
-                    'disetujui_oleh_admin_id' => $request->user()->id ?? null,
+                    'disetujui_oleh_admin_id' => $adminId,
                 ]);
 
                 // Auto-update jadwal dokter / perawat menjadi status 'cuti'
@@ -123,7 +139,7 @@ class PengajuanCutiApiController extends Controller
             } else {
                 $pengajuan->update([
                     'status' => 'ditolak',
-                    'disetujui_oleh_admin_id' => $request->user()->id ?? null,
+                    'disetujui_oleh_admin_id' => $adminId,
                     'alasan_penolakan' => $validated['alasan_penolakan'] ?? null,
                 ]);
             }

@@ -17,6 +17,8 @@ return new class extends Migration
             $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan'])->nullable();
             $table->enum('golongan_darah', ['A', 'B', 'AB', 'O', '-'])->nullable();
             $table->text('alamat')->nullable();
+            $table->string('provinsi', 100)->nullable();
+            $table->string('kota_kabupaten', 100)->nullable();
             $table->string('no_hp', 20)->nullable();
             $table->string('password')->nullable();
             $table->string('email', 150)->nullable();

@@ -87,6 +87,6 @@ class TukarJadwalService
             ]);
 
             return $pengajuan;
-        ]);
+        });
     }
 }

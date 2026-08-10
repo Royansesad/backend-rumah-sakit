@@ -211,7 +211,7 @@ export default function PapanAntrian({ poliList = [] }: PapanAntrianProps) {
             {/* Ticker Footer */}
             <div className="rounded-2xl bg-slate-900 border border-slate-800 p-3 overflow-hidden">
                 <div className="whitespace-nowrap animate-marquee text-xs font-semibold text-slate-300 flex items-center gap-6">
-                    <span className="text-teal-400 font-bold">📢 PENGUMUMAN RS:</span>
+                    <span className="text-teal-400 font-bold flex items-center gap-1.5"><i className="fa-solid fa-bullhorn"></i> PENGUMUMAN RS:</span>
                     <span>Mohon perhatian pasien yang dipanggil agar segera menuju Ruang Praktik yang telah ditentukan.</span>
                     <span>•</span>
                     <span>Jaga ketertiban dan periksakan kembali nomor antrian Anda. Terima kasih.</span>

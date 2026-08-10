@@ -74,6 +74,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
             roles: ['admin', 'dokter', 'perawat', 'apoteker', 'kasir', 'resepsionis', 'manajemen'],
         },
         {
+            label: 'Pendaftaran Pasien',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+            ),
+            route: '/pendaftaran-pasien',
+            roles: ['admin', 'dokter', 'perawat', 'resepsionis', 'manajemen'],
+        },
+        {
             label: 'Catatan Perawatan / RME',
             icon: (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -191,7 +201,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {/* Emergency Alert Button (if Doctor view) */}
                     {currentRole === 'dokter' && (
                         <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-700 py-3 text-xs font-bold text-white shadow-xs transition-all hover:bg-red-800">
-                            <span className="text-sm">🚨</span> Emergency Alert
+                            <i className="fa-solid fa-triangle-exclamation text-sm"></i> Emergency Alert
                         </button>
                     )}
 

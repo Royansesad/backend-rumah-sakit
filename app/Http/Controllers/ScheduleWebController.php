@@ -27,12 +27,10 @@ class ScheduleWebController extends Controller
 
         $dokter = Dokter::where('email', $user['email'] ?? '')->first() ?? Dokter::first();
 
-        $startDate = now()->startOfWeek()->toDateString();
-        $endDate = now()->endOfWeek()->toDateString();
+        $this->ensureInitialSchedulesExist();
 
         $jadwalMandiri = JadwalDokter::with(['poli', 'ruangan'])
             ->when($dokter, fn($q) => $q->where('dokter_id', $dokter->id))
-            ->whereBetween('tanggal', [$startDate, $endDate])
             ->get();
 
         $riwayatPengajuan = PengajuanCuti::where('pemohon_id', $dokter->id ?? null)
@@ -76,7 +74,6 @@ class ScheduleWebController extends Controller
 
         $shifts = JadwalShiftPerawat::with(['perawat', 'bangsal'])
             ->when($selectedBangsalId, fn($q) => $q->where('bangsal_id', $selectedBangsalId))
-            ->whereBetween('tanggal', [$startDate, $endDate])
             ->get();
 
         $perawatList = Perawat::select('id', 'nama_lengkap')->get();
@@ -111,17 +108,12 @@ class ScheduleWebController extends Controller
         $user = session('simrs_user');
         $role = session('simrs_role', 'admin');
 
-        $startDate = now()->startOfWeek()->toDateString();
-        $endDate = now()->endOfWeek()->toDateString();
+        $this->ensureInitialSchedulesExist();
 
-        $jadwalGrid = JadwalDokter::with(['dokter', 'poli', 'ruangan'])
-            ->whereBetween('tanggal', [$startDate, $endDate])
-            ->get();
+        $jadwalGrid = JadwalDokter::with(['dokter', 'poli', 'ruangan'])->get();
 
-        $dokters = Dokter::with('poli')->get()->map(function ($doc) use ($startDate, $endDate) {
-            $schedules = JadwalDokter::where('dokter_id', $doc->id)
-                ->whereBetween('tanggal', [$startDate, $endDate])
-                ->get();
+        $dokters = Dokter::with('poli')->get()->map(function ($doc) {
+            $schedules = JadwalDokter::where('dokter_id', $doc->id)->get();
 
             $totalMinutes = 0;
             $conflictHours = 0;
@@ -160,7 +152,19 @@ class ScheduleWebController extends Controller
 
         $pendingCutiList = PengajuanCuti::where('status', 'menunggu')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($cuti) {
+                $namaPemohon = '-';
+                if ($cuti->peran_pemohon === 'dokter') {
+                    $doc = Dokter::find($cuti->pemohon_id);
+                    $namaPemohon = $doc ? $doc->nama_lengkap : 'Dokter';
+                } elseif ($cuti->peran_pemohon === 'perawat') {
+                    $perawat = Perawat::find($cuti->pemohon_id);
+                    $namaPemohon = $perawat ? $perawat->nama_lengkap : 'Perawat';
+                }
+                $cuti->nama_pemohon = $namaPemohon;
+                return $cuti;
+            });
 
         return Inertia::render('jadwal-dokter-admin', [
             'user' => $user,
@@ -172,6 +176,32 @@ class ScheduleWebController extends Controller
             'ruanganList' => $ruanganList,
             'pendingCutiList' => $pendingCutiList,
         ]);
+    }
+
+    private function ensureInitialSchedulesExist(): void
+    {
+        if (JadwalDokter::count() === 0) {
+            $dokters = Dokter::all();
+            $poli = Poli::first();
+            $ruangan = Ruangan::first();
+
+            if ($dokters->isNotEmpty() && $poli) {
+                foreach ($dokters as $idx => $doc) {
+                    JadwalDokter::create([
+                        'dokter_id' => $doc->id,
+                        'poli_id' => $doc->poli_id ?? $poli->id,
+                        'ruangan_id' => $ruangan?->id,
+                        'tanggal' => now()->startOfWeek()->addDays($idx % 5)->toDateString(),
+                        'hari' => ($idx % 5) + 1,
+                        'jam_mulai' => '08:00',
+                        'jam_selesai' => '12:00',
+                        'kuota_maksimal' => 30,
+                        'status' => 'tersedia',
+                        'ada_bentrok' => false,
+                    ]);
+                }
+            }
+        }
     }
 
     /**

@@ -41,6 +41,11 @@ Route::middleware(['web.auth'])->group(function () {
     // Modul Data Pasien (Admin, Dokter, Perawat, Resepsionis, Manajemen)
     Route::middleware('web.role:admin,dokter,perawat,resepsionis,manajemen')->group(function () {
         Route::get('/pasien', [PatientController::class, 'index'])->name('pasien.index');
+        Route::get('/pasien/export', [PatientController::class, 'exportExcel'])->name('pasien.export');
+        Route::get('/pendaftaran-pasien', [PatientController::class, 'create'])->name('pasien.create');
+        Route::put('/pasien/{id}', [PatientController::class, 'update'])->name('pasien.update');
+        Route::delete('/pasien/{id}', [PatientController::class, 'destroy'])->name('pasien.destroy');
+        Route::get('/api/check-nik', [PatientController::class, 'checkNik'])->name('pasien.check-nik');
     });
 
     // Modul RME & Resep Digital (Hanya Admin, Dokter, Perawat, Apoteker)
@@ -56,4 +61,3 @@ Route::middleware(['web.auth'])->group(function () {
         Route::get('/rbac', [RbacController::class, 'index'])->name('rbac.index');
     });
 });
-

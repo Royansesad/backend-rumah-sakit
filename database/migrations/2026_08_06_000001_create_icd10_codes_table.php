@@ -10,8 +10,9 @@ return new class extends Migration
     {
         Schema::create('icd10_codes', function (Blueprint $table) {
             $table->id();
-            $table->string('code', 10)->unique();
-            $table->string('description');
+            $table->string('code', 20)->unique();
+            $table->text('description');
+            $table->text('name_en')->nullable();
             $table->string('category')->nullable();
             $table->timestamps();
 

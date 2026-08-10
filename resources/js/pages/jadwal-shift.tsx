@@ -32,17 +32,20 @@ export default function JadwalShift({
     const [tglShiftRekan, setTglShiftRekan] = useState(tomorrowStr);
     const [alasan, setAlasan] = useState('');
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null);
 
     const handleSwapSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setMessage('');
+        setMessage(null);
 
         try {
             const res = await fetch('/api/v1/pengajuan-tukar-jadwal', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
                 body: JSON.stringify({
                     kategori_tukar: 'shift_perawat',
                     target_pengganti_id: targetNurseId || (perawatList[0]?.id || 'p1'),
@@ -52,14 +55,14 @@ export default function JadwalShift({
             });
             const data = await res.json();
             if (res.ok || data.success) {
-                setMessage('✅ Pengajuan tukar shift berhasil dikirim!');
+                setMessage({ type: 'success', text: 'Pengajuan tukar shift berhasil dikirim!' });
                 setAlasan('');
                 router.reload();
             } else {
-                setMessage('⚠️ ' + (data.message || 'Gagal membuat pengajuan tukar shift.'));
+                setMessage({ type: 'warning', text: data.message || 'Gagal membuat pengajuan tukar shift.' });
             }
         } catch (err) {
-            setMessage('✅ Pengajuan tukar shift berhasil dibuat (Demo)!');
+            setMessage({ type: 'error', text: 'Terjadi kesalahan jaringan saat mengirim pengajuan tukar shift.' });
         } finally {
             setLoading(false);
         }
@@ -183,13 +186,22 @@ export default function JadwalShift({
                     <div className="space-y-6">
                         {/* Card: Ajukan Tukar Shift */}
                         <div className="rounded-2xl border border-[#d3ece7] bg-[#eef8f6] p-5 shadow-xs">
-                            <h3 className="text-sm font-bold text-[#145e5b] font-serif">
-                                ↔ Ajukan Tukar Shift
+                            <h3 className="text-sm font-bold text-[#145e5b] font-serif flex items-center gap-1.5">
+                                <i className="fa-solid fa-arrow-right-arrow-left"></i> Ajukan Tukar Shift
                             </h3>
 
                             {message && (
-                                <div className="mt-3 rounded-xl bg-white p-3 text-xs font-bold text-[#145e5b] border border-[#b5e2db]">
-                                    {message}
+                                <div className={`mt-3 rounded-xl p-3 text-xs font-bold border flex items-center gap-2 ${
+                                    message.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
+                                    message.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-800' :
+                                    'bg-white border-[#b5e2db] text-[#145e5b]'
+                                }`}>
+                                    <i className={`fa-solid ${
+                                        message.type === 'warning' ? 'fa-triangle-exclamation' :
+                                        message.type === 'error' ? 'fa-circle-xmark' :
+                                        'fa-circle-check'
+                                    }`}></i>
+                                    <span>{message.text}</span>
                                 </div>
                             )}
 
@@ -308,7 +320,7 @@ export default function JadwalShift({
                                 <div className="flex items-center justify-between py-3">
                                     <div>
                                         <h4 className="font-bold text-gray-900">Tukar dg Siti N.</h4>
-                                        <p className="text-[11px] text-gray-500">20 Okt (Pagi) ↔ 21 Okt (Siang)</p>
+                                        <p className="text-[11px] text-gray-500 flex items-center gap-1">20 Okt (Pagi) <i className="fa-solid fa-arrow-right-arrow-left text-[9px] text-gray-400"></i> 21 Okt (Siang)</p>
                                     </div>
                                     <span className="rounded-full bg-sky-100 px-2.5 py-0.5 font-bold text-sky-800 text-[11px]">Menunggu</span>
                                 </div>
@@ -316,7 +328,7 @@ export default function JadwalShift({
                                 <div className="flex items-center justify-between py-3">
                                     <div>
                                         <h4 className="font-bold text-gray-900">Tukar dg Agus W.</h4>
-                                        <p className="text-[11px] text-gray-500">05 Okt (Malam) ↔ 06 Okt (Malam)</p>
+                                        <p className="text-[11px] text-gray-500 flex items-center gap-1">05 Okt (Malam) <i className="fa-solid fa-arrow-right-arrow-left text-[9px] text-gray-400"></i> 06 Okt (Malam)</p>
                                     </div>
                                     <span className="rounded-full bg-[#dcfce7] px-2.5 py-0.5 font-bold text-emerald-800 text-[11px]">Disetujui</span>
                                 </div>
@@ -324,7 +336,7 @@ export default function JadwalShift({
                                 <div className="flex items-center justify-between py-3">
                                     <div>
                                         <h4 className="font-bold text-gray-900">Tukar dg Ratna D.</h4>
-                                        <p className="text-[11px] text-gray-500">28 Sep (Siang) ↔ 29 Sep (Pagi)</p>
+                                        <p className="text-[11px] text-gray-500 flex items-center gap-1">28 Sep (Siang) <i className="fa-solid fa-arrow-right-arrow-left text-[9px] text-gray-400"></i> 29 Sep (Pagi)</p>
                                     </div>
                                     <span className="rounded-full bg-[#fee2e2] px-2.5 py-0.5 font-bold text-rose-800 text-[11px]">Ditolak</span>
                                 </div>

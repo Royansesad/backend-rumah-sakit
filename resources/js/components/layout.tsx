@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
 import type { Role } from '../types/simrs';
 import { Sidebar } from './sidebar';
@@ -13,7 +14,6 @@ export const Layout: React.FC<LayoutProps> = ({
     children,
     user,
     role = 'admin',
-    title = 'Medical Portal',
 }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -46,9 +46,9 @@ export const Layout: React.FC<LayoutProps> = ({
             />
 
             <div className="flex min-w-0 flex-1 flex-col">
-                {/* Top Navbar Header (Matching Gambar 2 & 3 100%) */}
+                {/* Top Navbar Header (Matching Gambar 1, 2, 3) */}
                 <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#d3ece7] bg-[#f0faf7] px-6">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-6">
                         <button
                             type="button"
                             onClick={() => setSidebarOpen(true)}
@@ -60,29 +60,56 @@ export const Layout: React.FC<LayoutProps> = ({
                             </svg>
                         </button>
 
-                        <h2 className="text-lg font-bold text-[#145e5b] font-serif tracking-tight">
-                            {title}
+                        <h2 className="text-xl font-bold text-[#145e5b] font-serif tracking-tight">
+                            MediCare Admin
                         </h2>
+
+                        {/* Top Nav Tabs */}
+                        <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
+                            <Link href="/dashboard" className="text-gray-500 hover:text-[#145e5b] transition">
+                                Home
+                            </Link>
+                            <Link href="/pasien" className="relative py-4 text-[#145e5b] font-bold border-b-2 border-[#145e5b]">
+                                Patients
+                            </Link>
+                        </nav>
                     </div>
 
-                    {/* Right User & Notification Area */}
+                    {/* Right User, Search & Notification Area */}
                     <div className="flex items-center gap-4">
-                        {/* Notification Bell with Red Badge */}
-                        <div className="relative cursor-pointer p-1 text-[#4f8380] hover:text-[#145e5b]">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        {/* Global Search Input */}
+                        <div className="relative hidden md:block w-64">
+                            <svg className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
-                            <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-red-600 ring-2 ring-[#f0faf7]"></span>
+                            <input
+                                type="text"
+                                placeholder="Global Search..."
+                                className="w-full rounded-lg border border-[#c3e5df] bg-white pl-9 pr-3 py-1.5 text-xs text-gray-800 focus:border-[#145e5b] focus:outline-none"
+                            />
                         </div>
 
+                        {/* Notification Bell */}
+                        <div className="relative cursor-pointer p-1 text-[#4f8380] hover:text-[#145e5b] transition">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-teal-600"></span>
+                        </div>
+
+                        {/* Settings Icon */}
+                        <Link href="/settings" className="p-1 text-[#4f8380] hover:text-[#145e5b] transition">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </Link>
+
                         {/* User Profile Avatar Frame */}
-                        <div className="flex items-center gap-2.5 border-l border-[#d3ece7] pl-4">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#d7f2ee] text-[#145e5b] font-bold text-sm ring-2 ring-[#b5e2db] shadow-xs overflow-hidden">
+                        <div className="flex items-center gap-2 border-l border-[#d3ece7] pl-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#145e5b] text-white font-bold text-xs shadow-xs overflow-hidden">
                                 {userName.charAt(0).toUpperCase()}
                             </div>
-                            <span className="hidden sm:inline-block text-xs font-semibold text-[#145e5b]">
-                                {userName}
-                            </span>
                         </div>
                     </div>
                 </header>

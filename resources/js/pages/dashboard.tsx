@@ -71,25 +71,25 @@ export default function Dashboard({
                         label: 'Total Pasien Terdaftar',
                         value: '8.240',
                         trend: '↑ +5% vs last month',
-                        icon: '👤',
+                        icon: <i className="fa-solid fa-user-group text-[#0d4f42]"></i>,
                     },
                     {
                         label: 'Appointment Hari Ini',
                         value: '156',
                         trend: '↓ -2% vs yesterday',
-                        icon: '📅',
+                        icon: <i className="fa-solid fa-calendar-check text-[#0d4f42]"></i>,
                     },
                     {
                         label: 'Pendapatan Bulan Ini',
                         value: 'Rp 1.245M',
                         trend: '↑ +12% vs last month',
-                        icon: '💰',
+                        icon: <i className="fa-solid fa-wallet text-[#0d4f42]"></i>,
                     },
                     {
                         label: 'Dokter Aktif',
                         value: '42',
                         trend: '→ Stable',
-                        icon: '🩺',
+                        icon: <i className="fa-solid fa-user-doctor text-[#0d4f42]"></i>,
                     },
                 ].map((stat, idx) => (
                     <div
@@ -158,17 +158,17 @@ export default function Dashboard({
                             {
                                 title: 'Admin Budi menambahkan dokter baru: Dr. Siti Nurhaliza.',
                                 time: '2 menit lalu',
-                                icon: '👤',
+                                icon: <i className="fa-solid fa-user text-xs text-teal-700"></i>,
                             },
                             {
                                 title: 'Suster Rina mengubah jadwal poli Gigi.',
                                 time: '45 menit lalu',
-                                icon: '📅',
+                                icon: <i className="fa-solid fa-calendar-days text-xs text-teal-700"></i>,
                             },
                             {
                                 title: 'Sistem melaporkan stok Paracetamol menipis (Sisa: 2 Box).',
                                 time: '1 jam lalu',
-                                icon: '📦',
+                                icon: <i className="fa-solid fa-box text-xs text-teal-700"></i>,
                             },
                         ].map((act, idx) => (
                             <div
@@ -210,7 +210,7 @@ export default function Dashboard({
                     </p>
                 </div>
                 <button className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700">
-                    <span>📊</span> Filter
+                    <i className="fa-solid fa-filter text-xs"></i> Filter
                 </button>
             </div>
 
@@ -292,7 +292,7 @@ export default function Dashboard({
                             Rincian Invoice
                         </h3>
                         <button className="text-gray-400 hover:text-gray-700">
-                            ✕
+                            <i className="fa-solid fa-xmark"></i>
                         </button>
                     </div>
                     <h2 className="text-lg font-bold text-[#0d4f42]">
@@ -306,19 +306,19 @@ export default function Dashboard({
                                 label: 'Konsultasi',
                                 desc: 'Dr. Hermawan (Sp.PD)',
                                 price: 'Rp 350.000',
-                                icon: '🩺',
+                                icon: <i className="fa-solid fa-stethoscope"></i>,
                             },
                             {
                                 label: 'Obat-obatan',
                                 desc: 'Amoxicillin 500mg (10x)\nParacetamol 500mg (10x)',
                                 price: 'Rp 200.000',
-                                icon: '💊',
+                                icon: <i className="fa-solid fa-pills"></i>,
                             },
                             {
                                 label: 'Tindakan',
                                 desc: 'Cek Darah Lengkap',
                                 price: 'Rp 700.000',
-                                icon: '🧪',
+                                icon: <i className="fa-solid fa-vial"></i>,
                             },
                         ].map((item, idx) => (
                             <div
@@ -394,9 +394,9 @@ export default function Dashboard({
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="rounded-xl border border-gray-200 bg-[#d1fae5]/20 p-6">
                     <div className="mb-4 flex items-start justify-between">
-                        <span className="text-2xl">🛏️</span>
+                        <i className="fa-solid fa-bed text-2xl text-[#0d4f42]"></i>
                         <span className="flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">
-                            <span>⚠️</span> 4 Perlu Perhatian
+                            <i className="fa-solid fa-triangle-exclamation text-xs"></i> 4 Perlu Perhatian
                         </span>
                     </div>
                     <p className="text-sm text-gray-600">Pasien Shift Ini</p>
@@ -409,7 +409,7 @@ export default function Dashboard({
                     <span className="absolute top-4 right-4 rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">
                         Berakhir dlm 4j 30m
                     </span>
-                    <span className="mb-4 block text-2xl">⏰</span>
+                    <i className="fa-regular fa-clock mb-4 block text-2xl text-[#0d4f42]"></i>
                     <p className="text-sm text-gray-600">Jadwal Shift Anda</p>
                     <p className="mt-1 text-2xl font-bold text-[#0d4f42]">
                         Shift Pagi
@@ -421,7 +421,7 @@ export default function Dashboard({
 
                 <div className="relative rounded-xl border border-red-100 bg-red-50 p-6">
                     <div className="mb-2 flex items-center gap-2">
-                        <span className="text-2xl">⚠️</span>
+                        <i className="fa-solid fa-triangle-exclamation text-2xl text-red-600"></i>
                         <span className="text-sm font-bold text-red-800">
                             Peringatan Kritis
                         </span>
@@ -446,9 +446,9 @@ export default function Dashboard({
                         </h3>
                         <a
                             href="#"
-                            className="text-sm font-bold text-[#0d4f42]"
+                            className="text-sm font-bold text-[#0d4f42] flex items-center gap-1"
                         >
-                            Lihat Semua →
+                            Lihat Semua <i className="fa-solid fa-arrow-right text-xs"></i>
                         </a>
                     </div>
                     <div className="space-y-4">
@@ -507,17 +507,17 @@ export default function Dashboard({
                             {
                                 label: 'Catat Vital Pasien',
                                 desc: 'Input data TTV terbaru',
-                                icon: '📊',
+                                icon: <i className="fa-solid fa-chart-line text-lg text-teal-700"></i>,
                             },
                             {
                                 label: 'Lihat Daftar Monitoring',
                                 desc: 'Jadwal observasi pasien',
-                                icon: '📋',
+                                icon: <i className="fa-solid fa-clipboard-list text-lg text-teal-700"></i>,
                             },
                             {
                                 label: 'Request Obat Farmasi',
                                 desc: 'Isi ulang stok ruangan',
-                                icon: '💊',
+                                icon: <i className="fa-solid fa-pills text-lg text-teal-700"></i>,
                             },
                         ].map((a, idx) => (
                             <button
@@ -575,7 +575,7 @@ export default function Dashboard({
                         </div>
                     </div>
                     <button className="mt-8 flex w-fit items-center gap-2 rounded-lg bg-[#0d4f42] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#0a3d33]">
-                        👨‍⚕️ Mulai Konsultasi Pasien Berikutnya
+                        <i className="fa-solid fa-user-doctor"></i> Mulai Konsultasi Pasien Berikutnya
                     </button>
                 </div>
 
@@ -676,7 +676,7 @@ export default function Dashboard({
                                 ↑ 2 dari kemarin
                             </p>
                         </div>
-                        <span className="text-2xl">👤</span>
+                        <i className="fa-solid fa-users text-2xl text-[#0d4f42]"></i>
                     </div>
                     <div className="flex items-start justify-between rounded-xl border border-gray-200 bg-[#d1fae5]/20 p-6">
                         <div>
@@ -690,20 +690,20 @@ export default function Dashboard({
                                 ⊙ Tepat waktu
                             </p>
                         </div>
-                        <span className="text-2xl">⏱️</span>
+                        <i className="fa-regular fa-clock text-2xl text-[#0d4f42]"></i>
                     </div>
                 </div>
 
                 <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                     <div className="mb-4 flex items-center gap-2">
-                        <span className="text-lg">🔔</span>
+                        <i className="fa-solid fa-bell text-lg text-orange-500"></i>
                         <h3 className="font-bold text-gray-900">
                             Pemberitahuan Penting
                         </h3>
                     </div>
                     <div className="flex items-center justify-between rounded-lg border-l-4 border-orange-400 bg-orange-50 p-4">
                         <div className="flex items-center gap-3">
-                            <span className="text-orange-500">🧪</span>
+                            <i className="fa-solid fa-flask-vial text-orange-500 text-lg"></i>
                             <div>
                                 <p className="text-sm font-medium text-gray-800">
                                     Hasil lab Ibu Siti Aminah sudah masuk.
@@ -812,13 +812,13 @@ export default function Dashboard({
             {/* Tombol Aksi */}
             <div className="flex flex-wrap gap-4">
                 <button className="flex items-center gap-2 rounded-lg bg-[#0d4f42] px-5 py-3 text-xs font-bold text-white shadow-sm hover:bg-[#0a3d33]">
-                    ➕ Catat Pengeluaran Stok
+                    <i className="fa-solid fa-plus"></i> Catat Pengeluaran Stok
                 </button>
                 <button className="flex items-center gap-2 rounded-lg border border-[#0d4f42]/20 bg-[#d1fae5] px-5 py-3 text-xs font-bold text-[#0d4f42] hover:bg-teal-100">
-                    📦 Lihat Stok Obat
+                    <i className="fa-solid fa-boxes-stacked"></i> Lihat Stok Obat
                 </button>
                 <button className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-3 text-xs font-bold hover:bg-gray-50">
-                    📄 Lihat Riwayat Transaksi
+                    <i className="fa-solid fa-file-lines"></i> Lihat Riwayat Transaksi
                 </button>
             </div>
 
