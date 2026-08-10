@@ -46,8 +46,8 @@ export interface AuditLog {
     pembuat_id: string;
     modul: string;
     aksi: string;
-    data_sebelum?: Record<string, any> | null;
-    data_sesudah?: Record<string, any> | null;
+    data_sebelum?: Record<string, any> | string | null;
+    data_sesudah?: Record<string, any> | string | null;
     ip_address?: string;
     user_agent?: string;
     target_label?: string;

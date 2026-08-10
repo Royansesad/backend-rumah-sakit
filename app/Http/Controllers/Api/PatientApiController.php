@@ -225,8 +225,8 @@ class PatientApiController extends Controller
                 'pembuat_type' => $currentUser->getRoleAttribute(),
                 'modul' => 'api_pasien',
                 'aksi' => 'UPDATE_PATIENT',
-                'data_sebelum' => json_encode(['id' => $patient->id, 'nama_lengkap' => $dataSebelum['nama_lengkap']]),
-                'data_sesudah' => json_encode(['id' => $patient->id, 'updated_fields' => array_keys($payload)]),
+                'data_sebelum' => ['id' => $patient->id, 'nama_lengkap' => $dataSebelum['nama_lengkap']],
+                'data_sesudah' => ['id' => $patient->id, 'updated_fields' => array_keys($payload)],
                 'ip_address' => $request->ip(),
             ]);
         }
@@ -263,7 +263,7 @@ class PatientApiController extends Controller
                 'pembuat_type' => $currentUser->getRoleAttribute(),
                 'modul' => 'api_pasien',
                 'aksi' => 'DELETE_PATIENT',
-                'data_sebelum' => json_encode($dataSebelum),
+                'data_sebelum' => $dataSebelum,
                 'ip_address' => $request->ip(),
             ]);
         }

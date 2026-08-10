@@ -447,8 +447,8 @@ class PendaftaranApiController extends Controller
             'pembuat_type' => $user->getRoleAttribute(),
             'modul' => 'api_pendaftaran',
             'aksi' => $aksi,
-            'data_sebelum' => $sebelum ? json_encode($sebelum) : null,
-            'data_sesudah' => $sesudah ? json_encode($sesudah) : null,
+            'data_sebelum' => $sebelum,
+            'data_sesudah' => $sesudah,
             'ip_address' => $request->ip(),
         ]);
     }

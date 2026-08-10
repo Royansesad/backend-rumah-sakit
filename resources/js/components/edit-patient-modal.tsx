@@ -1,6 +1,80 @@
 import { router } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
 
+const DAFTAR_PROVINSI = [
+    'Aceh',
+    'Sumatera Utara',
+    'Sumatera Barat',
+    'Riau',
+    'Kepulauan Riau',
+    'Jambi',
+    'Sumatera Selatan',
+    'Kepulauan Bangka Belitung',
+    'Bengkulu',
+    'Lampung',
+    'DKI Jakarta',
+    'Jawa Barat',
+    'Banten',
+    'Jawa Tengah',
+    'DI Yogyakarta',
+    'Jawa Timur',
+    'Bali',
+    'Nusa Tenggara Barat',
+    'Nusa Tenggara Timur',
+    'Kalimantan Barat',
+    'Kalimantan Tengah',
+    'Kalimantan Selatan',
+    'Kalimantan Timur',
+    'Kalimantan Utara',
+    'Sulawesi Utara',
+    'Gorontalo',
+    'Sulawesi Tengah',
+    'Sulawesi Barat',
+    'Sulawesi Selatan',
+    'Sulawesi Tenggara',
+    'Maluku',
+    'Maluku Utara',
+    'Papua Barat',
+    'Papua',
+];
+
+const DAFTAR_KOTA = [
+    'Kota Jakarta Pusat',
+    'Kota Jakarta Utara',
+    'Kota Jakarta Barat',
+    'Kota Jakarta Selatan',
+    'Kota Jakarta Timur',
+    'Kab. Kepulauan Seribu',
+    'Kota Bandung',
+    'Kab. Bandung',
+    'Kab. Bandung Barat',
+    'Kota Bogor',
+    'Kab. Bogor',
+    'Kota Bekasi',
+    'Kab. Bekasi',
+    'Kota Depok',
+    'Kota Tangerang',
+    'Kota Tangerang Selatan',
+    'Kab. Tangerang',
+    'Kota Semarang',
+    'Kab. Semarang',
+    'Kota Surakarta',
+    'Kota Yogyakarta',
+    'Kab. Sleman',
+    'Kab. Bantul',
+    'Kota Surabaya',
+    'Kota Malang',
+    'Kota Denpasar',
+    'Kota Medan',
+    'Kota Palembang',
+    'Kota Makassar',
+    'Kota Balikpapan',
+    'Kota Samarinda',
+    'Kota Banjarmasin',
+    'Kota Pontianak',
+    'Kota Manado',
+];
+
 export interface EditPatientModalProps {
     isOpen: boolean;
     patient: any | null;
@@ -20,6 +94,8 @@ export const EditPatientModal: React.FC<EditPatientModalProps> = ({
         tanggal_lahir: '',
         jenis_kelamin: 'Laki-laki',
         alamat: '',
+        provinsi: '',
+        kota_kabupaten: '',
         no_hp: '',
         email: '',
         penjamin: 'umum',
@@ -41,6 +117,8 @@ export const EditPatientModal: React.FC<EditPatientModalProps> = ({
                 tanggal_lahir: patient.tanggal_lahir || '',
                 jenis_kelamin: patient.jenis_kelamin || 'Laki-laki',
                 alamat: patient.alamat || '',
+                provinsi: patient.provinsi || '',
+                kota_kabupaten: patient.kota_kabupaten || '',
                 no_hp: patient.no_hp || '',
                 email: patient.email || '',
                 penjamin: patient.penjamin || 'umum',
@@ -266,6 +344,50 @@ export const EditPatientModal: React.FC<EditPatientModalProps> = ({
                                 onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
                                 className="w-full rounded-lg border border-gray-300 p-2.5 text-xs text-gray-900 focus:border-[#145e5b] focus:outline-none"
                             />
+                        </div>
+
+                        {/* Provinsi & Kota/Kabupaten */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block font-semibold text-gray-700 mb-1">
+                                    Provinsi
+                                </label>
+                                <select
+                                    value={formData.provinsi}
+                                    onChange={(e) => setFormData({ ...formData, provinsi: e.target.value })}
+                                    className="w-full rounded-lg border border-gray-300 p-2.5 text-xs text-gray-900 focus:border-[#145e5b] focus:outline-none"
+                                >
+                                    <option value="">Pilih Provinsi</option>
+                                    {formData.provinsi && !DAFTAR_PROVINSI.includes(formData.provinsi) && (
+                                        <option value={formData.provinsi}>{formData.provinsi}</option>
+                                    )}
+                                    {DAFTAR_PROVINSI.map((prov, idx) => (
+                                        <option key={idx} value={prov}>
+                                            {prov}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block font-semibold text-gray-700 mb-1">
+                                    Kota / Kabupaten
+                                </label>
+                                <select
+                                    value={formData.kota_kabupaten}
+                                    onChange={(e) => setFormData({ ...formData, kota_kabupaten: e.target.value })}
+                                    className="w-full rounded-lg border border-gray-300 p-2.5 text-xs text-gray-900 focus:border-[#145e5b] focus:outline-none"
+                                >
+                                    <option value="">Pilih Kota / Kabupaten</option>
+                                    {formData.kota_kabupaten && !DAFTAR_KOTA.includes(formData.kota_kabupaten) && (
+                                        <option value={formData.kota_kabupaten}>{formData.kota_kabupaten}</option>
+                                    )}
+                                    {DAFTAR_KOTA.map((kota, idx) => (
+                                        <option key={idx} value={kota}>
+                                            {kota}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
                         {/* Alergi */}

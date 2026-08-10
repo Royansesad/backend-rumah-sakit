@@ -22,6 +22,62 @@ class AuditLog extends Model
     ];
 
     /**
+     * Safely normalize data_sebelum to an array if stored as string/double-encoded JSON.
+     */
+    public function getDataSebelumAttribute($value)
+    {
+        if (is_null($value)) {
+            return null;
+        }
+        if (is_array($value)) {
+            return $value;
+        }
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                if (is_array($decoded)) {
+                    return $decoded;
+                }
+                if (is_string($decoded)) {
+                    $decoded2 = json_decode($decoded, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded2)) {
+                        return $decoded2;
+                    }
+                }
+            }
+        }
+        return $value;
+    }
+
+    /**
+     * Safely normalize data_sesudah to an array if stored as string/double-encoded JSON.
+     */
+    public function getDataSesudahAttribute($value)
+    {
+        if (is_null($value)) {
+            return null;
+        }
+        if (is_array($value)) {
+            return $value;
+        }
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                if (is_array($decoded)) {
+                    return $decoded;
+                }
+                if (is_string($decoded)) {
+                    $decoded2 = json_decode($decoded, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded2)) {
+                        return $decoded2;
+                    }
+                }
+            }
+        }
+        return $value;
+    }
+
+    /**
      * Map pembuat_type to the corresponding database table.
      */
     private const TABLE_MAP = [
