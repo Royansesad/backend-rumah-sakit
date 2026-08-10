@@ -276,6 +276,14 @@ Seluruh aktivitas penting (termasuk `CREATE_SCHEDULE`, `APPROVE_CUTI`, `SWAP_SCH
 
 ---
 
+## Rate Limiting, CORS & Keamanan
+
+- **Rate Limiting:** Semua endpoint login (`/api/v1/login`, `/api/v1/admin-login`, `/api/v1/auth/login`) diberlakukan pembatasan **5 percobaan per menit per IP** via middleware `throttle:login` (`app/Providers/AppServiceProvider.php`).
+- **CORS:** Dikonfigurasi di `config/cors.php` untuk path `api/*` & `sanctum/csrf-cookie`, mengizinkan seluruh method, dan origin diambil dari env `CORS_ALLOWED_ORIGINS` (default `http://localhost:3000,http://localhost:5173`). Header `Authorization` (Bearer Token) diizinkan tanpa kredensial cookie.
+- **Header Authorization:** Mode keamanan API dikendalikan toggle `API_SECURITY_ENABLED` di `.env` (lihat [Sistem Autentikasi & Config Toggle Security](#sistem-autentikasi--config-toggle-security)).
+
+---
+
 ## Struktur Utama Direktori
 
 ```text
