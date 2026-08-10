@@ -93,6 +93,8 @@ class AuthController extends Controller
                 'aksi' => 'LOGIN',
                 'data_sesudah' => json_encode(['description' => "User logged in as {$request->role}"]),
                 'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'target_label' => 'Sistem',
             ]);
 
             return redirect()->route('dashboard');
@@ -117,6 +119,8 @@ class AuthController extends Controller
                 'aksi' => 'LOGOUT',
                 'data_sesudah' => json_encode(['description' => 'User logged out']),
                 'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'target_label' => 'Sistem',
             ]);
         }
 

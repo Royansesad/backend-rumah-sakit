@@ -6,7 +6,7 @@ Repository ini berisi **Backend Service & REST API** untuk Sistem Informasi Mana
 
 ---
 
-## 📋 Daftar Isi
+## Daftar Isi
 
 1. [Gambaran Umum](#gambaran-umum)
 2. [Fitur Utama Sistem](#fitur-utama-sistem)
@@ -25,7 +25,7 @@ Repository ini berisi **Backend Service & REST API** untuk Sistem Informasi Mana
 
 ---
 
-## 🏥 Gambaran Umum
+## Gambaran Umum
 
 Proyek ini adalah backend SIMRS modular yang dibangun dengan standar **3rd Normal Form (3NF)** dan batasan **100% Lokal (Tanpa Kompleksitas API Eksternal/SatuSehat)**. Sistem mencakup seluruh workflow operasional rumah sakit:
 - Pendaftaran & penomoran antrian pasien per poli.
@@ -39,7 +39,7 @@ Proyek ini adalah backend SIMRS modular yang dibangun dengan standar **3rd Norma
 
 ---
 
-## ✨ Fitur Utama Sistem
+## Fitur Utama Sistem
 
 ### 1. Modul Rekam Medis Elektronik (RME) 100% Lokal
 - **Monitoring Vital Signs Pasien**: Observasi Tekanan Darah (Sistol/Diastol), Suhu Tubuh, Denyut Nadi, SpO2, dan Indikator Status Kondisi Pasien (`stabil`, `perlu_perhatian`, `kritis`).
@@ -69,7 +69,7 @@ Proyek ini adalah backend SIMRS modular yang dibangun dengan standar **3rd Norma
 
 ---
 
-## 🛠️ Teknologi yang Digunakan
+## Teknologi yang Digunakan
 
 | Lapisan | Teknologi |
 |---|---|
@@ -84,7 +84,7 @@ Proyek ini adalah backend SIMRS modular yang dibangun dengan standar **3rd Norma
 
 ---
 
-## ⚙️ Persyaratan Sistem (Prerequisites)
+## Persyaratan Sistem (Prerequisites)
 
 - **PHP** `>= 8.3` (dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `curl`, `dom`, `fileinfo`)
 - **Composer** `>= 2.x`
@@ -93,7 +93,7 @@ Proyek ini adalah backend SIMRS modular yang dibangun dengan standar **3rd Norma
 
 ---
 
-## 🚀 Langkah Instalasi & Cara Mengoperasikan
+## Langkah Instalasi & Cara Mengoperasikan
 
 ### 1. Salin Environment & Install Dependensi
 
@@ -140,7 +140,7 @@ Akses portal di **`http://localhost:8000`** atau via Laravel Herd di `http://bac
 
 ---
 
-## 👤 Akun Placeholder / Demo User per Role
+## Akun Placeholder / Demo User per Role
 
 > **Password untuk semua akun placeholder:** `password123`
 
@@ -157,7 +157,7 @@ Akses portal di **`http://localhost:8000`** atau via Laravel Herd di `http://bac
 
 ---
 
-## 🌐 Halaman Web & Navigation Preview
+## Halaman Web & Navigation Preview
 
 Desain UI menggunakan **Sentosa Medika Design System** (Nuansa warna mint hijau botol `#145e5b`, `#f0faf7`, `#d3ece7`, lengkap dengan logo brand, tombol pintas tanggal `[Hari Ini]`, `[Besok]`, `[+7 Hari]`, & badge status dinamis).
 
@@ -178,7 +178,7 @@ Desain UI menggunakan **Sentosa Medika Design System** (Nuansa warna mint hijau 
 
 ---
 
-## 🔒 Sistem Autentikasi & Config Toggle Security
+## Sistem Autentikasi & Config Toggle Security
 
 Aplikasi mendukung dua mode keamanan via `.env`:
 
@@ -193,7 +193,7 @@ API_SECURITY_ENABLED=false
 
 ---
 
-## 📡 Dokumentasi Endpoint REST API (v1)
+## Dokumentasi Endpoint REST API (v1)
 
 ### 1. Autentikasi API
 
@@ -249,7 +249,7 @@ API_SECURITY_ENABLED=false
 
 ---
 
-## 🗄️ Struktur Database & Schema 3NF
+## Struktur Database & Schema 3NF
 
 ### Diagram Relasi Utama (Schedule, Queue, & RME)
 
@@ -270,13 +270,13 @@ dokters (UUID) ──< jadwal_dokter (UUID) >── ruangan ───┤
 
 ---
 
-## 🛡️ Audit Log Sistem
+## Audit Log Sistem
 
 Seluruh aktivitas penting (termasuk `CREATE_SCHEDULE`, `APPROVE_CUTI`, `SWAP_SCHEDULE`, `CALL_QUEUE`, `FINALIZATION_RME`, `TEBUS_RESP`) dicatat otomatis ke tabel `audit_logs` beserta IP address dan JSON snapshot `data_sebelum` / `data_sesudah`.
 
 ---
 
-## 📂 Struktur Utama Direktori
+## Struktur Utama Direktori
 
 ```text
 backend-rumah-sakit/
@@ -322,7 +322,7 @@ backend-rumah-sakit/
 
 ---
 
-## 🧪 Pengujian (Testing & Verification)
+## Pengujian (Testing & Verification)
 
 Seluruh logika bisnis (deteksi bentrok jam, persetujuan tukar shift 2-level, penomoran antrian atomic, dan persetujuan cuti) diuji secara otomatis via test suite PHPUnit:
 

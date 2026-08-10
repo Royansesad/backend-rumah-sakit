@@ -35,6 +35,7 @@ Route::middleware(['web.auth'])->group(function () {
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{role}/{id}', [UserController::class, 'update'])->name('users.update');
 
+        Route::get('/audit-logs/export', [AuditLogController::class, 'export'])->name('audit-logs.export');
         Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     });
 
@@ -59,5 +60,6 @@ Route::middleware(['web.auth'])->group(function () {
 
     Route::middleware('web.role:admin')->group(function () {
         Route::get('/rbac', [RbacController::class, 'index'])->name('rbac.index');
+        Route::post('/rbac', [RbacController::class, 'update'])->name('rbac.update');
     });
 });

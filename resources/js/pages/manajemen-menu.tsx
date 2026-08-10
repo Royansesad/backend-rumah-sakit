@@ -10,7 +10,10 @@ interface ManajemenMenuProps {
     menu: string;
     users?: any[];
     selectedRole?: string;
-    logs?: any[];
+    logs?: any;
+    filters?: any;
+    aksiOptions?: string[];
+    roleOptions?: string[];
 }
 
 function FallbackView({ menu }: { menu: string }) {
@@ -33,14 +36,17 @@ export default function ManajemenMenu({
     menu = '',
     users = [],
     selectedRole = 'admin',
-    logs = [],
+    logs,
+    filters,
+    aksiOptions,
+    roleOptions,
 }: ManajemenMenuProps) {
     const renderMenu = () => {
         switch (menu) {
             case 'users':
                 return <UsersView users={users} selectedRole={selectedRole} />;
             case 'audit-logs':
-                return <AuditLogsView logs={logs} />;
+                return <AuditLogsView logs={logs || []} filters={filters} aksiOptions={aksiOptions} roleOptions={roleOptions} />;
             default:
                 return <FallbackView menu={menu} />;
         }

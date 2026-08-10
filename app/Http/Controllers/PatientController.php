@@ -172,6 +172,9 @@ class PatientController extends Controller
             'aksi' => 'CREATE_PATIENT',
             'data_sesudah' => json_encode(['description' => "Created patient {$noRm}", 'patient' => $patient]),
             'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'target_label' => 'Pasien',
+            'target_id' => $noRm,
         ]);
 
         return redirect()->route('pasien.index');
@@ -232,6 +235,9 @@ class PatientController extends Controller
             'data_sebelum' => json_encode($dataSebelum),
             'data_sesudah' => json_encode($patient->toArray()),
             'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'target_label' => 'Pasien',
+            'target_id' => $patient->nomor_rekam_medis ?? $id,
         ]);
 
         return redirect()->route('pasien.index');
@@ -253,6 +259,9 @@ class PatientController extends Controller
             'aksi' => 'DELETE_PATIENT',
             'data_sebelum' => json_encode(['description' => "Deleted patient {$noRm}"]),
             'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'target_label' => 'Pasien',
+            'target_id' => $noRm,
         ]);
 
         return redirect()->route('pasien.index');

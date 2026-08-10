@@ -46,10 +46,20 @@ export interface AuditLog {
     pembuat_id: string;
     modul: string;
     aksi: string;
-    data_sebelum?: string;
-    data_sesudah?: string;
+    data_sebelum?: Record<string, any> | null;
+    data_sesudah?: Record<string, any> | null;
     ip_address?: string;
+    user_agent?: string;
+    target_label?: string;
+    target_id?: string;
+    alasan?: string;
     created_at: string;
+    pembuat?: {
+        id: string;
+        nama_lengkap: string;
+        role: string;
+        [key: string]: any;
+    } | null;
 }
 
 export const ROLE_LABELS: Record<Role, string> = {

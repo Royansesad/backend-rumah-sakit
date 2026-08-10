@@ -151,7 +151,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }`}
             >
                 <div className="flex flex-col flex-1 overflow-y-auto">
-                    {/* Header Brand Logo (Exact matching Gambar 2 & 3) */}
+                    {/* Header Brand Logo (Matching Gambar 1) */}
                     <div className="flex items-center gap-3 p-6 border-b border-[#e1f3ef]">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#145e5b] text-white shadow-xs">
                             <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
@@ -196,14 +196,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </nav>
                 </div>
 
-                {/* Bottom Section */}
+                {/* Bottom Section with + New Admission button */}
                 <div className="p-4 border-t border-[#e1f3ef] space-y-3">
-                    {/* Emergency Alert Button (if Doctor view) */}
-                    {currentRole === 'dokter' && (
-                        <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-700 py-3 text-xs font-bold text-white shadow-xs transition-all hover:bg-red-800">
-                            <i className="fa-solid fa-triangle-exclamation text-sm"></i> Emergency Alert
-                        </button>
-                    )}
+                    <Link
+                        href="/pendaftaran-pasien"
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#145e5b] py-3 text-xs font-bold text-white shadow-xs transition-all hover:bg-[#0f4a47]"
+                    >
+                        + New Admission
+                    </Link>
 
                     <div className="space-y-1">
                         <Link
