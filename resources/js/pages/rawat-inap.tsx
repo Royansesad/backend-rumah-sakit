@@ -162,14 +162,23 @@ export default function RawatInapPage({
     });
 
     // Bed Master Form Data
-    const [bedForm, setBedForm] = useState({
+    const [bedForm, setBedForm] = useState<{
+        id: string;
+        nomor_bed: string;
+        ruangan_id: string;
+        bangsal_id: string;
+        kelas: BedItem['kelas'];
+        tarif_per_hari: number;
+        status: BedItem['status'];
+        catatan: string;
+    }>({
         id: '',
         nomor_bed: '',
         ruangan_id: '',
         bangsal_id: '',
-        kelas: 'Kelas 3' as const,
+        kelas: 'Kelas 3',
         tarif_per_hari: 200000,
-        status: 'tersedia' as const,
+        status: 'tersedia',
         catatan: '',
     });
 
