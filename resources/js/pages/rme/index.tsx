@@ -33,8 +33,12 @@ interface Poli {
 interface Obat {
     id: number;
     kode_obat: string;
+    nie?: string;
     nama_obat: string;
     bentuk_sediaan: string;
+    kemasan?: string;
+    komposisi?: string;
+    pendaftar?: string;
     stok: number;
     harga: number;
     unit_farmasi?: {
@@ -114,6 +118,165 @@ interface RmePageProps {
     resepsList: Resep[];
 }
 
+interface DrugSelectorComboboxProps {
+    value?: number;
+    onChange: (obat: Obat) => void;
+    initialObats: Obat[];
+    cachedDrugs: Map<number, Obat>;
+    onCacheDrug: (drug: Obat) => void;
+}
+
+function DrugSelectorCombobox({
+    value,
+    onChange,
+    initialObats,
+    cachedDrugs,
+    onCacheDrug,
+}: DrugSelectorComboboxProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<Obat[]>(initialObats);
+    const [loading, setLoading] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const selectedDrug = (value ? cachedDrugs.get(value) : undefined) || initialObats.find((o) => o.id === value);
+
+    // Close dropdown on click outside
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setIsOpen(false);
+            }
+        }
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen]);
+
+    // Live search query debounce
+    useEffect(() => {
+        if (!isOpen) return;
+
+        if (!query.trim()) {
+            setResults(initialObats);
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            setLoading(true);
+            try {
+                const res = await fetch(`/api/v1/obat?search=${encodeURIComponent(query.trim())}&per_page=15`);
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.status === 'success' && json.data?.data) {
+                        setResults(json.data.data);
+                        json.data.data.forEach((d: Obat) => onCacheDrug(d));
+                    }
+                }
+            } catch (err) {
+                console.error('Error searching drugs:', err);
+            } finally {
+                setLoading(false);
+            }
+        }, 250);
+
+        return () => clearTimeout(timer);
+    }, [query, isOpen, initialObats]);
+
+    return (
+        <div ref={containerRef} className="relative w-full">
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full rounded-lg border border-gray-200 bg-white p-2 text-left text-xs text-gray-900 focus:border-[#145e5b] focus:outline-none flex items-center justify-between shadow-2xs hover:border-teal-600 transition-colors"
+            >
+                <span className="truncate font-medium">
+                    {selectedDrug ? (
+                        <>
+                            <span className="font-semibold text-gray-900">{selectedDrug.nama_obat}</span>
+                            {selectedDrug.bentuk_sediaan && (
+                                <span className="text-gray-500 text-[11px] ml-1">({selectedDrug.bentuk_sediaan})</span>
+                            )}
+                            <span className="text-teal-700 text-[11px] font-mono ml-1.5">
+                                • Rp {Number(selectedDrug.harga).toLocaleString('id-ID')}
+                            </span>
+                        </>
+                    ) : (
+                        <span className="text-gray-400">Pilih / Cari Obat...</span>
+                    )}
+                </span>
+                <i className={`fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute z-50 mt-1 w-full rounded-xl border border-gray-200 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100 min-w-[280px]">
+                    <div className="relative mb-2">
+                        <i className="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-[10px] text-gray-400" />
+                        <input
+                            type="text"
+                            autoFocus
+                            placeholder="Cari nama, zat aktif, atau kode obat..."
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            className="w-full rounded-lg border border-gray-200 pl-7 pr-3 py-1.5 text-xs focus:border-[#145e5b] focus:outline-none"
+                        />
+                        {loading && (
+                            <i className="fa-solid fa-spinner fa-spin absolute right-2.5 top-2 text-[10px] text-teal-600" />
+                        )}
+                    </div>
+
+                    <div className="max-h-56 overflow-y-auto space-y-1">
+                        {results.map((o) => (
+                            <button
+                                key={o.id}
+                                type="button"
+                                onClick={() => {
+                                    onCacheDrug(o);
+                                    onChange(o);
+                                    setIsOpen(false);
+                                    setQuery('');
+                                }}
+                                className={`w-full text-left p-2 rounded-lg text-xs transition-colors flex items-center justify-between ${
+                                    o.id === value ? 'bg-teal-50 text-[#145e5b] font-semibold' : 'hover:bg-gray-50 text-gray-800'
+                                }`}
+                            >
+                                <div className="truncate pr-2">
+                                    <div className="font-semibold text-gray-900 truncate">
+                                        {o.nama_obat}
+                                        {o.kode_obat && (
+                                            <span className="font-mono text-[10px] text-teal-700 ml-1.5">
+                                                [{o.kode_obat}]
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="text-[11px] text-gray-500 truncate">
+                                        {o.bentuk_sediaan || '-'}
+                                        {o.komposisi ? ` • ${o.komposisi}` : ''}
+                                    </div>
+                                </div>
+                                <div className="text-right whitespace-nowrap">
+                                    <div className={`text-[10px] font-bold ${o.stok < 10 ? 'text-rose-600' : 'text-emerald-700'}`}>
+                                        Stok: {o.stok}
+                                    </div>
+                                    <div className="text-[10px] text-gray-500">
+                                        Rp {Number(o.harga).toLocaleString('id-ID')}
+                                    </div>
+                                </div>
+                            </button>
+                        ))}
+                        {results.length === 0 && !loading && (
+                            <div className="p-4 text-center text-xs text-gray-400">
+                                Tidak ada obat yang cocok.
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function RmeIndex({
     user,
     role = 'admin',
@@ -138,6 +301,22 @@ export default function RmeIndex({
     const [localResepsList, setLocalResepsList] = useState<Resep[]>(resepsList);
     const [localObats, setLocalObats] = useState<Obat[]>(obats);
     const [localRekamMedisList, setLocalRekamMedisList] = useState<RekamMedis[]>(rekamMedisList);
+
+    // Drug metadata cache map for instant lookups
+    const [cachedDrugsMap, setCachedDrugsMap] = useState<Map<number, Obat>>(() => {
+        const map = new Map<number, Obat>();
+        obats.forEach((o) => map.set(o.id, o));
+        return map;
+    });
+
+    const handleCacheDrug = (drug: Obat) => {
+        setCachedDrugsMap((prev) => {
+            if (prev.has(drug.id)) return prev;
+            const updated = new Map(prev);
+            updated.set(drug.id, drug);
+            return updated;
+        });
+    };
 
     useEffect(() => {
         setLocalResepsList(resepsList);
@@ -205,9 +384,9 @@ export default function RmeIndex({
     const [resepSearch, setResepSearch] = useState('');
     const [resepStatusFilter, setResepStatusFilter] = useState<string>('all');
     const [resepPage, setResepPage] = useState(1);
-    const [obatPage, setObatPage] = useState(1);
     const [resepTanggal, setResepTanggal] = useState(new Date().toISOString().split('T')[0]);
     const [resepCatatan, setResepCatatan] = useState('');
+    const [masterSubTab, setMasterSubTab] = useState<'obat' | 'icd'>('obat');
 
     // States for ICD-10 Search Combobox in Input RME Form
     const comboboxRef = useRef<HTMLDivElement>(null);
@@ -226,6 +405,16 @@ export default function RmeIndex({
         total: number;
     }>({ data: icd10Codes, current_page: 1, last_page: 1, total: icd10Codes.length });
     const [masterIcdLoading, setMasterIcdLoading] = useState(false);
+
+    // States for Master Obat Catalogue Tab
+    const [masterObatPage, setMasterObatPage] = useState(1);
+    const [masterObatData, setMasterObatData] = useState<{
+        data: Obat[];
+        current_page: number;
+        last_page: number;
+        total: number;
+    }>({ data: obats, current_page: 1, last_page: 1, total: obats.length });
+    const [masterObatLoading, setMasterObatLoading] = useState(false);
 
     // Live API search for ICD-10 Combobox in Input RME Form
     useEffect(() => {
@@ -282,6 +471,49 @@ export default function RmeIndex({
 
         return () => clearTimeout(timer);
     }, [searchIcd, masterIcdPage, activeTab]);
+
+    // Live API search & pagination for Katalog Obat Tab
+    useEffect(() => {
+        if (activeTab !== 'master') return;
+
+        const timer = setTimeout(async () => {
+            setMasterObatLoading(true);
+            try {
+                let url = `/api/v1/obat?page=${masterObatPage}&per_page=12`;
+                if (searchObat.trim()) {
+                    url += `&search=${encodeURIComponent(searchObat.trim())}`;
+                }
+                if (obatSediaanFilter !== 'all') {
+                    url += `&bentuk_sediaan=${encodeURIComponent(obatSediaanFilter)}`;
+                }
+                if (obatStockFilter !== 'all') {
+                    url += `&stock_filter=${encodeURIComponent(obatStockFilter)}`;
+                }
+
+                const res = await fetch(url);
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.status === 'success' && json.data) {
+                        setMasterObatData({
+                            data: json.data.data || [],
+                            current_page: json.data.current_page || 1,
+                            last_page: json.data.last_page || 1,
+                            total: json.data.total || 0,
+                        });
+                        if (json.data.data) {
+                            json.data.data.forEach((d: Obat) => handleCacheDrug(d));
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching master Obat:', err);
+            } finally {
+                setMasterObatLoading(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchObat, obatSediaanFilter, obatStockFilter, masterObatPage, activeTab]);
 
     // Detect available space for ICD combobox
     const updateDropdownDirection = () => {
@@ -389,41 +621,28 @@ export default function RmeIndex({
     const totalResepPages = Math.ceil(filteredReseps.length / resepsPerPage);
     const paginatedReseps = filteredReseps.slice((resepPage - 1) * resepsPerPage, resepPage * resepsPerPage);
 
-    // Obat Filtering & Pagination
-    const filteredObat = localObats.filter((o) => {
-        const matchSearch =
-            !searchObat ||
-            o.nama_obat.toLowerCase().includes(searchObat.toLowerCase()) ||
-            o.kode_obat.toLowerCase().includes(searchObat.toLowerCase());
-        const matchSediaan =
-            obatSediaanFilter === 'all' || o.bentuk_sediaan?.toLowerCase() === obatSediaanFilter.toLowerCase();
-        const matchStock =
-            obatStockFilter === 'all' ||
-            (obatStockFilter === 'low' && o.stok < 50) ||
-            (obatStockFilter === 'safe' && o.stok >= 50);
-        return matchSearch && matchSediaan && matchStock;
-    });
-
-    const obatPerPage = 10;
-    const totalObatPages = Math.ceil(filteredObat.length / obatPerPage);
-    const paginatedObat = filteredObat.slice((obatPage - 1) * obatPerPage, obatPage * obatPerPage);
-
     // Helper: sediaan badge styling
     const getSediaanStyle = (sediaan: string = '') => {
-        switch (sediaan.toLowerCase()) {
-            case 'sirup':
-                return 'bg-cyan-100 text-cyan-800 border-cyan-300';
-            case 'tablet':
-                return 'bg-slate-100 text-slate-700 border-slate-300';
-            case 'kapsul':
-                return 'bg-amber-100 text-amber-800 border-amber-300';
-            case 'salep':
-                return 'bg-purple-100 text-purple-800 border-purple-300';
-            case 'injeksi':
-                return 'bg-rose-100 text-rose-800 border-rose-300';
-            default:
-                return 'bg-gray-100 text-gray-700 border-gray-300';
+        const s = sediaan.toLowerCase();
+        if (s.includes('sirup') || s.includes('suspensi') || s.includes('larutan') || s.includes('cairan') || s.includes('emulsi') || s.includes('elixir')) {
+            return 'bg-cyan-50 text-cyan-800 border-cyan-200';
         }
+        if (s.includes('kapsul')) {
+            return 'bg-purple-50 text-purple-800 border-purple-200';
+        }
+        if (s.includes('injeksi') || s.includes('infus') || s.includes('serbuk injeksi')) {
+            return 'bg-amber-50 text-amber-900 border-amber-300';
+        }
+        if (s.includes('tetes') || s.includes('drop') || s.includes('guttae')) {
+            return 'bg-emerald-50 text-emerald-800 border-emerald-200';
+        }
+        if (s.includes('salep') || s.includes('krim') || s.includes('gel') || s.includes('lotion') || s.includes('pasta')) {
+            return 'bg-rose-50 text-rose-800 border-rose-200';
+        }
+        if (s.includes('tablet') || s.includes('kaplet') || s.includes('pil')) {
+            return 'bg-blue-50 text-blue-800 border-blue-200';
+        }
+        return 'bg-slate-50 text-slate-700 border-slate-200';
     };
 
     // Calculate Estimated Resep Total in Form
@@ -2013,7 +2232,7 @@ export default function RmeIndex({
                                     </div>
 
                                     {resepFormData.details.map((item, idx) => {
-                                        const selectedDrug = localObats.find((o) => o.id === item.obat_id);
+                                        const selectedDrug = (item.obat_id ? cachedDrugsMap.get(item.obat_id) : undefined) || localObats.find((o) => o.id === item.obat_id);
                                         const isLowStock = selectedDrug && item.jumlah_dosis > selectedDrug.stok;
 
                                         return (
@@ -2030,7 +2249,7 @@ export default function RmeIndex({
                                                     <div className="col-span-12 sm:col-span-5">
                                                         <div className="flex items-center justify-between mb-0.5">
                                                             <label className="block text-[11px] font-medium text-gray-500">
-                                                                Pilih Obat
+                                                                Pilih / Cari Obat
                                                             </label>
                                                             {selectedDrug && (
                                                                 <span className={`text-[10px] font-semibold ${
@@ -2040,24 +2259,20 @@ export default function RmeIndex({
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <select
+                                                        <DrugSelectorCombobox
                                                             value={item.obat_id}
-                                                            onChange={(e) => {
+                                                            onChange={(o) => {
                                                                 const newDetails = [...resepFormData.details];
-                                                                newDetails[idx].obat_id = Number(e.target.value);
+                                                                newDetails[idx].obat_id = o.id;
                                                                 setResepFormData({
                                                                     ...resepFormData,
                                                                     details: newDetails,
                                                                 });
                                                             }}
-                                                            className="w-full rounded-lg border border-gray-200 bg-white p-2 text-xs text-gray-900 focus:border-[#145e5b] focus:outline-none"
-                                                        >
-                                                            {localObats.map((o) => (
-                                                                <option key={o.id} value={o.id}>
-                                                                    {o.nama_obat} ({o.bentuk_sediaan}) – Rp {o.harga.toLocaleString('id-ID')}
-                                                                </option>
-                                                            ))}
-                                                        </select>
+                                                            initialObats={localObats}
+                                                            cachedDrugs={cachedDrugsMap}
+                                                            onCacheDrug={handleCacheDrug}
+                                                        />
                                                     </div>
                                                     <div className="col-span-4 sm:col-span-2">
                                                         <label className="block text-[11px] font-medium text-gray-500 mb-0.5">
@@ -2350,267 +2565,359 @@ export default function RmeIndex({
                 {/* ═══════════════════════════════════════════════════════════
                     TAB 4: KATALOG OBAT & ICD-10 (OPTIMIZED)
                 ═══════════════════════════════════════════════════════════ */}
+                {/* ═══════════════════════════════════════════════════════════
+                    TAB 4: KATALOG OBAT & ICD-10 (OPTIMIZED FULL WIDTH)
+                ═══════════════════════════════════════════════════════════ */}
                 {activeTab === 'master' && (
-                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        {/* ── Katalog Obat Farmasi ── */}
-                        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div>
-                                    <h2 className="text-base font-bold text-gray-900">Katalog Obat Farmasi</h2>
-                                    <p className="text-xs text-gray-500 mt-0.5">
-                                        Stok obat terhubung langsung dengan sistem resep digital.
-                                    </p>
-                                </div>
-                                <div className="relative">
-                                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-2 text-xs text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Cari kode/obat..."
-                                        value={searchObat}
-                                        onChange={(e) => {
-                                            setSearchObat(e.target.value);
-                                            setObatPage(1);
-                                        }}
-                                        className="rounded-lg border border-gray-200 pl-8 pr-3 py-1.5 text-xs focus:border-[#145e5b] focus:outline-none"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Filters for Obat */}
-                            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                                <span className="text-gray-500 text-[11px] font-medium">Sediaan:</span>
-                                {['all', 'tablet', 'sirup', 'kapsul', 'injeksi'].map((s) => (
-                                    <button
-                                        key={s}
-                                        type="button"
-                                        onClick={() => {
-                                            setObatSediaanFilter(s);
-                                            setObatPage(1);
-                                        }}
-                                        className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold capitalize transition-all ${
-                                            obatSediaanFilter === s
-                                                ? 'bg-[#145e5b] text-white shadow-xs'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {s === 'all' ? 'Semua' : s}
-                                    </button>
-                                ))}
-                                <div className="ml-auto flex items-center gap-1">
-                                    <button
-                                        type="button"
-                                        onClick={() => setObatStockFilter(obatStockFilter === 'low' ? 'all' : 'low')}
-                                        className={`rounded-lg px-2 py-1 text-[11px] font-bold border transition-colors ${
-                                            obatStockFilter === 'low'
-                                                ? 'bg-rose-100 text-rose-800 border-rose-300'
-                                                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                                        }`}
-                                    >
-                                        ⚠ Stok Rendah
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-xs text-gray-700">
-                                    <thead>
-                                        <tr className="border-b border-gray-200">
-                                            <th className="p-2.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                                                Kode
-                                            </th>
-                                            <th className="p-2.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                                                Nama Obat
-                                            </th>
-                                            <th className="p-2.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                                                Sediaan
-                                            </th>
-                                            <th className="p-2.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                                                Stok
-                                            </th>
-                                            <th className="p-2.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                                                Harga
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {paginatedObat.map((o) => (
-                                            <tr key={o.id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="p-2.5 font-mono font-bold text-[#145e5b]">
-                                                    {o.kode_obat}
-                                                </td>
-                                                <td className="p-2.5 font-semibold text-gray-900">{o.nama_obat}</td>
-                                                <td className="p-2.5">
-                                                    <span
-                                                        className={`inline-block rounded-full border px-2 py-0.5 text-[10px] font-semibold ${getSediaanStyle(o.bentuk_sediaan)}`}
-                                                    >
-                                                        {o.bentuk_sediaan}
-                                                    </span>
-                                                </td>
-                                                <td className="p-2.5">
-                                                    <span
-                                                        className={`font-bold ${o.stok < 50 ? 'text-rose-600' : 'text-gray-900'}`}
-                                                    >
-                                                        {o.stok}
-                                                    </span>
-                                                    {o.stok < 50 && (
-                                                        <i className="fa-solid fa-triangle-exclamation text-amber-500 text-[10px] ml-1" title="Stok menipis" />
-                                                    )}
-                                                </td>
-                                                <td className="p-2.5 text-gray-700">
-                                                    Rp {Number(o.harga).toLocaleString('id-ID')}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {paginatedObat.length === 0 && (
-                                            <tr>
-                                                <td colSpan={5} className="p-6 text-center text-gray-400">
-                                                    Tidak ada obat ditemukan.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Obat Pagination */}
-                            {totalObatPages > 0 && (
-                                <div className="flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-600">
-                                    <div>
-                                        Halaman{' '}
-                                        <span className="font-bold">{obatPage}</span> dari{' '}
-                                        <span className="font-bold">{totalObatPages}</span>{' '}
-                                        ({filteredObat.length} Total)
-                                    </div>
-                                    <div className="flex gap-1">
-                                        <button
-                                            disabled={obatPage <= 1}
-                                            onClick={() => setObatPage((p) => Math.max(1, p - 1))}
-                                            className="rounded-lg border bg-white px-2.5 py-1 text-xs font-medium hover:bg-gray-50 disabled:opacity-40 transition-colors"
-                                        >
-                                            <i className="fa-solid fa-chevron-left" />
-                                        </button>
-                                        <button
-                                            disabled={obatPage >= totalObatPages}
-                                            onClick={() => setObatPage((p) => Math.min(totalObatPages, p + 1))}
-                                            className="rounded-lg border bg-white px-2.5 py-1 text-xs font-medium hover:bg-gray-50 disabled:opacity-40 transition-colors"
-                                        >
-                                            <i className="fa-solid fa-chevron-right" />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                    <div className="space-y-6">
+                        {/* Sub-tab Navigation */}
+                        <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 pb-3">
+                            <button
+                                type="button"
+                                onClick={() => setMasterSubTab('obat')}
+                                className={`rounded-xl px-4 py-2.5 text-xs font-bold transition-all flex items-center gap-2 ${
+                                    masterSubTab === 'obat'
+                                        ? 'bg-[#145e5b] text-white shadow-sm'
+                                        : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                                }`}
+                            >
+                                <i className="fa-solid fa-pills text-sm" />
+                                <span>Katalog Obat Farmasi</span>
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                    masterSubTab === 'obat' ? 'bg-teal-800 text-white' : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                    {masterObatData.total.toLocaleString('id-ID')} BPOM
+                                </span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMasterSubTab('icd')}
+                                className={`rounded-xl px-4 py-2.5 text-xs font-bold transition-all flex items-center gap-2 ${
+                                    masterSubTab === 'icd'
+                                        ? 'bg-[#145e5b] text-white shadow-sm'
+                                        : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                                }`}
+                            >
+                                <i className="fa-solid fa-book-medical text-sm" />
+                                <span>Referensi Master ICD-10</span>
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                    masterSubTab === 'icd' ? 'bg-teal-800 text-white' : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                    {masterIcdData.total.toLocaleString('id-ID')} Kode
+                                </span>
+                            </button>
                         </div>
 
-                        {/* ── Referensi Master ICD-10 ── */}
-                        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div>
-                                    <h2 className="text-base font-bold text-gray-900">
-                                        Referensi Master ICD-10{' '}
-                                        <span className="text-sm font-normal text-gray-500">
-                                            ({masterIcdData.total.toLocaleString('id-ID')} Kode)
-                                        </span>
-                                    </h2>
-                                    <p className="text-xs text-gray-500 mt-0.5">
-                                        Katalog standar internasional pengkodean penyakit pasien.
-                                    </p>
+                        {/* ── Sub-tab 1: Katalog Obat Farmasi (Full Width) ── */}
+                        {masterSubTab === 'obat' && (
+                            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                                            Katalog Obat Farmasi BPOM
+                                            <span className="text-xs font-normal text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-2.5 py-0.5">
+                                                {masterObatData.total.toLocaleString('id-ID')} Data Resmi
+                                            </span>
+                                        </h2>
+                                        <p className="text-xs text-gray-500 mt-0.5">
+                                            Data komoditi obat BPOM terintegrasi langsung dengan peresepan digital.
+                                        </p>
+                                    </div>
+                                    <div className="relative">
+                                        <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Cari nama, zat aktif, kode, NIE..."
+                                            value={searchObat}
+                                            onChange={(e) => {
+                                                setSearchObat(e.target.value);
+                                                setMasterObatPage(1);
+                                            }}
+                                            className="rounded-lg border border-gray-200 pl-8 pr-8 py-2 text-xs focus:border-[#145e5b] focus:outline-none w-64 shadow-2xs"
+                                        />
+                                        {masterObatLoading && (
+                                            <i className="fa-solid fa-spinner fa-spin absolute right-2.5 top-2.5 text-xs text-teal-600" />
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="relative">
-                                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-2 text-xs text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Cari kode/penyakit..."
-                                        value={searchIcd}
-                                        onChange={(e) => {
-                                            setSearchIcd(e.target.value);
-                                            setMasterIcdPage(1);
-                                        }}
-                                        className="rounded-lg border border-gray-200 pl-8 pr-3 py-1.5 text-xs focus:border-[#145e5b] focus:outline-none"
-                                    />
-                                    {masterIcdLoading && (
-                                        <span className="absolute right-2.5 top-2 text-[10px] text-teal-600 font-semibold animate-pulse">
-                                            ...
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-xs text-gray-700">
-                                    <thead>
-                                        <tr className="border-b border-gray-200">
-                                            <th className="p-2.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                                Kode ICD-10
-                                            </th>
-                                            <th className="p-2.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                                                Deskripsi Diagnosa (Bahasa Indonesia)
-                                            </th>
-                                            <th className="p-2.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                                                Nama Inggris
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {masterIcdData.data.map((i) => (
-                                            <tr
-                                                key={i.id || i.code}
-                                                className="hover:bg-teal-50/40 transition-colors"
+                                {/* Filters for Obat */}
+                                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                                    <span className="text-gray-500 text-[11px] font-medium">Filter Sediaan:</span>
+                                    {[
+                                        { key: 'all', label: 'Semua' },
+                                        { key: 'tablet', label: 'Tablet / Kaplet' },
+                                        { key: 'sirup', label: 'Sirup / Suspensi' },
+                                        { key: 'kapsul', label: 'Kapsul' },
+                                        { key: 'injeksi', label: 'Injeksi / Infus' },
+                                        { key: 'salep', label: 'Salep / Krim' },
+                                        { key: 'tetes', label: 'Tetes / Drop' },
+                                    ].map((s) => (
+                                        <button
+                                            key={s.key}
+                                            type="button"
+                                            onClick={() => {
+                                                setObatSediaanFilter(s.key);
+                                                setMasterObatPage(1);
+                                            }}
+                                            className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all ${
+                                                obatSediaanFilter === s.key
+                                                    ? 'bg-[#145e5b] text-white shadow-xs'
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {s.label}
+                                        </button>
+                                    ))}
+                                    <div className="ml-auto flex items-center gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setObatStockFilter(obatStockFilter === 'low' ? 'all' : 'low');
+                                                setMasterObatPage(1);
+                                            }}
+                                            className={`rounded-lg px-3 py-1.5 text-[11px] font-bold border transition-colors ${
+                                                obatStockFilter === 'low'
+                                                    ? 'bg-rose-100 text-rose-800 border-rose-300'
+                                                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            ⚠ Stok Rendah (&lt; 50)
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="overflow-x-auto rounded-xl border border-gray-100">
+                                    <table className="w-full text-left text-xs text-gray-700">
+                                        <thead>
+                                            <tr className="border-b border-gray-200 bg-gray-50/70">
+                                                <th className="p-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-36">
+                                                    Kode / NIE
+                                                </th>
+                                                <th className="p-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                                                    Nama Produk & Komposisi
+                                                </th>
+                                                <th className="p-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-56">
+                                                    Bentuk Sediaan
+                                                </th>
+                                                <th className="p-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-28">
+                                                    Stok
+                                                </th>
+                                                <th className="p-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-36">
+                                                    Harga HET
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {masterObatData.data.map((o) => {
+                                                const rawSediaan = o.bentuk_sediaan || '';
+                                                const parts = rawSediaan.split(';');
+                                                const primarySediaan = parts[0]?.trim() || '-';
+                                                const sediaanDetail = parts.slice(1).join(';').trim();
+
+                                                return (
+                                                    <tr key={o.id} className="hover:bg-teal-50/30 transition-colors">
+                                                        <td className="p-3 font-mono font-bold text-[#145e5b] whitespace-nowrap">
+                                                            <div>{o.kode_obat}</div>
+                                                            {o.nie && o.nie !== o.kode_obat && (
+                                                                <div className="text-[10px] text-gray-400 font-normal mt-0.5">
+                                                                    NIE: {o.nie}
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div className="font-semibold text-gray-900">{o.nama_obat}</div>
+                                                            {o.komposisi && (
+                                                                <div className="text-[11px] text-gray-500 mt-0.5 line-clamp-1" title={o.komposisi}>
+                                                                    {o.komposisi}
+                                                                </div>
+                                                            )}
+                                                            {o.pendaftar && (
+                                                                <div className="text-[10px] text-teal-700 font-mono mt-0.5">
+                                                                    Produsen: {o.pendaftar}
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div className="flex flex-col items-start gap-0.5">
+                                                                <span
+                                                                    className={`inline-block rounded-md border px-2.5 py-1 text-[11px] font-semibold ${getSediaanStyle(primarySediaan)}`}
+                                                                >
+                                                                    {primarySediaan}
+                                                                </span>
+                                                                {sediaanDetail && (
+                                                                    <span className="text-[10px] text-gray-400 font-mono truncate max-w-[220px]" title={sediaanDetail}>
+                                                                        {sediaanDetail}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <span
+                                                                    className={`font-bold text-sm ${o.stok < 50 ? 'text-rose-600' : 'text-gray-900'}`}
+                                                                >
+                                                                    {o.stok}
+                                                                </span>
+                                                                {o.stok < 50 && (
+                                                                    <i className="fa-solid fa-triangle-exclamation text-amber-500 text-xs" title="Stok menipis" />
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-3 text-gray-900 font-bold whitespace-nowrap">
+                                                            Rp {Number(o.harga).toLocaleString('id-ID')}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                            {masterObatData.data.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={5} className="p-8 text-center text-gray-400">
+                                                        <i className="fa-solid fa-box-open text-2xl mb-2 block text-gray-300" />
+                                                        Tidak ada data obat ditemukan dengan kriteria tersebut.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Obat Pagination */}
+                                {masterObatData.last_page > 1 && (
+                                    <div className="flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-600">
+                                        <div>
+                                            Halaman <span className="font-bold">{masterObatData.current_page}</span> dari{' '}
+                                            <span className="font-bold">{masterObatData.last_page}</span> ({masterObatData.total.toLocaleString('id-ID')} Total Data)
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <button
+                                                disabled={masterObatData.current_page <= 1 || masterObatLoading}
+                                                onClick={() => setMasterObatPage((p) => Math.max(1, p - 1))}
+                                                className="rounded-lg border bg-white px-3 py-1.5 text-xs font-medium hover:bg-gray-50 disabled:opacity-40 transition-colors flex items-center gap-1"
                                             >
-                                                <td className="p-2.5 font-mono font-bold text-indigo-700 whitespace-nowrap">
-                                                    {i.code}
-                                                </td>
-                                                <td className="p-2.5 font-medium text-gray-900">{i.description}</td>
-                                                <td className="p-2.5 text-gray-500 italic text-[11px]">
-                                                    {i.name_en || '-'}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {masterIcdData.data.length === 0 && (
-                                            <tr>
-                                                <td colSpan={3} className="p-6 text-center text-gray-400">
-                                                    Tidak ada data ICD-10 ditemukan.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* ICD-10 Pagination */}
-                            {masterIcdData.last_page > 1 && (
-                                <div className="flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-600">
-                                    <div>
-                                        Halaman{' '}
-                                        <span className="font-bold">{masterIcdData.current_page}</span> dari{' '}
-                                        <span className="font-bold">{masterIcdData.last_page}</span>{' '}
-                                        ({masterIcdData.total.toLocaleString('id-ID')} Total)
+                                                <i className="fa-solid fa-chevron-left text-[10px]" /> Prev
+                                            </button>
+                                            <button
+                                                disabled={masterObatData.current_page >= masterObatData.last_page || masterObatLoading}
+                                                onClick={() => setMasterObatPage((p) => Math.min(masterObatData.last_page, p + 1))}
+                                                className="rounded-lg border bg-white px-3 py-1.5 text-xs font-medium hover:bg-gray-50 disabled:opacity-40 transition-colors flex items-center gap-1"
+                                            >
+                                                Next <i className="fa-solid fa-chevron-right text-[10px]" />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex gap-1">
-                                        <button
-                                            disabled={masterIcdData.current_page <= 1 || masterIcdLoading}
-                                            onClick={() => setMasterIcdPage((p) => Math.max(1, p - 1))}
-                                            className="rounded-lg border bg-white px-3 py-1 text-xs font-medium hover:bg-gray-50 disabled:opacity-40 flex items-center gap-1 transition-colors"
-                                        >
-                                            <i className="fa-solid fa-chevron-left text-[9px]" /> Prev
-                                        </button>
-                                        <button
-                                            disabled={
-                                                masterIcdData.current_page >= masterIcdData.last_page ||
-                                                masterIcdLoading
-                                            }
-                                            onClick={() =>
-                                                setMasterIcdPage((p) =>
-                                                    Math.min(masterIcdData.last_page, p + 1),
-                                                )
-                                            }
-                                            className="rounded-lg border bg-white px-3 py-1 text-xs font-medium hover:bg-gray-50 disabled:opacity-40 flex items-center gap-1 transition-colors"
-                                        >
-                                            Next <i className="fa-solid fa-chevron-right text-[9px]" />
-                                        </button>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ── Sub-tab 2: Referensi Master ICD-10 (Full Width) ── */}
+                        {masterSubTab === 'icd' && (
+                            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                                            Referensi Master ICD-10
+                                            <span className="text-xs font-normal text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full px-2.5 py-0.5">
+                                                {masterIcdData.total.toLocaleString('id-ID')} Kode Standard
+                                            </span>
+                                        </h2>
+                                        <p className="text-xs text-gray-500 mt-0.5">
+                                            Katalog standar internasional pengkodean penyakit pasien WHO ICD-10.
+                                        </p>
+                                    </div>
+                                    <div className="relative">
+                                        <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Cari kode/penyakit..."
+                                            value={searchIcd}
+                                            onChange={(e) => {
+                                                setSearchIcd(e.target.value);
+                                                setMasterIcdPage(1);
+                                            }}
+                                            className="rounded-lg border border-gray-200 pl-8 pr-8 py-2 text-xs focus:border-[#145e5b] focus:outline-none w-64 shadow-2xs"
+                                        />
+                                        {masterIcdLoading && (
+                                            <i className="fa-solid fa-spinner fa-spin absolute right-2.5 top-2.5 text-xs text-teal-600" />
+                                        )}
                                     </div>
                                 </div>
-                            )}
-                        </div>
+
+                                <div className="overflow-x-auto rounded-xl border border-gray-100">
+                                    <table className="w-full text-left text-xs text-gray-700">
+                                        <thead>
+                                            <tr className="border-b border-gray-200 bg-gray-50/70">
+                                                <th className="p-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-36 whitespace-nowrap">
+                                                    Kode ICD-10
+                                                </th>
+                                                <th className="p-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                                                    Deskripsi Diagnosa (Bahasa Indonesia)
+                                                </th>
+                                                <th className="p-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-72">
+                                                    Nama Inggris
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {masterIcdData.data.map((i) => (
+                                                <tr
+                                                    key={i.id || i.code}
+                                                    className="hover:bg-teal-50/30 transition-colors"
+                                                >
+                                                    <td className="p-3 font-mono font-bold text-indigo-700 text-sm whitespace-nowrap">
+                                                        {i.code}
+                                                    </td>
+                                                    <td className="p-3 font-medium text-gray-900">{i.description}</td>
+                                                    <td className="p-3 text-gray-500 italic text-xs">
+                                                        {i.name_en || '-'}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {masterIcdData.data.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={3} className="p-8 text-center text-gray-400">
+                                                        Tidak ada data ICD-10 ditemukan.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* ICD-10 Pagination */}
+                                {masterIcdData.last_page > 1 && (
+                                    <div className="flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-600">
+                                        <div>
+                                            Halaman <span className="font-bold">{masterIcdData.current_page}</span> dari{' '}
+                                            <span className="font-bold">{masterIcdData.last_page}</span> ({masterIcdData.total.toLocaleString('id-ID')} Total Data)
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <button
+                                                disabled={masterIcdData.current_page <= 1 || masterIcdLoading}
+                                                onClick={() => setMasterIcdPage((p) => Math.max(1, p - 1))}
+                                                className="rounded-lg border bg-white px-3 py-1.5 text-xs font-medium hover:bg-gray-50 disabled:opacity-40 flex items-center gap-1 transition-colors"
+                                            >
+                                                <i className="fa-solid fa-chevron-left text-[10px]" /> Prev
+                                            </button>
+                                            <button
+                                                disabled={
+                                                    masterIcdData.current_page >= masterIcdData.last_page ||
+                                                    masterIcdLoading
+                                                }
+                                                onClick={() =>
+                                                    setMasterIcdPage((p) =>
+                                                        Math.min(masterIcdData.last_page, p + 1),
+                                                    )
+                                                }
+                                                className="rounded-lg border bg-white px-3 py-1.5 text-xs font-medium hover:bg-gray-50 disabled:opacity-40 flex items-center gap-1 transition-colors"
+                                            >
+                                                Next <i className="fa-solid fa-chevron-right text-[10px]" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

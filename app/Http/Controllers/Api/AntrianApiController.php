@@ -110,20 +110,83 @@ class AntrianApiController extends Controller
             ->orderBy('waktu_dipanggil', 'desc')
             ->first();
 
-        $daftarTunggu = Antrian::with(['pasien'])
+        // Ambil panggilan aktif terbaru per poliklinik untuk layar TV multi-loket
+        $polis = \App\Models\Poli::all();
+        $panggilanPerPoli = [];
+
+        foreach ($polis as $p) {
+            $antrianPoli = Antrian::with(['dokter', 'pasien', 'loket'])
+                ->whereDate('created_at', now()->toDateString())
+                ->where('poli_id', $p->id)
+                ->whereIn('status', ['dipanggil', 'sedang_dilayani'])
+                ->orderBy('waktu_dipanggil', 'desc')
+                ->first();
+
+            $panggilanPerPoli[] = [
+                'poli' => $p,
+                'antrian' => $antrianPoli,
+            ];
+        }
+
+        $daftarTunggu = Antrian::with(['pasien', 'poli', 'dokter'])
             ->whereDate('created_at', now()->toDateString())
             ->when($poliId, fn($q) => $q->where('poli_id', $poliId))
             ->whereIn('status', ['menunggu', 'skrining'])
             ->orderBy('angka_antrian')
-            ->take(10)
+            ->take(15)
             ->get();
 
         return response()->json([
             'success' => true,
             'data' => [
                 'sedang_dipanggil' => $sedangDipanggil,
+                'panggilan_per_poli' => $panggilanPerPoli,
                 'daftar_tunggu' => $daftarTunggu,
             ],
+        ]);
+    }
+
+    /**
+     * Panggil Pasien Berikutnya (Auto-call next in queue)
+     */
+    public function panggilBerikutnya(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'jadwal_dokter_id' => 'required|uuid|exists:jadwal_dokter,id',
+            'loket_id' => 'nullable|uuid|exists:loket_antrian,id',
+        ]);
+
+        $antrian = $this->antrianService->panggilBerikutnya(
+            $validated['jadwal_dokter_id'],
+            $validated['loket_id'] ?? null
+        );
+
+        if (! $antrian) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada antrian yang menunggu untuk jadwal dokter ini.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Pasien {$antrian->pasien->nama_lengkap} (No. {$antrian->nomor_antrian}) berhasil dipanggil.",
+            'data' => $antrian,
+        ]);
+    }
+
+    /**
+     * Statistik Antrian Hari Ini
+     */
+    public function statistikHariIni(Request $request): JsonResponse
+    {
+        $poliId = $request->query('poli_id');
+
+        $statistik = $this->antrianService->hitungStatistikHariIni($poliId);
+
+        return response()->json([
+            'success' => true,
+            'data' => $statistik,
         ]);
     }
 }

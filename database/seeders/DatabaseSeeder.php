@@ -18,7 +18,9 @@ class DatabaseSeeder extends Seeder
             PasienSeeder::class,
             AuditLogSeeder::class,
             MasterIcdSeeder::class,
+            MasterObatSeeder::class,
             RmeSeeder::class,
+            BedSeeder::class,
         ]);
     }
 }

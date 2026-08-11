@@ -39,15 +39,14 @@ class AntrianService
 
         return DB::transaction(function () use ($data, $jadwal, $hariIni) {
             $poli = $jadwal->poli;
-            $prefixPoli = strtoupper($poli->kode_poli ?? substr($poli->nama_poli ?? 'POLI', 0, 3));
-            $cacheKey = "sekuens_antrian:{$poli->id}:{$hariIni}";
+            $prefixPoli = $this->getPrefixPoli($poli);
 
-            // Atomic Increment nomor antrian
-            $angkaAntrian = Cache::increment($cacheKey);
-            if ($angkaAntrian === 1) {
-                Cache::put($cacheKey, 1, now()->endOfDay());
-            }
+            // Hitung nomor antrian berikutnya secara presisi (max + 1 per poli hari ini)
+            $maxAngka = Antrian::where('poli_id', $jadwal->poli_id)
+                ->whereDate('created_at', $hariIni)
+                ->max('angka_antrian') ?? 0;
 
+            $angkaAntrian = ((int) $maxAngka) + 1;
             $nomorFormatted = sprintf("%s-%03d", $prefixPoli, $angkaAntrian);
 
             return Antrian::create([
@@ -61,6 +60,26 @@ class AntrianService
                 'status' => 'menunggu',
             ]);
         });
+    }
+
+    /**
+     * Generate Kode Prefix Unik per Poli (misal: Poli Umum -> UMU, Poli Gigi -> GIG, Poli Anak -> ANK)
+     */
+    public function getPrefixPoli(Poli $poli): string
+    {
+        $nama = strtolower($poli->nama_poli);
+
+        if (str_contains($nama, 'umum')) return 'UMU';
+        if (str_contains($nama, 'gigi')) return 'GIG';
+        if (str_contains($nama, 'anak')) return 'ANK';
+        if (str_contains($nama, 'kandungan') || str_contains($nama, 'obgyn')) return 'KND';
+        if (str_contains($nama, 'mata')) return 'MAT';
+        if (str_contains($nama, 'dalam')) return 'PDL';
+        if (str_contains($nama, 'bedah')) return 'BDH';
+
+        $words = explode(' ', trim($poli->nama_poli));
+        $lastWord = end($words);
+        return strtoupper(substr($lastWord, 0, 3));
     }
 
     /**
@@ -90,5 +109,66 @@ class AntrianService
 
         $antrian->update($payload);
         return $antrian->fresh(['poli', 'dokter', 'pasien', 'loket']);
+    }
+
+    /**
+     * Panggil pasien berikutnya (antrian menunggu/skrining dengan angka terkecil)
+     */
+    public function panggilBerikutnya(string $jadwalDokterId, ?string $loketId = null): ?Antrian
+    {
+        $antrian = Antrian::where('jadwal_dokter_id', $jadwalDokterId)
+            ->whereDate('created_at', now()->toDateString())
+            ->whereIn('status', ['menunggu', 'skrining'])
+            ->orderBy('angka_antrian')
+            ->first();
+
+        if (! $antrian) {
+            return null;
+        }
+
+        return $this->updateStatusAntrian($antrian, 'dipanggil', $loketId);
+    }
+
+    /**
+     * Hitung statistik antrian hari ini
+     *
+     * @return array<string, mixed>
+     */
+    public function hitungStatistikHariIni(?string $poliId = null): array
+    {
+        $query = Antrian::whereDate('created_at', now()->toDateString());
+
+        if ($poliId) {
+            $query->where('poli_id', $poliId);
+        }
+
+        $statusCounts = (clone $query)->selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'menunggu' THEN 1 ELSE 0 END) as menunggu,
+            SUM(CASE WHEN status = 'skrining' THEN 1 ELSE 0 END) as skrining,
+            SUM(CASE WHEN status = 'dipanggil' THEN 1 ELSE 0 END) as dipanggil,
+            SUM(CASE WHEN status = 'sedang_dilayani' THEN 1 ELSE 0 END) as sedang_dilayani,
+            SUM(CASE WHEN status = 'selesai' THEN 1 ELSE 0 END) as selesai,
+            SUM(CASE WHEN status = 'dilewati' THEN 1 ELSE 0 END) as dilewati,
+            SUM(CASE WHEN status = 'dibatalkan' THEN 1 ELSE 0 END) as dibatalkan
+        ")->first();
+
+        // Rata-rata waktu tunggu (dari created_at hingga waktu_dipanggil) dalam menit
+        $avgWaitMinutes = (clone $query)
+            ->whereNotNull('waktu_dipanggil')
+            ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, created_at, waktu_dipanggil)) as avg_wait')
+            ->value('avg_wait');
+
+        return [
+            'total' => (int) ($statusCounts->total ?? 0),
+            'menunggu' => (int) ($statusCounts->menunggu ?? 0),
+            'skrining' => (int) ($statusCounts->skrining ?? 0),
+            'dipanggil' => (int) ($statusCounts->dipanggil ?? 0),
+            'sedang_dilayani' => (int) ($statusCounts->sedang_dilayani ?? 0),
+            'selesai' => (int) ($statusCounts->selesai ?? 0),
+            'dilewati' => (int) ($statusCounts->dilewati ?? 0),
+            'dibatalkan' => (int) ($statusCounts->dibatalkan ?? 0),
+            'rata_rata_tunggu_menit' => $avgWaitMinutes !== null ? round((float) $avgWaitMinutes, 1) : null,
+        ];
     }
 }

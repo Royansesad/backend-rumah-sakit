@@ -25,7 +25,7 @@ class UserStaffSeeder extends Seeder
             'updated_at' => $now,
         ]);
 
-        // Dokters
+        // Dokters (Semua Poli)
         DB::table('dokters')->insert([
             [
                 'id' => '00000000-0000-0000-0000-000000000011',
@@ -34,7 +34,7 @@ class UserStaffSeeder extends Seeder
                 'password' => $password,
                 'nomor_str' => 'STR-DK-001',
                 'spesialisasi' => 'Umum',
-                'poli_id' => '00000000-0000-0000-0000-000000000001',
+                'poli_id' => '00000000-0000-0000-0000-000000000001', // Poli Umum
                 'status_praktik' => 'aktif',
                 'status_akun' => 'aktif',
                 'created_at' => $now,
@@ -42,12 +42,64 @@ class UserStaffSeeder extends Seeder
             ],
             [
                 'id' => '00000000-0000-0000-0000-000000000012',
-                'nama_lengkap' => 'Dr. Ahmad Fauzi',
+                'nama_lengkap' => 'Dr. Ahmad Fauzi, Sp.A',
                 'email' => 'ahmad.fauzi@simrs.id',
                 'password' => $password,
                 'nomor_str' => 'STR-DK-002',
-                'spesialisasi' => 'Sp.A',
-                'poli_id' => '00000000-0000-0000-0000-000000000003',
+                'spesialisasi' => 'Spesialis Anak',
+                'poli_id' => '00000000-0000-0000-0000-000000000003', // Poli Anak
+                'status_praktik' => 'aktif',
+                'status_akun' => 'aktif',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'id' => '00000000-0000-0000-0000-000000000019',
+                'nama_lengkap' => 'Dr. Ratna Sari, Sp.KG',
+                'email' => 'ratna.sari@simrs.id',
+                'password' => $password,
+                'nomor_str' => 'STR-DK-003',
+                'spesialisasi' => 'Konservasi Gigi',
+                'poli_id' => '00000000-0000-0000-0000-000000000002', // Poli Gigi
+                'status_praktik' => 'aktif',
+                'status_akun' => 'aktif',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'id' => '00000000-0000-0000-0000-000000000020',
+                'nama_lengkap' => 'Dr. Maya Indah, Sp.OG',
+                'email' => 'maya.indah@simrs.id',
+                'password' => $password,
+                'nomor_str' => 'STR-DK-004',
+                'spesialisasi' => 'Kebidanan & Kandungan',
+                'poli_id' => '00000000-0000-0000-0000-000000000004', // Poli Kandungan
+                'status_praktik' => 'aktif',
+                'status_akun' => 'aktif',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'id' => '00000000-0000-0000-0000-000000000021',
+                'nama_lengkap' => 'Dr. Hendra Wijaya, Sp.M',
+                'email' => 'hendra.wijaya.dokter@simrs.id',
+                'password' => $password,
+                'nomor_str' => 'STR-DK-005',
+                'spesialisasi' => 'Spesialis Mata',
+                'poli_id' => '00000000-0000-0000-0000-000000000005', // Poli Mata
+                'status_praktik' => 'aktif',
+                'status_akun' => 'aktif',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'id' => '00000000-0000-0000-0000-000000000022',
+                'nama_lengkap' => 'Dr. Bambang Hermanto, Sp.PD',
+                'email' => 'bambang.hermanto@simrs.id',
+                'password' => $password,
+                'nomor_str' => 'STR-DK-006',
+                'spesialisasi' => 'Penyakit Dalam',
+                'poli_id' => '00000000-0000-0000-0000-000000000001', // Poli Umum / Penyakit Dalam
                 'status_praktik' => 'aktif',
                 'status_akun' => 'aktif',
                 'created_at' => $now,

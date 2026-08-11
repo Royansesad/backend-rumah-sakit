@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\BedApiController;
+use App\Http\Controllers\Api\RawatInapApiController;
 use App\Http\Controllers\Api\AuditLogApiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Icd10CodeApiController;
@@ -61,6 +63,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/antrian/ambil', [App\Http\Controllers\Api\AntrianApiController::class, 'ambilAntrian']);
         Route::get('/antrian/hari-ini', [App\Http\Controllers\Api\AntrianApiController::class, 'indexHariIni']);
         Route::patch('/antrian/{id}/status', [App\Http\Controllers\Api\AntrianApiController::class, 'updateStatus']);
+        Route::post('/antrian/panggil-berikutnya', [App\Http\Controllers\Api\AntrianApiController::class, 'panggilBerikutnya']);
+        Route::get('/antrian/statistik', [App\Http\Controllers\Api\AntrianApiController::class, 'statistikHariIni']);
 
         // Pasien API
         Route::get('/pasien', [PatientApiController::class, 'index']);
@@ -137,6 +141,35 @@ Route::prefix('v1')->group(function () {
                 ->middleware('role:admin,dokter');
             Route::patch('/{id}/tebus', [ResepApiController::class, 'tebus'])
                 ->middleware('role:admin,apoteker');
+        });
+
+        // =====================================================================
+        // Modul Tempat Tidur (Bed) & Rawat Inap
+        // =====================================================================
+        Route::prefix('beds')->group(function () {
+            Route::get('/', [BedApiController::class, 'index']);
+            Route::get('/matrix', [BedApiController::class, 'matrix']);
+            Route::get('/{id}', [BedApiController::class, 'show']);
+            Route::post('/', [BedApiController::class, 'store'])
+                ->middleware('role:admin,manajemen,perawat,resepsionis');
+            Route::put('/{id}', [BedApiController::class, 'update'])
+                ->middleware('role:admin,manajemen,perawat,resepsionis');
+            Route::patch('/{id}/status', [BedApiController::class, 'updateStatus'])
+                ->middleware('role:admin,manajemen,perawat,resepsionis');
+            Route::delete('/{id}', [BedApiController::class, 'destroy'])
+                ->middleware('role:admin,manajemen');
+        });
+
+        Route::prefix('rawat-inap')->group(function () {
+            Route::get('/', [RawatInapApiController::class, 'index']);
+            Route::get('/statistik', [RawatInapApiController::class, 'statistik']);
+            Route::get('/{id}', [RawatInapApiController::class, 'show']);
+            Route::post('/check-in', [RawatInapApiController::class, 'checkIn'])
+                ->middleware('role:admin,resepsionis,perawat,dokter');
+            Route::post('/{id}/pindah-bed', [RawatInapApiController::class, 'pindahBed'])
+                ->middleware('role:admin,resepsionis,perawat,dokter');
+            Route::post('/{id}/check-out', [RawatInapApiController::class, 'checkOut'])
+                ->middleware('role:admin,resepsionis,perawat,dokter');
         });
     });
 });

@@ -25,4 +25,11 @@ class Bangsal extends Model
     {
         return $this->hasMany(JadwalShiftPerawat::class, 'bangsal_id');
     }
+
+    /** @return HasMany<Bed, $this> */
+    public function beds(): HasMany
+    {
+        return $this->hasMany(Bed::class, 'bangsal_id');
+    }
 }
+

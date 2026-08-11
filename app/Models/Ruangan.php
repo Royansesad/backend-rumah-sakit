@@ -12,6 +12,8 @@ class Ruangan extends Model
 
     protected $table = 'ruangan';
 
+    public $timestamps = false;
+
     protected $guarded = [];
 
     /** @return HasMany<Perawat, $this> */
@@ -19,4 +21,11 @@ class Ruangan extends Model
     {
         return $this->hasMany(Perawat::class, 'ruangan_id');
     }
+
+    /** @return HasMany<Bed, $this> */
+    public function beds(): HasMany
+    {
+        return $this->hasMany(Bed::class, 'ruangan_id');
+    }
 }
+

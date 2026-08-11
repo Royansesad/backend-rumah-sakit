@@ -1,26 +1,59 @@
-import { useForm } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { Layout } from '../components/layout';
 import type { Role } from '../types/simrs';
 import { ROLE_LABELS } from '../types/simrs';
-// Ikon menggunakan SVG inline agar tidak perlu install ulang library di project ini
-// Jika project Anda sudah punya lucide-react/heroicons, bisa diganti nanti sesuai keinginan.
+
+interface WeeklyVisitItem {
+    day: string;
+    fullName: string;
+    count: number;
+    rawatJalan?: number;
+    igd?: number;
+    rawatInap?: number;
+    isHighlighted?: boolean;
+}
+
+interface ActivityItem {
+    id: string;
+    title: string;
+    time: string;
+    type: 'user' | 'calendar' | 'stock' | 'document' | 'system';
+}
 
 interface DashboardProps {
     user: any;
     role: Role;
-    stats?: any[];
+    stats?: {
+        totalPatients?: string;
+        todayAppointments?: string;
+        monthlyRevenue?: string;
+        activeDoctors?: string;
+        patientTrend?: string;
+        appointmentTrend?: string;
+        revenueTrend?: string;
+        doctorTrend?: string;
+        totalUsers?: number;
+    } | any;
+    weeklyVisits?: WeeklyVisitItem[];
+    recentActivities?: ActivityItem[];
     recentAuditLogs?: any[];
 }
 
 export default function Dashboard({
     user,
     role = 'admin',
-    stats = [],
+    stats = {},
+    weeklyVisits = [],
+    recentActivities = [],
     recentAuditLogs = [],
 }: DashboardProps) {
-    // [TIDAK DIUBAH] State form dan modal
+    // State form dan modal New Admission
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedDay, setSelectedDay] = useState<string>('Kam');
+    const [chartRange, setChartRange] = useState<string>('7 Hari Terakhir');
+    const [showRangeDropdown, setShowRangeDropdown] = useState(false);
+
     const { data, setData, post, processing, errors, reset } = useForm({
         nama_lengkap: '',
         nik: '',
@@ -29,7 +62,7 @@ export default function Dashboard({
         no_hp: '',
         email: '',
         alamat: '',
-        jenis_layanan: '',
+        jenis_layanan: 'rawat_jalan',
         penjamin: 'umum',
         nomor_penjamin: '',
         prioritas: 'normal',
@@ -46,146 +79,322 @@ export default function Dashboard({
         });
     };
 
-    // =======================================================================
-    // [DIUBAH] Sesuai permintaan, saya membuat 5 tampilan Dashboard yang berbeda
-    // =======================================================================
+    // Default visits fallback if not provided
+    const defaultVisits: WeeklyVisitItem[] = [
+        { day: 'Sen', fullName: 'Senin', count: 142, rawatJalan: 98, igd: 30, rawatInap: 14, isHighlighted: false },
+        { day: 'Sel', fullName: 'Selasa', count: 158, rawatJalan: 110, igd: 34, rawatInap: 14, isHighlighted: false },
+        { day: 'Rab', fullName: 'Rabu', count: 135, rawatJalan: 92, igd: 28, rawatInap: 15, isHighlighted: false },
+        { day: 'Kam', fullName: 'Kamis', count: 184, rawatJalan: 130, igd: 38, rawatInap: 16, isHighlighted: true },
+        { day: 'Jum', fullName: 'Jumat', count: 160, rawatJalan: 115, igd: 31, rawatInap: 14, isHighlighted: false },
+        { day: 'Sab', fullName: 'Sabtu', count: 110, rawatJalan: 75, igd: 25, rawatInap: 10, isHighlighted: false },
+        { day: 'Min', fullName: 'Minggu', count: 95, rawatJalan: 55, igd: 32, rawatInap: 8, isHighlighted: false },
+    ];
 
-    // 1. Dashboard Admin (Gambar 4)
+    const currentWeeklyVisits = weeklyVisits && weeklyVisits.length > 0 ? weeklyVisits : defaultVisits;
+    const maxVisitCount = Math.max(...currentWeeklyVisits.map((v) => v.count), 200);
+
+    const defaultActivities: ActivityItem[] = [
+        {
+            id: '1',
+            title: 'Admin Budi menambahkan dokter baru: Dr. Siti Nurhaliza.',
+            time: '2 menit lalu',
+            type: 'user',
+        },
+        {
+            id: '2',
+            title: 'Suster Rina mengubah jadwal poli Gigi.',
+            time: '45 menit lalu',
+            type: 'calendar',
+        },
+        {
+            id: '3',
+            title: 'Sistem melaporkan stok Paracetamol menipis (Sisa: 2 Box).',
+            time: '1 jam lalu',
+            type: 'stock',
+        },
+    ];
+
+    const currentActivities = recentActivities && recentActivities.length > 0 ? recentActivities : defaultActivities;
+    const activeDayData = currentWeeklyVisits.find((v) => v.day === selectedDay) || currentWeeklyVisits[3];
+
+    // =======================================================================
+    // 1. Dashboard Admin (Matching Sentosa Medika Design Mockup)
+    // =======================================================================
     const AdminDashboard = () => (
         <div className="space-y-6">
-            <div className="flex items-start justify-between">
+            {/* Header Title Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="mb-1 font-serif text-3xl text-[#0d4f42]">
+                    <h1 className="font-serif text-3xl font-bold text-[#0d4f42] tracking-tight">
                         Dashboard Admin
                     </h1>
-                    <p className="text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-gray-500">
                         Overview of RS Sentosa Medika operations for today.
                     </p>
                 </div>
             </div>
 
-            {/* Statistik Admin */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {[
-                    {
-                        label: 'Total Pasien Terdaftar',
-                        value: '8.240',
-                        trend: '↑ +5% vs last month',
-                        icon: <i className="fa-solid fa-user-group text-[#0d4f42]"></i>,
-                    },
-                    {
-                        label: 'Appointment Hari Ini',
-                        value: '156',
-                        trend: '↓ -2% vs yesterday',
-                        icon: <i className="fa-solid fa-calendar-check text-[#0d4f42]"></i>,
-                    },
-                    {
-                        label: 'Pendapatan Bulan Ini',
-                        value: 'Rp 1.245M',
-                        trend: '↑ +12% vs last month',
-                        icon: <i className="fa-solid fa-wallet text-[#0d4f42]"></i>,
-                    },
-                    {
-                        label: 'Dokter Aktif',
-                        value: '42',
-                        trend: '→ Stable',
-                        icon: <i className="fa-solid fa-user-doctor text-[#0d4f42]"></i>,
-                    },
-                ].map((stat, idx) => (
-                    <div
-                        key={idx}
-                        className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
-                    >
-                        <div className="flex items-start justify-between">
-                            <span className="text-sm text-gray-500">
-                                {stat.label}
-                            </span>
-                            <span className="text-xl">{stat.icon}</span>
-                        </div>
-                        <div className="mt-3">
-                            <div className="text-3xl font-bold text-gray-900">
-                                {stat.value}
-                            </div>
-                            <div
-                                className={`mt-1 text-xs font-medium ${stat.trend.includes('↑') ? 'text-red-500' : stat.trend.includes('↓') ? 'text-red-500' : 'text-gray-500'}`}
-                            >
-                                {stat.trend}
-                            </div>
+            {/* 4 Statistik Cards Grid */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {/* Card 1: Total Pasien Terdaftar */}
+                <Link
+                    href="/pasien"
+                    className="group flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-xs transition-all hover:border-[#145e5b]/30 hover:shadow-md"
+                >
+                    <div className="flex items-start justify-between">
+                        <span className="text-xs sm:text-sm font-medium text-gray-500">
+                            Total Pasien Terdaftar
+                        </span>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e4f6f2] text-[#0d4f42] group-hover:bg-[#145e5b] group-hover:text-white transition-colors">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
                         </div>
                     </div>
-                ))}
+                    <div className="mt-4">
+                        <div className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                            {stats?.totalPatients || '8.240'}
+                        </div>
+                        <div className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#0d4f42]">
+                            <svg className="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                            <span>{stats?.patientTrend || '+5% vs last month'}</span>
+                        </div>
+                    </div>
+                </Link>
+
+                {/* Card 2: Appointment Hari Ini */}
+                <Link
+                    href="/papan-antrian"
+                    className="group flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-xs transition-all hover:border-[#145e5b]/30 hover:shadow-md"
+                >
+                    <div className="flex items-start justify-between">
+                        <span className="text-xs sm:text-sm font-medium text-gray-500">
+                            Appointment Hari Ini
+                        </span>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e4f6f2] text-[#0d4f42] group-hover:bg-[#145e5b] group-hover:text-white transition-colors">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <div className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                            {stats?.todayAppointments || '156'}
+                        </div>
+                        <div className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-600">
+                            <svg className="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" />
+                            </svg>
+                            <span>{stats?.appointmentTrend || '-2% vs yesterday'}</span>
+                        </div>
+                    </div>
+                </Link>
+
+                {/* Card 3: Pendapatan Bulan Ini */}
+                <Link
+                    href="/audit-logs"
+                    className="group flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-xs transition-all hover:border-[#145e5b]/30 hover:shadow-md"
+                >
+                    <div className="flex items-start justify-between">
+                        <span className="text-xs sm:text-sm font-medium text-gray-500">
+                            Pendapatan Bulan Ini
+                        </span>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e4f6f2] text-[#0d4f42] group-hover:bg-[#145e5b] group-hover:text-white transition-colors">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <div className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                            {stats?.monthlyRevenue || 'Rp 1.245M'}
+                        </div>
+                        <div className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#0d4f42]">
+                            <svg className="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                            <span>{stats?.revenueTrend || '+12% vs last month'}</span>
+                        </div>
+                    </div>
+                </Link>
+
+                {/* Card 4: Dokter Aktif */}
+                <Link
+                    href="/jadwal-dokter-admin"
+                    className="group flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-xs transition-all hover:border-[#145e5b]/30 hover:shadow-md"
+                >
+                    <div className="flex items-start justify-between">
+                        <span className="text-xs sm:text-sm font-medium text-gray-500">
+                            Dokter Aktif
+                        </span>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e4f6f2] text-[#0d4f42] group-hover:bg-[#145e5b] group-hover:text-white transition-colors">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <div className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                            {stats?.activeDoctors || '42'}
+                        </div>
+                        <div className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-gray-500">
+                            <span>→</span>
+                            <span>{stats?.doctorTrend || 'Stable'}</span>
+                        </div>
+                    </div>
+                </Link>
             </div>
 
-            {/* Kunjungan Pasien & Aktivitas Terbaru */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm lg:col-span-2">
-                    <div className="mb-6 flex items-center justify-between">
-                        <h3 className="font-bold text-gray-900">
+            {/* Kunjungan Pasien & Aktivitas Terbaru Row */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                {/* Left (8/12 cols): Kunjungan Pasien */}
+                <div className="flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-6 shadow-xs lg:col-span-8">
+                    <div className="flex items-center justify-between">
+                        <h3 className="font-serif text-lg font-bold text-gray-900">
                             Kunjungan Pasien
                         </h3>
-                        <span className="rounded-full bg-[#d1fae5] px-3 py-1 text-xs font-medium text-[#0d4f42]">
-                            7 Hari Terakhir
-                        </span>
-                    </div>
-                    {/* Chart Bars mock-up */}
-                    <div className="flex h-40 items-end justify-between gap-4 px-2 pt-10">
-                        {['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(
-                            (day, idx) => (
-                                <div
-                                    key={idx}
-                                    className="flex w-full flex-col items-center gap-2"
-                                >
-                                    <div
-                                        className={`w-full h-${idx === 3 ? 24 : 12 + idx * 2} ${idx === 3 ? 'bg-[#0d4f42]' : 'bg-[#0d4f42]/20'} rounded-t-sm`}
-                                    ></div>
-                                    <span
-                                        className={`text-xs font-medium ${idx === 3 ? 'font-bold text-[#0d4f42]' : 'text-gray-500'}`}
-                                    >
-                                        {day}
-                                    </span>
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setShowRangeDropdown(!showRangeDropdown)}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-[#e4f6f2] px-3.5 py-1.5 text-xs font-semibold text-[#0d4f42] hover:bg-[#d5f0ea] transition-colors"
+                            >
+                                <span>{chartRange}</span>
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {showRangeDropdown && (
+                                <div className="absolute right-0 top-full mt-1 w-40 rounded-xl border border-gray-200 bg-white py-1 shadow-lg z-20 text-xs">
+                                    {['7 Hari Terakhir', '14 Hari Terakhir', 'Bulan Ini'].map((opt) => (
+                                        <button
+                                            key={opt}
+                                            type="button"
+                                            onClick={() => {
+                                                setChartRange(opt);
+                                                setShowRangeDropdown(false);
+                                            }}
+                                            className={`block w-full text-left px-3 py-1.5 font-medium ${chartRange === opt ? 'bg-teal-50 text-[#0d4f42] font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
+                                        >
+                                            {opt}
+                                        </button>
+                                    ))}
                                 </div>
-                            ),
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Chart Visualization Area */}
+                    <div className="mt-8">
+                        <div className="flex h-48 items-end justify-between gap-3 sm:gap-6 px-2 border-b border-gray-100 pb-2">
+                            {currentWeeklyVisits.map((item, idx) => {
+                                const heightPercent = Math.max(15, Math.round((item.count / maxVisitCount) * 100));
+                                const isSelected = selectedDay === item.day;
+                                const isHighlighted = item.isHighlighted || isSelected;
+
+                                return (
+                                    <div
+                                        key={idx}
+                                        onClick={() => setSelectedDay(item.day)}
+                                        className="group relative flex flex-1 flex-col items-center cursor-pointer"
+                                    >
+                                        {/* Hover / Selected Tooltip */}
+                                        <div className="pointer-events-none absolute -top-12 z-20 hidden rounded-lg bg-gray-900 px-2.5 py-1 text-[11px] font-semibold text-white shadow-md group-hover:block whitespace-nowrap">
+                                            {item.fullName}: <span className="text-teal-300 font-bold">{item.count}</span> pasien
+                                        </div>
+
+                                        {/* Bar */}
+                                        <div className="w-full flex items-end justify-center h-40">
+                                            <div
+                                                style={{ height: `${heightPercent}%` }}
+                                                className={`w-full max-w-[56px] rounded-t-sm transition-all duration-300 ${
+                                                    isHighlighted
+                                                        ? 'bg-[#0d4f42] shadow-xs'
+                                                        : 'bg-[#5a9c92]/30 hover:bg-[#5a9c92]/60'
+                                                }`}
+                                            ></div>
+                                        </div>
+
+                                        {/* Day Label */}
+                                        <span
+                                            className={`mt-3 text-xs transition-colors ${
+                                                isHighlighted
+                                                    ? 'font-bold text-[#0d4f42]'
+                                                    : 'font-medium text-gray-500 group-hover:text-gray-800'
+                                            }`}
+                                        >
+                                            {item.day}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Selected Day Quick Breakdown */}
+                        {activeDayData && (
+                            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[#f0faf7] p-3 text-xs text-[#0d4f42]">
+                                <div className="font-semibold">
+                                    📊 Kunjungan {activeDayData.fullName}: <span className="font-bold">{activeDayData.count} Pasien</span>
+                                </div>
+                                <div className="flex items-center gap-4 text-[11px] text-gray-600">
+                                    <span>Rawat Jalan: <b>{activeDayData.rawatJalan || Math.round(activeDayData.count * 0.7)}</b></span>
+                                    <span>IGD: <b>{activeDayData.igd || Math.round(activeDayData.count * 0.2)}</b></span>
+                                    <span>Rawat Inap: <b>{activeDayData.rawatInap || Math.round(activeDayData.count * 0.1)}</b></span>
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>
 
-                <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <h3 className="mb-6 font-bold text-gray-900">
-                        Aktivitas Terbaru
-                    </h3>
-                    <div className="space-y-4">
-                        {[
-                            {
-                                title: 'Admin Budi menambahkan dokter baru: Dr. Siti Nurhaliza.',
-                                time: '2 menit lalu',
-                                icon: <i className="fa-solid fa-user text-xs text-teal-700"></i>,
-                            },
-                            {
-                                title: 'Suster Rina mengubah jadwal poli Gigi.',
-                                time: '45 menit lalu',
-                                icon: <i className="fa-solid fa-calendar-days text-xs text-teal-700"></i>,
-                            },
-                            {
-                                title: 'Sistem melaporkan stok Paracetamol menipis (Sisa: 2 Box).',
-                                time: '1 jam lalu',
-                                icon: <i className="fa-solid fa-box text-xs text-teal-700"></i>,
-                            },
-                        ].map((act, idx) => (
-                            <div
-                                key={idx}
-                                className="relative flex items-start gap-3"
-                            >
-                                {idx !== 2 && (
-                                    <div className="absolute top-8 bottom-0 left-3 -ml-px w-px bg-gray-200"></div>
+                {/* Right (4/12 cols): Aktivitas Terbaru */}
+                <div className="flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-6 shadow-xs lg:col-span-4">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="font-bold text-gray-900 text-base sm:text-lg">
+                            Aktivitas Terbaru
+                        </h3>
+                        <Link
+                            href="/audit-logs"
+                            className="text-xs font-semibold text-[#145e5b] hover:underline"
+                        >
+                            View All
+                        </Link>
+                    </div>
+
+                    {/* Timeline List */}
+                    <div className="space-y-6 flex-1">
+                        {currentActivities.slice(0, 4).map((act, idx) => (
+                            <div key={act.id || idx} className="relative flex items-start gap-3.5">
+                                {/* Vertical Connector Line */}
+                                {idx !== currentActivities.slice(0, 4).length - 1 && (
+                                    <div className="absolute top-7 bottom-0 left-3.5 -ml-px w-px bg-gray-200"></div>
                                 )}
-                                <div className="relative z-10 mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs">
-                                    {act.icon}
+
+                                {/* Icon Circle Node */}
+                                <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#edf8f5] text-[#145e5b] shadow-2xs">
+                                    {act.type === 'calendar' ? (
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    ) : act.type === 'stock' ? (
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                        </svg>
+                                    ) : (
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                        </svg>
+                                    )}
                                 </div>
-                                <div>
-                                    <p className="text-sm leading-tight text-gray-800">
+
+                                {/* Content */}
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-xs font-normal leading-snug text-gray-800">
                                         {act.title}
                                     </p>
-                                    <span className="mt-1 block text-xs text-gray-400">
+                                    <span className="mt-1 block text-[11px] font-medium text-gray-400">
                                         {act.time}
                                     </span>
                                 </div>
@@ -196,6 +405,7 @@ export default function Dashboard({
             </div>
         </div>
     );
+
 
     // 2. Dashboard Billing / Kasir (Gambar 1)
     const BillingDashboard = () => (
@@ -989,7 +1199,7 @@ export default function Dashboard({
     // =======================================================================
     return (
         <Layout user={user} role={role}>
-            <div className="min-h-[calc(100vh-100px)] bg-white p-4 md:p-8">
+            <div className="w-full">
                 {role === 'admin' && <AdminDashboard />}
                 {role === 'dokter' && <DoctorDashboard />}
                 {role === 'perawat' && <NurseDashboard />}

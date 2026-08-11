@@ -24,7 +24,7 @@ class RmeWebController extends Controller
         $dokters = Dokter::select('id', 'nama_lengkap', 'spesialisasi')->get();
         $perawats = Perawat::select('id', 'nama_lengkap')->get();
         $polis = Poli::select('id', 'nama_poli')->get();
-        $obats = Obat::with('unitFarmasi:id,nama_unit')->orderBy('nama_obat')->get();
+        $obats = Obat::with('unitFarmasi:id,nama_unit')->orderBy('nama_obat')->take(50)->get();
         $icd10Codes = Icd10Code::orderBy('code')->take(50)->get();
 
         $rekamMedisList = RekamMedis::with([

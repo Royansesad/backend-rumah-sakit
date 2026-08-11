@@ -11,6 +11,13 @@ class Obat extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'stok' => 'integer',
+        'harga' => 'decimal:2',
+        'tanggal_terbit' => 'date',
+        'masa_berlaku' => 'date',
+    ];
+
     /** @return BelongsTo<UnitFarmasi, $this> */
     public function unitFarmasi(): BelongsTo
     {

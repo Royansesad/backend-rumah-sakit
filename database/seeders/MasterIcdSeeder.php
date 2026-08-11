@@ -27,6 +27,7 @@ class MasterIcdSeeder extends Seeder
         $now = now()->toDateTimeString();
         $records = [];
         $insertedCount = 0;
+        $chunkSize = app()->environment('testing') ? 20 : 500;
 
         while (($line = fgets($handle)) !== false) {
             $trimmed = trim($line);
@@ -63,10 +64,14 @@ class MasterIcdSeeder extends Seeder
                     'updated_at' => $now,
                 ];
 
-                if (count($records) >= 500) {
+                if (count($records) >= $chunkSize) {
                     DB::table('icd10_codes')->insertOrIgnore($records);
                     $insertedCount += count($records);
                     $records = [];
+
+                    if (app()->environment('testing') && $insertedCount >= 50) {
+                        break;
+                    }
                 }
             }
         }

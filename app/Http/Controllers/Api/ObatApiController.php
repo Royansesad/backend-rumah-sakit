@@ -21,12 +21,42 @@ class ObatApiController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('nama_obat', 'like', "%{$search}%")
-                    ->orWhere('kode_obat', 'like', "%{$search}%");
+                    ->orWhere('kode_obat', 'like', "%{$search}%")
+                    ->orWhere('nie', 'like', "%{$search}%")
+                    ->orWhere('komposisi', 'like', "%{$search}%")
+                    ->orWhere('pendaftar', 'like', "%{$search}%");
             });
         }
 
-        if ($request->filled('bentuk_sediaan')) {
-            $query->where('bentuk_sediaan', $request->input('bentuk_sediaan'));
+        if ($request->filled('bentuk_sediaan') && $request->input('bentuk_sediaan') !== 'all') {
+            $sediaanKey = strtolower($request->input('bentuk_sediaan'));
+            $categories = [
+                'tablet' => ['TABLET', 'KAPLET', 'PIL'],
+                'sirup' => ['SIRUP', 'SUSPENSI', 'LARUTAN', 'CAIRAN', 'EMULSI', 'ELIXIR'],
+                'kapsul' => ['KAPSUL'],
+                'injeksi' => ['INJEKSI', 'INFUS', 'SERBUK INJEKSI'],
+                'salep' => ['SALEP', 'KRIM', 'GEL', 'LOTION', 'PASTA'],
+                'tetes' => ['TETES', 'DROP', 'GUTTAE'],
+            ];
+
+            if (array_key_exists($sediaanKey, $categories)) {
+                $keywords = $categories[$sediaanKey];
+                $query->where(function ($q) use ($keywords) {
+                    foreach ($keywords as $kw) {
+                        $q->orWhere('bentuk_sediaan', 'like', "%{$kw}%");
+                    }
+                });
+            } else {
+                $query->where('bentuk_sediaan', 'like', "%{$sediaanKey}%");
+            }
+        }
+
+        if ($request->filled('stock_filter')) {
+            if ($request->input('stock_filter') === 'low') {
+                $query->where('stok', '<', 50);
+            } elseif ($request->input('stock_filter') === 'safe') {
+                $query->where('stok', '>=', 50);
+            }
         }
 
         $data = $query->orderBy('nama_obat')->paginate($request->input('per_page', 15));
@@ -82,7 +112,7 @@ class ObatApiController extends Controller
         }
 
         $obat = Obat::create($request->only([
-            'unit_farmasi_id', 'kode_obat', 'nama_obat', 'bentuk_sediaan', 'stok', 'harga',
+            'unit_farmasi_id', 'kode_obat', 'nie', 'nama_obat', 'bentuk_sediaan', 'kemasan', 'komposisi', 'pendaftar', 'tanggal_terbit', 'masa_berlaku', 'diterbitkan_oleh', 'stok', 'harga',
         ]));
 
         return response()->json([
@@ -108,7 +138,7 @@ class ObatApiController extends Controller
         }
 
         $payload = $request->only([
-            'unit_farmasi_id', 'kode_obat', 'nama_obat', 'bentuk_sediaan', 'stok', 'harga',
+            'unit_farmasi_id', 'kode_obat', 'nie', 'nama_obat', 'bentuk_sediaan', 'kemasan', 'komposisi', 'pendaftar', 'tanggal_terbit', 'masa_berlaku', 'diterbitkan_oleh', 'stok', 'harga',
         ]);
 
         if (isset($payload['kode_obat']) && $payload['kode_obat'] !== $obat->kode_obat) {

@@ -65,6 +65,12 @@ class Pasien extends Authenticatable implements HasSimrsRole
         return $this->hasMany(Resep::class, 'pasien_id');
     }
 
+    /** @return HasMany<RawatInapAdmission, $this> */
+    public function rawatInapAdmissions(): HasMany
+    {
+        return $this->hasMany(RawatInapAdmission::class, 'pasien_id');
+    }
+
     // --- Query Scopes ---
 
     /** @param Builder<Pasien> $query */
