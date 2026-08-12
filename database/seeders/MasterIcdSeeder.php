@@ -13,6 +13,7 @@ class MasterIcdSeeder extends Seeder
         $sqlPath = base_path('master_icd_x.sql');
         if (! File::exists($sqlPath)) {
             $this->command->error("File master_icd_x.sql tidak ditemukan di {$sqlPath}");
+
             return;
         }
 
@@ -21,6 +22,7 @@ class MasterIcdSeeder extends Seeder
         $handle = fopen($sqlPath, 'r');
         if (! $handle) {
             $this->command->error('Gagal membuka file master_icd_x.sql');
+
             return;
         }
 

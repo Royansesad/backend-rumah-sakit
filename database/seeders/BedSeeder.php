@@ -6,7 +6,6 @@ use App\Models\Bangsal;
 use App\Models\Bed;
 use App\Models\Ruangan;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class BedSeeder extends Seeder
 {

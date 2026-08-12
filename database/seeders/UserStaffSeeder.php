@@ -14,7 +14,7 @@ class UserStaffSeeder extends Seeder
         $now = now();
 
         // Admins
-        DB::table('admins')->insert([
+        DB::table('admins')->insertOrIgnore([
             'id' => '00000000-0000-0000-0000-000000000010',
             'nama_lengkap' => 'Budi Santoso',
             'email' => 'budi.admin@simrs.id',
@@ -26,7 +26,7 @@ class UserStaffSeeder extends Seeder
         ]);
 
         // Dokters (Semua Poli)
-        DB::table('dokters')->insert([
+        DB::table('dokters')->insertOrIgnore([
             [
                 'id' => '00000000-0000-0000-0000-000000000011',
                 'nama_lengkap' => 'Dr. Siti Rahayu',
@@ -108,7 +108,7 @@ class UserStaffSeeder extends Seeder
         ]);
 
         // Perawats
-        DB::table('perawats')->insert([
+        DB::table('perawats')->insertOrIgnore([
             [
                 'id' => '00000000-0000-0000-0000-000000000013',
                 'nama_lengkap' => 'Dewi Lestari',
@@ -136,7 +136,7 @@ class UserStaffSeeder extends Seeder
         ]);
 
         // Apotekers
-        DB::table('apotekers')->insert([
+        DB::table('apotekers')->insertOrIgnore([
             'id' => '00000000-0000-0000-0000-000000000015',
             'nama_lengkap' => 'Andi Pratama',
             'email' => 'andi.pratama@simrs.id',
@@ -148,7 +148,7 @@ class UserStaffSeeder extends Seeder
         ]);
 
         // Kasirs
-        DB::table('kasirs')->insert([
+        DB::table('kasirs')->insertOrIgnore([
             'id' => '00000000-0000-0000-0000-000000000016',
             'nama_lengkap' => 'Mega Putri',
             'email' => 'mega.putri@simrs.id',
@@ -161,7 +161,7 @@ class UserStaffSeeder extends Seeder
         ]);
 
         // Resepsionis
-        DB::table('resepsionis')->insert([
+        DB::table('resepsionis')->insertOrIgnore([
             'id' => '00000000-0000-0000-0000-000000000017',
             'nama_lengkap' => 'Lina Sari',
             'email' => 'lina.sari@simrs.id',
@@ -174,7 +174,7 @@ class UserStaffSeeder extends Seeder
         ]);
 
         // Manajemen
-        DB::table('manajemen')->insert([
+        DB::table('manajemen')->insertOrIgnore([
             'id' => '00000000-0000-0000-0000-000000000018',
             'nama_lengkap' => 'Hendra Wijaya',
             'email' => 'hendra.wijaya@simrs.id',

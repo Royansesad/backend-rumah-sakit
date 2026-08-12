@@ -26,7 +26,7 @@ class RawatInapBedTest extends TestCase
         $this->seed();
 
         $loginRes = $this->postJson('/api/v1/admin-login', [
-            'email' => 'admin@simrs.id',
+            'email' => 'budi.admin@simrs.id',
             'password' => 'password123',
             'role' => 'admin',
         ]);
@@ -111,7 +111,7 @@ class RawatInapBedTest extends TestCase
             'status' => 'terisi',
         ]);
 
-        $this.assertDatabaseHas('rawat_inap_admissions', [
+        $this->assertDatabaseHas('rawat_inap_admissions', [
             'pasien_id' => $pasien->id,
             'bed_id' => $bed->id,
             'status' => 'aktif',
@@ -161,17 +161,17 @@ class RawatInapBedTest extends TestCase
         $response->assertStatus(200)
                  ->assertJsonPath('status', 'success');
 
-        $this.assertDatabaseHas('beds', [
+        $this->assertDatabaseHas('beds', [
             'id' => $bedAsal->id,
             'status' => 'dibersihkan',
         ]);
 
-        $this.assertDatabaseHas('beds', [
+        $this->assertDatabaseHas('beds', [
             'id' => $bedTujuan->id,
             'status' => 'terisi',
         ]);
 
-        $this.assertDatabaseHas('riwayat_pindah_bed', [
+        $this->assertDatabaseHas('riwayat_pindah_bed', [
             'admission_id' => $admission->id,
             'bed_asal_id' => $bedAsal->id,
             'bed_tujuan_id' => $bedTujuan->id,
@@ -207,12 +207,12 @@ class RawatInapBedTest extends TestCase
         $response->assertStatus(200)
                  ->assertJsonPath('status', 'success');
 
-        $this.assertDatabaseHas('beds', [
+        $this->assertDatabaseHas('beds', [
             'id' => $bed->id,
             'status' => 'dibersihkan',
         ]);
 
-        $this.assertDatabaseHas('rawat_inap_admissions', [
+        $this->assertDatabaseHas('rawat_inap_admissions', [
             'id' => $admission->id,
             'status' => 'pulang_sembuh',
         ]);

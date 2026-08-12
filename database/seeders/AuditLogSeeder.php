@@ -60,7 +60,7 @@ class AuditLogSeeder extends Seeder
                     'Jadwal ID' => 'SCH-0992',
                     'Dokter' => 'Dr. Siti Rahayu',
                     'Hari' => 'Senin (08:00 - 12:00)',
-                    'Status' => 'Dibatalkan Permanen'
+                    'Status' => 'Dibatalkan Permanen',
                 ]),
                 'data_sesudah' => null,
                 'ip_address' => '192.168.1.1',
@@ -80,7 +80,7 @@ class AuditLogSeeder extends Seeder
                 'data_sesudah' => json_encode([
                     'Resep' => 'RSP-9921',
                     'Obat' => 'Paracetamol 500mg (10 tab), Amoxicillin 500mg (15 cap)',
-                    'Status' => 'Disiapkan'
+                    'Status' => 'Disiapkan',
                 ]),
                 'ip_address' => '10.1.1.5',
                 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
@@ -98,13 +98,13 @@ class AuditLogSeeder extends Seeder
                 'data_sebelum' => json_encode([
                     'Invoice' => 'INV-2023-4412',
                     'Status' => 'UNPAID',
-                    'Total Tagihan' => 'Rp 450.000'
+                    'Total Tagihan' => 'Rp 450.000',
                 ]),
                 'data_sesudah' => json_encode([
                     'Invoice' => 'INV-2023-4412',
                     'Status' => 'PAID',
                     'Metode' => 'QRIS Transfer',
-                    'Total Tagihan' => 'Rp 450.000'
+                    'Total Tagihan' => 'Rp 450.000',
                 ]),
                 'ip_address' => '10.1.1.20',
                 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
@@ -123,7 +123,7 @@ class AuditLogSeeder extends Seeder
                 'data_sesudah' => json_encode([
                     'Antrian' => 'A-012',
                     'Pasien' => 'Agus Setiawan',
-                    'Poli' => 'Poli Umum'
+                    'Poli' => 'Poli Umum',
                 ]),
                 'ip_address' => '10.1.2.15',
                 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
@@ -142,7 +142,7 @@ class AuditLogSeeder extends Seeder
                 'data_sesudah' => json_encode([
                     'Laporan' => 'Rekap Pendapatan Rawat Jalan',
                     'Format' => 'Excel (.xlsx)',
-                    'Periode' => '01 Okt 2023 - 24 Okt 2023'
+                    'Periode' => '01 Okt 2023 - 24 Okt 2023',
                 ]),
                 'ip_address' => '192.168.1.150',
                 'user_agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
@@ -174,11 +174,11 @@ class AuditLogSeeder extends Seeder
                 'aksi' => 'EDIT_DATA',
                 'data_sebelum' => json_encode([
                     'Nama' => 'Dewi Lestari',
-                    'Shift' => 'Pagi (07:00 - 14:00)'
+                    'Shift' => 'Pagi (07:00 - 14:00)',
                 ]),
                 'data_sesudah' => json_encode([
                     'Nama' => 'Dewi Lestari',
-                    'Shift' => 'Malam (21:00 - 07:00)'
+                    'Shift' => 'Malam (21:00 - 07:00)',
                 ]),
                 'ip_address' => '192.168.1.11',
                 'user_agent' => 'Mozilla/5.0 (X11; Linux x86_64; rv:119.0) Gecko/20100101 Firefox/119.0',

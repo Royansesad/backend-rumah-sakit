@@ -1,4 +1,4 @@
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
 import type { Role } from '../types/simrs';
 import { Sidebar } from './sidebar';
@@ -12,9 +12,12 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({
     children,
-    user,
-    role = 'admin',
+    user: propUser,
+    role: propRole,
 }) => {
+    const pageProps = usePage().props as any;
+    const role: Role = propRole || pageProps.role || 'resepsionis';
+    const user = propUser || pageProps.user;
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
@@ -126,7 +129,7 @@ export const Layout: React.FC<LayoutProps> = ({
 
             <div className="flex min-w-0 flex-1 flex-col">
                 {/* Top Navbar Header (Exact match to design mockup) */}
-                <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#e2e8f0] bg-white px-6">
+                <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#e2e8f0] bg-[#F1FAFA] px-6">
                     <div className="flex items-center gap-4 flex-1 max-w-xl">
                         <button
                             type="button"

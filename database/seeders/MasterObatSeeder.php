@@ -15,6 +15,7 @@ class MasterObatSeeder extends Seeder
 
         if (! File::exists($csvPath)) {
             $this->command->error("File dataset obat tidak ditemukan di {$csvPath}");
+
             return;
         }
 
@@ -23,6 +24,7 @@ class MasterObatSeeder extends Seeder
         $handle = fopen($csvPath, 'r');
         if (! $handle) {
             $this->command->error('Gagal membuka file CSV.');
+
             return;
         }
 
@@ -60,7 +62,7 @@ class MasterObatSeeder extends Seeder
             }
 
             // Hindari duplikasi baris identik
-            $rowHash = md5($nie . '|' . $namaProduk . '|' . $bentukSediaan . '|' . $kemasan . '|' . $tglTerbit . '|' . $masaBerlaku);
+            $rowHash = md5($nie.'|'.$namaProduk.'|'.$bentukSediaan.'|'.$kemasan.'|'.$tglTerbit.'|'.$masaBerlaku);
             if (isset($seenHashes[$rowHash])) {
                 continue;
             }
@@ -69,10 +71,10 @@ class MasterObatSeeder extends Seeder
             // Generate kode_obat unik berbasis NIE
             if (! isset($nieCounts[$nie])) {
                 $nieCounts[$nie] = 1;
-                $kodeObat = $nie ?: ('OBT-' . strtoupper(bin2hex(random_bytes(4))));
+                $kodeObat = $nie ?: ('OBT-'.strtoupper(bin2hex(random_bytes(4))));
             } else {
                 $nieCounts[$nie]++;
-                $kodeObat = $nie . '-' . $nieCounts[$nie];
+                $kodeObat = $nie.'-'.$nieCounts[$nie];
             }
 
             $komposisiClean = preg_replace('/<br\s*\/?>/i', ', ', $komposisi);

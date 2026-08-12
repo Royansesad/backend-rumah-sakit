@@ -176,7 +176,7 @@ export default function ManajemenAntrian({
     };
 
     return (
-        <Layout user={user} currentRole={role as any}>
+        <Layout user={user} role={role as any}>
             <div className="min-h-screen bg-[#f0faf7] p-6 font-sans">
                 {/* Toast Notification */}
                 {toast && (

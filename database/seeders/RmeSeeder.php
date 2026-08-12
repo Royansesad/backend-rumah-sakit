@@ -65,6 +65,7 @@ class RmeSeeder extends Seeder
 
         if (! $pasien || ! $dokter) {
             $this->command->warn('Skipping RekamMedis & Resep seeding: Pasien or Dokter not found.');
+
             return;
         }
 
@@ -125,10 +126,10 @@ class RmeSeeder extends Seeder
 
         if ($obat1 && $obat2) {
             $resep1 = Resep::firstOrCreate(
-                ['no_resep' => 'RSP-' . now()->format('Ymd') . '-001'],
+                ['no_resep' => 'RSP-'.now()->format('Ymd').'-001'],
                 [
                     'id' => (string) Str::uuid(),
-                    'no_resep' => 'RSP-' . now()->format('Ymd') . '-001',
+                    'no_resep' => 'RSP-'.now()->format('Ymd').'-001',
                     'pasien_id' => $pasien->id,
                     'dokter_id' => $dokter->id,
                     'rekam_medis_id' => $rm1->id,
@@ -157,10 +158,10 @@ class RmeSeeder extends Seeder
 
         if ($obat3) {
             $resep2 = Resep::firstOrCreate(
-                ['no_resep' => 'RSP-' . now()->format('Ymd') . '-002'],
+                ['no_resep' => 'RSP-'.now()->format('Ymd').'-002'],
                 [
                     'id' => (string) Str::uuid(),
-                    'no_resep' => 'RSP-' . now()->format('Ymd') . '-002',
+                    'no_resep' => 'RSP-'.now()->format('Ymd').'-002',
                     'pasien_id' => $pasien->id,
                     'dokter_id' => $dokter->id,
                     'rekam_medis_id' => $rm2->id,

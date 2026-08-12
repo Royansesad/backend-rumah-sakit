@@ -172,7 +172,7 @@ export default function JadwalDokterAdmin({
                             onClick={() => setShowModal(true)}
                             className="rounded-xl bg-[#145e5b] px-4 py-2 text-xs font-bold text-white shadow-xs transition-all hover:bg-[#0f4947]"
                         >
-                            + Tambah Jadwal
+                            Tambah Jadwal
                         </button>
                     </div>
                 </div>

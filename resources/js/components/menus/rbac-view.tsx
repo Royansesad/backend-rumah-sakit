@@ -738,7 +738,7 @@ export const RbacView: React.FC<RbacViewProps> = ({
                                     href="/users"
                                     className="inline-block font-bold text-[#145e5b] hover:underline"
                                 >
-                                    + Tambah di Manajemen User
+                                    Tambah di Manajemen User
                                 </Link>
                             </div>
                         )}

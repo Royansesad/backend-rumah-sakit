@@ -13,7 +13,7 @@ class PasienSeeder extends Seeder
         $now = now();
         $password = Hash::make('password123');
 
-        DB::table('pasien')->insert([
+        DB::table('pasien')->insertOrIgnore([
             [
                 'id' => '00000000-0000-0000-0000-000000000021',
                 'nomor_rekam_medis' => 'RM-2024-0001',

@@ -69,4 +69,25 @@ Route::middleware(['web.auth'])->group(function () {
         Route::get('/rbac', [RbacController::class, 'index'])->name('rbac.index');
         Route::post('/rbac', [RbacController::class, 'update'])->name('rbac.update');
     });
+
+    // Modul Billing & Tagihan Kasir (Admin, Kasir, Manajemen)
+    Route::middleware('web.role:admin,kasir,manajemen')->group(function () {
+        Route::get('/laporan-kasir', [\App\Http\Controllers\TagihanWebController::class, 'laporan'])->name('laporan.kasir');
+        Route::post('/tagihan/{id}/bayar', [\App\Http\Controllers\TagihanWebController::class, 'bayar'])->name('tagihan.bayar');
+    });
+
+    // Modul Apoteker & Penebusan Resep / Stok Obat (Admin, Apoteker)
+    Route::middleware('web.role:admin,apoteker')->group(function () {
+        Route::post('/resep/{id}/tebus', [\App\Http\Controllers\ApotekerWebController::class, 'tebusResep'])->name('resep.tebus');
+        Route::post('/obat/{id}/stok', [\App\Http\Controllers\ApotekerWebController::class, 'updateStokObat'])->name('obat.stok');
+        Route::post('/obat', [\App\Http\Controllers\ApotekerWebController::class, 'storeObat'])->name('obat.store');
+    });
+
+    // Modul Manajemen Inventaris & Aset (Admin, Manajemen, Apoteker)
+    Route::middleware('web.role:admin,manajemen,apoteker')->group(function () {
+        Route::get('/inventaris', [\App\Http\Controllers\InventarisWebController::class, 'index'])->name('inventaris.index');
+    });
+    Route::middleware('web.role:admin,manajemen')->group(function () {
+        Route::get('/aset', [\App\Http\Controllers\AsetWebController::class, 'index'])->name('aset.index');
+    });
 });

@@ -171,6 +171,55 @@ Route::prefix('v1')->group(function () {
             Route::post('/{id}/check-out', [RawatInapApiController::class, 'checkOut'])
                 ->middleware('role:admin,resepsionis,perawat,dokter');
         });
+
+        // =====================================================================
+        // Modul Kasir & Billing Tagihan
+        // =====================================================================
+        Route::prefix('tagihan')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\TagihanApiController::class, 'index']);
+            Route::get('/laporan', [\App\Http\Controllers\Api\TagihanApiController::class, 'laporan'])
+                ->middleware('role:admin,kasir,manajemen');
+            Route::get('/{id}', [\App\Http\Controllers\Api\TagihanApiController::class, 'show']);
+            Route::post('/', [\App\Http\Controllers\Api\TagihanApiController::class, 'store'])
+                ->middleware('role:admin,kasir,manajemen');
+            Route::post('/{id}/bayar', [\App\Http\Controllers\Api\TagihanApiController::class, 'bayar'])
+                ->middleware('role:admin,kasir');
+            Route::patch('/{id}/batalkan', [\App\Http\Controllers\Api\TagihanApiController::class, 'batalkan'])
+                ->middleware('role:admin,kasir,manajemen');
+        });
+
+        // =====================================================================
+        // Modul Manajemen Inventaris (Barang Habis Pakai)
+        // =====================================================================
+        Route::prefix('inventaris')->middleware('role:admin,manajemen,apoteker')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\InventarisApiController::class, 'index']);
+            Route::get('/master', [\App\Http\Controllers\Api\InventarisApiController::class, 'master']);
+            Route::get('/laporan', [\App\Http\Controllers\Api\InventarisApiController::class, 'laporan']);
+            Route::post('/', [\App\Http\Controllers\Api\InventarisApiController::class, 'store']);
+            Route::get('/{id}', [\App\Http\Controllers\Api\InventarisApiController::class, 'show']);
+            Route::put('/{id}', [\App\Http\Controllers\Api\InventarisApiController::class, 'update']);
+            Route::post('/{id}/mutasi', [\App\Http\Controllers\Api\InventarisApiController::class, 'mutasi']);
+            Route::delete('/{id}', [\App\Http\Controllers\Api\InventarisApiController::class, 'destroy']);
+        });
+
+        // =====================================================================
+        // Modul Manajemen Aset Tetap
+        // =====================================================================
+        Route::prefix('aset')->middleware('role:admin,manajemen')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\AsetApiController::class, 'index']);
+            Route::get('/master', [\App\Http\Controllers\Api\AsetApiController::class, 'master']);
+            Route::get('/laporan', [\App\Http\Controllers\Api\AsetApiController::class, 'laporan']);
+            Route::post('/', [\App\Http\Controllers\Api\AsetApiController::class, 'store']);
+            Route::get('/{id}', [\App\Http\Controllers\Api\AsetApiController::class, 'show']);
+            Route::put('/{id}', [\App\Http\Controllers\Api\AsetApiController::class, 'update']);
+            Route::post('/{id}/maintenance', [\App\Http\Controllers\Api\AsetApiController::class, 'maintenance']);
+            Route::post('/{id}/pinjam', [\App\Http\Controllers\Api\AsetApiController::class, 'pinjam']);
+            Route::post('/{id}/kembalikan', [\App\Http\Controllers\Api\AsetApiController::class, 'kembalikan']);
+            Route::delete('/{id}', [\App\Http\Controllers\Api\AsetApiController::class, 'destroy']);
+        });
+
+        Route::patch('/aset/maintenance/{id}/selesai', [\App\Http\Controllers\Api\AsetApiController::class, 'maintenanceSelesai'])
+            ->middleware('role:admin,manajemen');
     });
 });
 

@@ -114,6 +114,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
             roles: ['admin', 'dokter', 'perawat', 'resepsionis', 'manajemen'],
         },
         {
+            label: 'Manajemen Inventaris',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+            ),
+            route: '/inventaris',
+            roles: ['admin', 'manajemen', 'apoteker'],
+        },
+        {
+            label: 'Manajemen Aset',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+            ),
+            route: '/aset',
+            roles: ['admin', 'manajemen'],
+        },
+        {
             label: 'Papan Antrian TV',
             icon: (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -162,7 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
                 <div className="flex flex-col flex-1 overflow-y-auto">
                     {/* Header Brand Logo (Matching Gambar 1) */}
-                    <div className="flex items-center gap-3 p-6 border-b border-[#e1f3ef]">
+                    <div className="flex items-center gap-3 p-6">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#145e5b] text-white shadow-xs">
                             <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
                                 <path d="M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z" />
