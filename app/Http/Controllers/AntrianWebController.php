@@ -32,7 +32,7 @@ class AntrianWebController extends Controller
 
         // Jadwal dokter hari ini yang tersedia, beserta count antrian aktif
         $jadwalDokterHariIni = JadwalDokter::with(['dokter:id,nama_lengkap,spesialisasi', 'poli:id,nama_poli', 'ruangan:id,nama_ruangan'])
-            ->withCount(['antrian as antrian_aktif_count' => fn($q) => $q->whereDate('created_at', $hariIni)->where('status', '!=', 'dibatalkan')])
+            ->withCount(['antrian as antrian_aktif_count' => fn($q) => $q->where('status', '!=', 'dibatalkan')])
             ->whereDate('tanggal', $hariIni)
             ->where('status', 'tersedia')
             ->orderBy('jam_mulai')
@@ -42,9 +42,9 @@ class AntrianWebController extends Controller
                 return $jadwal;
             });
 
-        // Daftar antrian hari ini
+        // Daftar antrian hari ini (dikelompokkan berdasarkan tanggal layanan jadwal)
         $antrianHariIni = Antrian::with(['pasien:id,nama_lengkap,nomor_rekam_medis', 'poli:id,nama_poli', 'dokter:id,nama_lengkap,spesialisasi', 'loket:id,nama_loket'])
-            ->whereDate('created_at', $hariIni)
+            ->whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', $hariIni))
             ->orderBy('angka_antrian')
             ->get();
 

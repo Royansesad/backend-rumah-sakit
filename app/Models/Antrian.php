@@ -11,6 +11,10 @@ class Antrian extends Model
 {
     use HasUuids, SoftDeletes;
 
+    public const SUMBER_WALK_IN = 'walk_in';
+
+    public const SUMBER_ONLINE = 'online';
+
     protected $table = 'antrian';
 
     protected $guarded = [];

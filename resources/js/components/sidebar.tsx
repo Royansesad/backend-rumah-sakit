@@ -31,7 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </svg>
             ),
             route: '/dashboard',
-            roles: ['admin', 'dokter', 'perawat', 'apoteker', 'kasir', 'resepsionis', 'manajemen', 'pasien'],
+            roles: ['admin', 'dokter', 'perawat', 'apoteker', 'kasir', 'resepsionis', 'manajemen'],
         },
         {
             label: 'Pendaftaran Pasien',
@@ -141,7 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </svg>
             ),
             route: '/papan-antrian',
-            roles: ['admin', 'dokter', 'perawat', 'apoteker', 'kasir', 'resepsionis', 'manajemen', 'pasien'],
+            roles: ['admin', 'dokter', 'perawat', 'apoteker', 'kasir', 'resepsionis', 'manajemen'],
         },
         {
             label: 'Hak Akses',

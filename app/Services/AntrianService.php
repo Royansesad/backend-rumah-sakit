@@ -57,6 +57,59 @@ class AntrianService
                 'jadwal_dokter_id' => $jadwal->id,
                 'pasien_id' => $data['pasien_id'],
                 'tipe_pasien' => $data['tipe_pasien'] ?? 'umum',
+                'sumber' => Antrian::SUMBER_WALK_IN,
+                'status' => 'menunggu',
+            ]);
+        });
+    }
+
+    /**
+     * Buat booking online untuk pasien pada jadwal dokter yang tersedia.
+     * Mengizinkan booking untuk tanggal hari ini atau mendatang.
+     */
+    public function bookingAntrian(array $data): Antrian
+    {
+        $jadwal = JadwalDokter::with(['poli', 'dokter'])
+            ->withCount(['antrian as antrian_aktif_count' => fn($q) => $q->where('status', '!=', 'dibatalkan')])
+            ->findOrFail($data['jadwal_dokter_id']);
+
+        $tanggalLayanan = $jadwal->tanggal->toDateString();
+
+        // 1. Validasi Tanggal Layanan (hari ini atau mendatang)
+        if ($tanggalLayanan < now()->toDateString()) {
+            throw new Exception("Tidak dapat melakukan booking pada jadwal yang sudah lewat ({$jadwal->tanggal->format('d-m-Y')}).");
+        }
+
+        // 2. Validasi Status Dokter / Jadwal
+        if ($jadwal->status !== 'tersedia') {
+            throw new Exception('Dokter bersangkutan sedang tidak tersedia untuk jadwal yang dipilih.');
+        }
+
+        // 3. Validasi Kuota
+        if ($jadwal->antrian_aktif_count >= $jadwal->kuota_maksimal) {
+            throw new Exception("Kuota booking untuk dokter {$jadwal->dokter->nama_lengkap} pada tanggal {$jadwal->tanggal->format('d-m-Y')} telah habis (Maksimal {$jadwal->kuota_maksimal} pasien).");
+        }
+
+        return DB::transaction(function () use ($data, $jadwal) {
+            $poli = $jadwal->poli;
+            $prefixPoli = $this->getPrefixPoli($poli);
+
+            // Nomor antrian dihitung per jadwal layanan (bukan per tanggal dibuat)
+            $maxAngka = Antrian::where('jadwal_dokter_id', $jadwal->id)
+                ->max('angka_antrian') ?? 0;
+
+            $angkaAntrian = ((int) $maxAngka) + 1;
+            $nomorFormatted = sprintf("%s-%03d", $prefixPoli, $angkaAntrian);
+
+            return Antrian::create([
+                'nomor_antrian' => $nomorFormatted,
+                'angka_antrian' => $angkaAntrian,
+                'poli_id' => $jadwal->poli_id,
+                'dokter_id' => $jadwal->dokter_id,
+                'jadwal_dokter_id' => $jadwal->id,
+                'pasien_id' => $data['pasien_id'],
+                'tipe_pasien' => $data['tipe_pasien'] ?? 'umum',
+                'sumber' => Antrian::SUMBER_ONLINE,
                 'status' => 'menunggu',
             ]);
         });
@@ -117,7 +170,7 @@ class AntrianService
     public function panggilBerikutnya(string $jadwalDokterId, ?string $loketId = null): ?Antrian
     {
         $antrian = Antrian::where('jadwal_dokter_id', $jadwalDokterId)
-            ->whereDate('created_at', now()->toDateString())
+            ->whereRelation('jadwalDokter', fn($q) => $q->whereDate('tanggal', now()->toDateString()))
             ->whereIn('status', ['menunggu', 'skrining'])
             ->orderBy('angka_antrian')
             ->first();
@@ -136,7 +189,7 @@ class AntrianService
      */
     public function hitungStatistikHariIni(?string $poliId = null): array
     {
-        $query = Antrian::whereDate('created_at', now()->toDateString());
+        $query = Antrian::whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', now()->toDateString()));
 
         if ($poliId) {
             $query->where('poli_id', $poliId);

@@ -10,6 +10,7 @@ use App\Models\Resep;
 use App\Models\Tagihan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -43,101 +44,100 @@ class DashboardController extends Controller
             $apotekerData = $this->getApotekerData();
         }
 
+        $perawatData = [];
+        if ($role === 'perawat') {
+            $perawatData = $this->getPerawatData();
+        }
+
+        $dokterData = [];
+        if ($role === 'dokter') {
+            $dokterData = $this->getDokterData();
+        }
+
         // Total Pasien
-        $dbPatientCount = DB::table('pasien')->count();
-        $totalPatientsDisplay = $dbPatientCount > 0 ? number_format($dbPatientCount, 0, ',', '.') : '8.240';
+        $totalPatients = DB::table('pasien')->count();
 
         // Appointment Hari Ini
         $today = Carbon::today()->toDateString();
-        $dbAppointments = DB::table('pasien')->whereDate('tanggal_pendaftaran', $today)->count();
-        if (SchemaHasTable('antrian')) {
-            $dbAppointments += DB::table('antrian')->whereDate('created_at', $today)->count();
+        $todayAppointments = DB::table('pasien')->whereDate('tanggal_pendaftaran', $today)->count();
+        if (Schema::hasTable('antrian')) {
+            $todayAppointments += Antrian::whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', $today))->count();
         }
-        $todayAppointmentsDisplay = $dbAppointments > 0 ? (string) $dbAppointments : '156';
 
         // Dokter Aktif
-        $dbDoctorsCount = DB::table('dokters')->count();
-        $activeDoctorsDisplay = $dbDoctorsCount > 0 ? (string) $dbDoctorsCount : '42';
-
-        // Pendapatan Bulan Ini (Contoh realitas operasional RS Sentosa Medika)
-        $monthlyRevenueDisplay = 'Rp 1.245M';
-
-        $stats = [
-            'totalPatients' => $totalPatientsDisplay,
-            'todayAppointments' => $todayAppointmentsDisplay,
-            'monthlyRevenue' => $monthlyRevenueDisplay,
-            'activeDoctors' => $activeDoctorsDisplay,
-            'patientTrend' => '+5% vs last month',
-            'appointmentTrend' => '-2% vs yesterday',
-            'revenueTrend' => '+12% vs last month',
-            'doctorTrend' => 'Stable',
-        ];
-
-        // Data Kunjungan Pasien 7 Hari Terakhir
-        $weeklyVisits = [
-            ['day' => 'Sen', 'fullName' => 'Senin', 'count' => 142, 'rawatJalan' => 98, 'igd' => 30, 'rawatInap' => 14, 'isHighlighted' => false],
-            ['day' => 'Sel', 'fullName' => 'Selasa', 'count' => 158, 'rawatJalan' => 110, 'igd' => 34, 'rawatInap' => 14, 'isHighlighted' => false],
-            ['day' => 'Rab', 'fullName' => 'Rabu', 'count' => 135, 'rawatJalan' => 92, 'igd' => 28, 'rawatInap' => 15, 'isHighlighted' => false],
-            ['day' => 'Kam', 'fullName' => 'Kamis', 'count' => 184, 'rawatJalan' => 130, 'igd' => 38, 'rawatInap' => 16, 'isHighlighted' => true],
-            ['day' => 'Jum', 'fullName' => 'Jumat', 'count' => 160, 'rawatJalan' => 115, 'igd' => 31, 'rawatInap' => 14, 'isHighlighted' => false],
-            ['day' => 'Sab', 'fullName' => 'Sabtu', 'count' => 110, 'rawatJalan' => 75, 'igd' => 25, 'rawatInap' => 10, 'isHighlighted' => false],
-            ['day' => 'Min', 'fullName' => 'Minggu', 'count' => 95, 'rawatJalan' => 55, 'igd' => 32, 'rawatInap' => 8, 'isHighlighted' => false],
-        ];
-
-        // Aktivitas Terbaru (Mengambil dari AuditLog dan fallback representatif)
-        $auditLogs = AuditLog::orderBy('created_at', 'desc')->take(6)->get();
-        $recentActivities = [];
-
-        if ($auditLogs->isNotEmpty()) {
-            foreach ($auditLogs as $log) {
-                $pembuatName = $log->pembuat['nama_lengkap'] ?? 'Petugas';
-                $modulName = str_replace('_', ' ', $log->modul ?? '');
-                $aksiName = strtolower(str_replace('_', ' ', $log->aksi ?? 'memperbarui data'));
-                $target = $log->target_id ? " ({$log->target_id})" : '';
-
-                $iconType = 'user';
-                if (str_contains(strtolower($log->modul ?? ''), 'jadwal')) {
-                    $iconType = 'calendar';
-                } elseif (str_contains(strtolower($log->modul ?? ''), 'obat') || str_contains(strtolower($log->modul ?? ''), 'resep')) {
-                    $iconType = 'stock';
-                } elseif (str_contains(strtolower($log->modul ?? ''), 'medis') || str_contains(strtolower($log->modul ?? ''), 'pasien')) {
-                    $iconType = 'document';
-                }
-
-                $timeAgo = Carbon::parse($log->created_at)->diffForHumans();
-
-                $recentActivities[] = [
-                    'id' => $log->id,
-                    'title' => "{$pembuatName} {$aksiName} pada modul {$modulName}{$target}.",
-                    'time' => $timeAgo,
-                    'type' => $iconType,
-                ];
-            }
+        $activeDoctors = DB::table('dokters')->where('status_praktik', 'aktif')->count();
+        if ($activeDoctors === 0) {
+            $activeDoctors = DB::table('dokters')->count();
         }
 
-        // Fallback default jika audit log belum banyak terisi agar 100% cocok dengan mockup
-        if (count($recentActivities) < 3) {
-            $defaultMockActivities = [
-                [
-                    'id' => 'mock-1',
-                    'title' => 'Admin Budi menambahkan dokter baru: Dr. Siti Nurhaliza.',
-                    'time' => '2 menit lalu',
-                    'type' => 'user',
-                ],
-                [
-                    'id' => 'mock-2',
-                    'title' => 'Suster Rina mengubah jadwal poli Gigi.',
-                    'time' => '45 menit lalu',
-                    'type' => 'calendar',
-                ],
-                [
-                    'id' => 'mock-3',
-                    'title' => 'Sistem melaporkan stok Paracetamol menipis (Sisa: 2 Box).',
-                    'time' => '1 jam lalu',
-                    'type' => 'stock',
-                ],
+        // Pendapatan Bulan Ini (real dari tagihan lunas)
+        $monthlyRevenueRaw = Tagihan::where('status', 'lunas')
+            ->whereYear('waktu_pembayaran', now()->year)
+            ->whereMonth('waktu_pembayaran', now()->month)
+            ->sum('total_tagihan');
+        $monthlyRevenueDisplay = $monthlyRevenueRaw > 0
+            ? $this->formatRupiah($monthlyRevenueRaw)
+            : 'Rp 0';
+
+        $stats = [
+            'totalPatients' => number_format($totalPatients, 0, ',', '.'),
+            'todayAppointments' => (string) $todayAppointments,
+            'monthlyRevenue' => $monthlyRevenueDisplay,
+            'activeDoctors' => (string) $activeDoctors,
+            'patientTrend' => $this->computeTrend('pasien', 'created_at', 'registered'),
+            'appointmentTrend' => $this->computeTrend('antrian', 'created_at', 'appointment'),
+            'revenueTrend' => $this->computeRevenueTrend(),
+            'doctorTrend' => $activeDoctors > 0 ? 'Stable' : 'Belum ada data',
+        ];
+
+        // Data Kunjungan Pasien 7 Hari Terakhir (real dari antrian & rawat inap)
+        $dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        $weeklyVisits = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            $rawatJalan = Antrian::whereDate('created_at', $date)->count();
+            $rawatInap = \App\Models\RawatInapAdmission::whereDate('tanggal_masuk', $date)->count();
+            $igd = \App\Models\RekamMedis::whereDate('created_at', $date)
+                ->whereHas('poli', fn($q) => $q->where('nama_poli', 'like', '%IGD%'))
+                ->count();
+            $weeklyVisits[] = [
+                'day' => $dayNames[$date->dayOfWeek],
+                'fullName' => $date->isoFormat('dddd'),
+                'count' => $rawatJalan + $rawatInap + $igd,
+                'rawatJalan' => $rawatJalan,
+                'igd' => $igd,
+                'rawatInap' => $rawatInap,
+                'isHighlighted' => $date->isToday(),
             ];
-            $recentActivities = array_merge($recentActivities, array_slice($defaultMockActivities, count($recentActivities)));
+        }
+
+        // Aktivitas Terbaru (real dari AuditLog, tanpa fallback dummy)
+        $auditLogs = AuditLog::orderBy('created_at', 'desc')->take(10)->get();
+        $recentActivities = [];
+
+        foreach ($auditLogs as $log) {
+            $pembuatName = $log->pembuat['nama_lengkap'] ?? 'Petugas';
+            $modulName = str_replace('_', ' ', $log->modul ?? '');
+            $aksiName = strtolower(str_replace('_', ' ', $log->aksi ?? 'memperbarui data'));
+            $target = $log->target_id ? " ({$log->target_id})" : '';
+
+            $iconType = 'user';
+            if (str_contains(strtolower($log->modul ?? ''), 'jadwal')) {
+                $iconType = 'calendar';
+            } elseif (str_contains(strtolower($log->modul ?? ''), 'obat') || str_contains(strtolower($log->modul ?? ''), 'resep')) {
+                $iconType = 'stock';
+            } elseif (str_contains(strtolower($log->modul ?? ''), 'medis') || str_contains(strtolower($log->modul ?? ''), 'pasien')) {
+                $iconType = 'document';
+            }
+
+            $timeAgo = Carbon::parse($log->created_at)->diffForHumans();
+
+            $recentActivities[] = [
+                'id' => $log->id,
+                'title' => "{$pembuatName} {$aksiName} pada modul {$modulName}{$target}.",
+                'time' => $timeAgo,
+                'type' => $iconType,
+            ];
         }
 
         return Inertia::render('dashboard', array_merge([
@@ -147,7 +147,7 @@ class DashboardController extends Controller
             'recentAuditLogs' => $auditLogs,
             'user' => $user,
             'role' => $role,
-        ], $manajemenData, $resepsionisData, $kasirData, $apotekerData));
+        ], $manajemenData, $resepsionisData, $kasirData, $apotekerData, $perawatData, $dokterData));
     }
 
     /**
@@ -256,36 +256,32 @@ class DashboardController extends Controller
         $today = Carbon::today()->toDateString();
 
         // 1. Pasien Check-in Hari Ini
-        $dbCheckin = DB::table('pasien')->whereDate('tanggal_pendaftaran', $today)->count();
-        if ($dbCheckin === 0 && SchemaHasTable('antrian')) {
-            $dbCheckin = DB::table('antrian')
-                ->whereDate('created_at', $today)
+        $rcpCheckinCount = DB::table('pasien')->whereDate('tanggal_pendaftaran', $today)->count();
+        if ($rcpCheckinCount === 0 && Schema::hasTable('antrian')) {
+            $rcpCheckinCount = Antrian::whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', $today))
                 ->whereIn('status', ['dipanggil', 'sedang_dilayani', 'selesai'])
                 ->count();
         }
-        $rcpCheckinCount = $dbCheckin > 0 ? (string) $dbCheckin : '42';
 
         // 2. Antrian Walk-in Aktif (live)
-        $dbActiveQueue = 0;
-        if (SchemaHasTable('antrian')) {
-            $dbActiveQueue = DB::table('antrian')
-                ->whereDate('created_at', $today)
+        $rcpActiveQueue = 0;
+        if (Schema::hasTable('antrian')) {
+            $rcpActiveQueue = Antrian::whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', $today))
                 ->whereIn('status', ['menunggu', 'skrining', 'dipanggil'])
                 ->count();
         }
-        $rcpActiveQueue = $dbActiveQueue > 0 ? (string) $dbActiveQueue : '7';
 
         // 3. Janji Temu Hari Ini
-        $dbAppointments = DB::table('pasien')->whereDate('tanggal_pendaftaran', $today)->count();
-        if (SchemaHasTable('antrian')) {
-            $dbAppointments += DB::table('antrian')->whereDate('created_at', $today)->count();
+        $rcpTodayAppointments = DB::table('pasien')->whereDate('tanggal_pendaftaran', $today)->count();
+        if (Schema::hasTable('antrian')) {
+            $rcpTodayAppointments += Antrian::whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', $today))->count();
         }
-        $rcpTodayAppointments = $dbAppointments > 0 ? (string) $dbAppointments : '65';
 
-        // 4. Latest Walk-in Queue
+        // 4. Antrian Terbaru (live dari database)
         $rcpLatestQueue = [];
-        if (SchemaHasTable('antrian')) {
+        if (Schema::hasTable('antrian')) {
             $rcpLatestQueue = Antrian::with(['pasien:id,nama_lengkap', 'poli:id,nama_poli'])
+                ->whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', $today))
                 ->orderBy('created_at', 'desc')
                 ->limit(5)
                 ->get()
@@ -301,19 +297,10 @@ class DashboardController extends Controller
                 ->toArray();
         }
 
-        // Fallback jika database antrian belum ada data untuk hari ini
-        if (empty($rcpLatestQueue)) {
-            $rcpLatestQueue = [
-                ['id' => 'q-1', 'nomor_antrian' => 'A-012', 'nama' => 'Bpk. Budi Santoso', 'poli' => 'Poli Umum', 'status' => 'menunggu'],
-                ['id' => 'q-2', 'nomor_antrian' => 'B-005', 'nama' => 'Ibu Siti Aminah', 'poli' => 'Poli Gigi', 'status' => 'menunggu'],
-                ['id' => 'q-3', 'nomor_antrian' => 'C-021', 'nama' => 'An. Kevin Pratama', 'poli' => 'Poli Anak', 'status' => 'dipanggil'],
-            ];
-        }
-
         return [
-            'rcpCheckinCount' => $rcpCheckinCount,
-            'rcpActiveQueue' => $rcpActiveQueue,
-            'rcpTodayAppointments' => $rcpTodayAppointments,
+            'rcpCheckinCount' => (string) $rcpCheckinCount,
+            'rcpActiveQueue' => (string) $rcpActiveQueue,
+            'rcpTodayAppointments' => (string) $rcpTodayAppointments,
             'rcpLatestQueue' => $rcpLatestQueue,
         ];
     }
@@ -523,10 +510,208 @@ class DashboardController extends Controller
             'aptObatMasterList' => $aptObatMasterList,
         ];
     }
-}
 
-function SchemaHasTable(string $table): bool
-{
-    return \Illuminate\Support\Facades\Schema::hasTable($table);
+    /**
+     * Data khusus dashboard Perawat: shift hari ini, pasien dirawat, dan tugas keperawatan.
+     */
+    private function getPerawatData(): array
+    {
+        $user = session('simrs_user', []);
+        $perawat = \App\Models\Perawat::with('ruangan:id,nama_ruangan')->find(data_get($user, 'id'));
+
+        // 1. Jadwal shift hari ini
+        $shiftHariIni = null;
+        if ($perawat) {
+            $shiftHariIni = \App\Models\JadwalShiftPerawat::where('perawat_id', $perawat->id)
+                ->whereDate('tanggal', Carbon::today())
+                ->with('bangsal:id,nama_bangsal')
+                ->orderBy('jam_mulai')
+                ->first();
+        }
+
+        $shiftLabel = $shiftHariIni
+            ? ucfirst($shiftHariIni->jenis_shift).' • '.$shiftHariIni->bangsal->nama_bangsal
+            : null;
+        $jamShift = $shiftHariIni
+            ? Carbon::parse($shiftHariIni->jam_mulai)->format('H:i').' – '.Carbon::parse($shiftHariIni->jam_selesai)->format('H:i').' WIB'
+            : null;
+
+        // 2. Pasien rawat inap (dirawat hari ini)
+        $pasienRawatinapCount = \App\Models\RawatInapAdmission::whereDate('tanggal_masuk', '<=', Carbon::today())
+            ->where(fn ($q) => $q->whereNull('tanggal_keluar_aktual')->orWhereDate('tanggal_keluar_aktual', '>=', Carbon::today()))
+            ->count();
+
+        // 3. Tugas keperawatan: rekam medis yang belum difinalisasi / pasien rawat inap aktif
+        $tugasPerawatan = \App\Models\RekamMedis::with(['pasien:id,nama_lengkap', 'poli:id,nama_poli'])
+            ->whereDate('created_at', Carbon::today())
+            ->where('status', '!=', 'final')
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get()
+            ->map(function ($rm) {
+                return [
+                    'task' => substr($rm->keluhan_utama ?: 'Perawatan pasien', 0, 60),
+                    'desc' => ($rm->pasien->nama_lengkap ?? 'Pasien').' • '.($rm->poli->nama_poli ?? '-'),
+                    'time' => $rm->created_at->format('H:i'),
+                    'status' => false,
+                ];
+            });
+
+        // 4. Pasien yang belum probing vitals (status draft dari rawat inap aktif)
+        $pasienPerluPerhatian = \App\Models\RawatInapAdmission::whereDate('tanggal_masuk', '<=', Carbon::today())
+            ->where(fn ($q) => $q->whereNull('tanggal_keluar_aktual')->orWhereDate('tanggal_keluar_aktual', '>=', Carbon::today()))
+            ->where('status', '!=', 'pulang_sembuh')
+            ->count();
+
+        return [
+            'prjShiftLabel' => $shiftLabel,
+            'prjJamShift' => $jamShift,
+            'prjTotalPasien' => (int) $pasienRawatinapCount,
+            'prjPerluPerhatian' => (int) $pasienPerluPerhatian,
+            'prjTugasPerawatan' => $tugasPerawatan,
+        ];
+    }
+
+    /**
+     * Data khusus dashboard Dokter: antrian pasien hari ini, jadwal praktik, dan statistik.
+     */
+    private function getDokterData(): array
+    {
+        $user = session('simrs_user', []);
+        $dokter = \App\Models\Dokter::find(data_get($user, 'id'));
+        $today = Carbon::today();
+
+        // 1. Antrian pasien untuk dokter ini (hari ini)
+        $antrianHariIni = [];
+        $jadwalIds = [];
+        if ($dokter) {
+            $jadwalHariIni = \App\Models\JadwalDokter::where('dokter_id', $dokter->id)
+                ->whereDate('tanggal', $today)
+                ->pluck('id');
+            $jadwalIds = $jadwalHariIni->toArray();
+
+            $antrianHariIni = Antrian::with(['pasien:id,nama_lengkap', 'poli:id,nama_poli'])
+                ->where('dokter_id', $dokter->id)
+                ->whereDate('created_at', $today)
+                ->orderBy('angka_antrian')
+                ->get()
+                ->map(function ($a) {
+                    return [
+                        'nomor_antrian' => $a->nomor_antrian,
+                        'nama' => $a->pasien->nama_lengkap ?? '-',
+                        'poli' => $a->poli->nama_poli ?? '-',
+                        'time' => $a->created_at->format('H:i'),
+                        'status' => $a->status,
+                    ];
+                })
+                ->values()
+                ->toArray();
+        }
+
+        // 2. Jadwal praktik hari ini
+        $jadwalPraktik = \App\Models\JadwalDokter::where('dokter_id', $dokter?->id)
+            ->whereDate('tanggal', $today)
+            ->orderBy('jam_mulai')
+            ->get(['id', 'tanggal', 'jam_mulai', 'jam_selesai', 'status', 'kuota_maksimal'])
+            ->map(function ($j) {
+                return [
+                    'jam' => Carbon::parse($j->jam_mulai)->format('H:i').' – '.Carbon::parse($j->jam_selesai)->format('H:i'),
+                    'status' => $j->status,
+                    'kuota' => $j->kuota_maksimal,
+                ];
+            });
+
+        // 3. Jumlah pasien & selesai hari ini
+        $jmlPasienHariIni = count($antrianHariIni);
+        $jmlSelesai = collect($antrianHariIni)->whereIn('status', ['selesai', 'sedang_dilayani'])->count();
+
+        return [
+            'dktNama' => $dokter?->nama_lengkap,
+            'dktAntrianHariIni' => $antrianHariIni,
+            'dktJadwalPraktik' => $jadwalPraktik,
+            'dktJmlPasienHariIni' => $jmlPasienHariIni,
+            'dktJmlSelesai' => $jmlSelesai,
+            'dktJadwalIds' => $jadwalIds,
+        ];
+    }
+
+    /**
+     * Format angka menjadi Rupiah, mis. Rp 1.245.000.
+     */
+    private function formatRupiah(float|int $value): string
+    {
+        if ($value >= 1000000000) {
+            return 'Rp ' . number_format($value / 1000000000, 1, ',', '.') . 'M';
+        }
+        if ($value >= 1000000) {
+            return 'Rp ' . number_format($value / 1000000, 1, ',', '.') . 'M';
+        }
+        if ($value >= 1000) {
+            return 'Rp ' . number_format($value / 1000, 1, ',', '.') . 'K';
+        }
+
+        return 'Rp ' . number_format($value, 0, ',', '.');
+    }
+
+    /**
+     * Hitung tren kunjungan/pendaftaran: membandingkan hari ini dengan kemarin untuk
+     * antrian, atau bulan ini vs bulan lalu untuk pendaftaran pasien.
+     */
+    private function computeTrend(string $table, string $column, string $kind = 'appointment'): string
+    {
+        if (! Schema::hasTable($table)) {
+            return $kind === 'registered' ? 'Belum ada data' : 'Belum ada data';
+        }
+
+        if ($kind === 'registered') {
+            $current = DB::table($table)->whereMonth($column, now()->month)
+                ->whereYear($column, now()->year)->count();
+            $previous = DB::table($table)->whereMonth($column, now()->subMonthNoOverflow()->month)
+                ->whereYear($column, now()->subMonthNoOverflow()->year)->count();
+
+            if ($previous === 0) {
+                return $current > 0 ? 'Baru bulan ini' : 'Belum ada data';
+            }
+
+            return (($current - $previous) / $previous * 100) >= 0
+                ? '+'.round(($current - $previous) / $previous * 100, 0).'% vs last month'
+                : round(($current - $previous) / $previous * 100, 0).'% vs last month';
+        }
+
+        // appointment kind
+        $todayCount = DB::table('antrian')->whereDate($column, Carbon::today())->count();
+        $yesterdayCount = DB::table('antrian')->whereDate($column, Carbon::yesterday())->count();
+
+        if ($yesterdayCount === 0) {
+            return 'Baru hari ini';
+        }
+
+        $diff = $todayCount - $yesterdayCount;
+
+        return ($diff >= 0 ? '+'.$diff : $diff).' vs yesterday';
+    }
+
+    /**
+     * Hitung tren pendapatan: bulan ini vs bulan lalu dari tagihan lunas.
+     */
+    private function computeRevenueTrend(): string
+    {
+        $current = Tagihan::where('status', 'lunas')
+            ->whereMonth('waktu_pembayaran', now()->month)
+            ->whereYear('waktu_pembayaran', now()->year)
+            ->sum('total_tagihan');
+        $previous = Tagihan::where('status', 'lunas')
+            ->whereMonth('waktu_pembayaran', now()->subMonthNoOverflow()->month)
+            ->whereYear('waktu_pembayaran', now()->subMonthNoOverflow()->year)
+            ->sum('total_tagihan');
+
+        if ($previous <= 0) {
+            return $current > 0 ? 'Baru bulan ini' : 'Belum ada data';
+        }
+
+        $pct = round(($current - $previous) / $previous * 100, 0);
+
+        return $pct >= 0 ? '+'.$pct.'% vs last month' : $pct.'% vs last month';
+    }
 }
 

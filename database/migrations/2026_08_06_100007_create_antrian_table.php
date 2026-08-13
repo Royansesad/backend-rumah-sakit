@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignUuid('jadwal_dokter_id')->constrained('jadwal_dokter')->cascadeOnDelete();
             $table->foreignUuid('pasien_id')->constrained('pasien')->cascadeOnDelete();
             $table->enum('tipe_pasien', ['umum', 'bpjs', 'prioritas'])->default('umum');
+            $table->enum('sumber', ['walk_in', 'online'])->default('walk_in')->after('tipe_pasien');
             $table->enum('status', [
                 'menunggu',
                 'skrining',
@@ -36,6 +37,7 @@ return new class extends Migration
 
             $table->index(['poli_id', 'dokter_id', 'created_at', 'status']);
             $table->index(['jadwal_dokter_id', 'status', 'angka_antrian']);
+            $table->index('pasien_id');
         });
     }
 

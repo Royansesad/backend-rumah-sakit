@@ -14,3 +14,31 @@
     --color-primary-dark: #00c9c1;
     --color-primary-deep: #0f766e;
 }
+
+@media print {
+    aside,
+    header,
+    nav,
+    footer,
+    button,
+    .print\:hidden {
+        display: none !important;
+    }
+
+    html,
+    body,
+    main,
+    #app {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    @page {
+        margin: 0 !important;
+        size: A4 landscape;
+    }
+}

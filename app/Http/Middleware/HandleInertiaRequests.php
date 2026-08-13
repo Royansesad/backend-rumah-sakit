@@ -43,6 +43,10 @@ class HandleInertiaRequests extends Middleware
             ],
             'user' => session('simrs_user'),
             'role' => session('simrs_role'),
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
         ];
     }
 }

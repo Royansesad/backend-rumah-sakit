@@ -150,6 +150,25 @@ interface DashboardProps {
     aptPrescriptionQueue?: any[];
     aptRecentTransactions?: any[];
     aptObatMasterList?: any[];
+    // Perawat-specific props
+    prjShiftLabel?: string | null;
+    prjJamShift?: string | null;
+    prjTotalPasien?: number;
+    prjPerluPerhatian?: number;
+    prjTugasPerawatan?: { task: string; desc: string; time: string; status: boolean }[];
+    // Dokter-specific props
+    dktNama?: string | null;
+    dktAntrianHariIni?: {
+        nomor_antrian: string;
+        nama: string;
+        poli: string;
+        time: string;
+        status: string;
+    }[];
+    dktJadwalPraktik?: { jam: string; status: string; kuota: number }[];
+    dktJmlPasienHariIni?: number;
+    dktJmlSelesai?: number;
+    dktJadwalIds?: number[];
 }
 
 export default function Dashboard({
@@ -167,9 +186,9 @@ export default function Dashboard({
     mgtTodayProcessed = 0,
     mgtPrescriptionQueue = [],
     mgtRecentTransactions = [],
-    rcpCheckinCount = '42',
-    rcpActiveQueue = '7',
-    rcpTodayAppointments = '65',
+    rcpCheckinCount = '0',
+    rcpActiveQueue = '0',
+    rcpTodayAppointments = '0',
     rcpLatestQueue = [],
     kasirTodayRevenue = 0,
     kasirPendingCount = 0,
@@ -187,6 +206,16 @@ export default function Dashboard({
     aptPrescriptionQueue = [],
     aptRecentTransactions = [],
     aptObatMasterList = [],
+    prjShiftLabel = null,
+    prjJamShift = null,
+    prjTotalPasien = 0,
+    prjPerluPerhatian = 0,
+    prjTugasPerawatan = [],
+    dktNama = null,
+    dktAntrianHariIni = [],
+    dktJadwalPraktik = [],
+    dktJmlPasienHariIni = 0,
+    dktJmlSelesai = 0,
 }: DashboardProps) {
     // State form dan modal New Admission
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -220,42 +249,11 @@ export default function Dashboard({
     };
 
     // Default visits fallback if not provided
-    const defaultVisits: WeeklyVisitItem[] = [
-        { day: 'Sen', fullName: 'Senin', count: 142, rawatJalan: 98, igd: 30, rawatInap: 14, isHighlighted: false },
-        { day: 'Sel', fullName: 'Selasa', count: 158, rawatJalan: 110, igd: 34, rawatInap: 14, isHighlighted: false },
-        { day: 'Rab', fullName: 'Rabu', count: 135, rawatJalan: 92, igd: 28, rawatInap: 15, isHighlighted: false },
-        { day: 'Kam', fullName: 'Kamis', count: 184, rawatJalan: 130, igd: 38, rawatInap: 16, isHighlighted: true },
-        { day: 'Jum', fullName: 'Jumat', count: 160, rawatJalan: 115, igd: 31, rawatInap: 14, isHighlighted: false },
-        { day: 'Sab', fullName: 'Sabtu', count: 110, rawatJalan: 75, igd: 25, rawatInap: 10, isHighlighted: false },
-        { day: 'Min', fullName: 'Minggu', count: 95, rawatJalan: 55, igd: 32, rawatInap: 8, isHighlighted: false },
-    ];
+    const currentWeeklyVisits = weeklyVisits && weeklyVisits.length > 0 ? weeklyVisits : [];
+    const maxVisitCount = Math.max(...currentWeeklyVisits.map((v) => v.count), 1);
 
-    const currentWeeklyVisits = weeklyVisits && weeklyVisits.length > 0 ? weeklyVisits : defaultVisits;
-    const maxVisitCount = Math.max(...currentWeeklyVisits.map((v) => v.count), 200);
-
-    const defaultActivities: ActivityItem[] = [
-        {
-            id: '1',
-            title: 'Admin Budi menambahkan dokter baru: Dr. Siti Nurhaliza.',
-            time: '2 menit lalu',
-            type: 'user',
-        },
-        {
-            id: '2',
-            title: 'Suster Rina mengubah jadwal poli Gigi.',
-            time: '45 menit lalu',
-            type: 'calendar',
-        },
-        {
-            id: '3',
-            title: 'Sistem melaporkan stok Paracetamol menipis (Sisa: 2 Box).',
-            time: '1 jam lalu',
-            type: 'stock',
-        },
-    ];
-
-    const currentActivities = recentActivities && recentActivities.length > 0 ? recentActivities : defaultActivities;
-    const activeDayData = currentWeeklyVisits.find((v) => v.day === selectedDay) || currentWeeklyVisits[3];
+    const currentActivities = recentActivities && recentActivities.length > 0 ? recentActivities : [];
+    const activeDayData = currentWeeklyVisits.find((v) => v.day === selectedDay) || currentWeeklyVisits[0];
 
     // =======================================================================
     // 1. Dashboard Admin (Matching Sentosa Medika Design Mockup)
@@ -293,13 +291,13 @@ export default function Dashboard({
                     </div>
                     <div className="mt-4">
                         <div className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                            {stats?.totalPatients || '8.240'}
+                            {stats?.totalPatients ?? '0'}
                         </div>
                         <div className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#0d4f42]">
                             <svg className="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                             </svg>
-                            <span>{stats?.patientTrend || '+5% vs last month'}</span>
+                            <span>{stats?.patientTrend ?? 'Belum ada data'}</span>
                         </div>
                     </div>
                 </Link>
@@ -321,13 +319,13 @@ export default function Dashboard({
                     </div>
                     <div className="mt-4">
                         <div className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                            {stats?.todayAppointments || '156'}
+                            {stats?.todayAppointments ?? '0'}
                         </div>
                         <div className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-600">
                             <svg className="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" />
                             </svg>
-                            <span>{stats?.appointmentTrend || '-2% vs yesterday'}</span>
+                            <span>{stats?.appointmentTrend ?? 'Belum ada data'}</span>
                         </div>
                     </div>
                 </Link>
@@ -349,13 +347,13 @@ export default function Dashboard({
                     </div>
                     <div className="mt-4">
                         <div className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                            {stats?.monthlyRevenue || 'Rp 1.245M'}
+                            {stats?.monthlyRevenue ?? 'Rp 0'}
                         </div>
                         <div className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#0d4f42]">
                             <svg className="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                             </svg>
-                            <span>{stats?.revenueTrend || '+12% vs last month'}</span>
+                            <span>{stats?.revenueTrend ?? 'Belum ada data'}</span>
                         </div>
                     </div>
                 </Link>
@@ -377,11 +375,11 @@ export default function Dashboard({
                     </div>
                     <div className="mt-4">
                         <div className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                            {stats?.activeDoctors || '42'}
+                            {stats?.activeDoctors ?? '0'}
                         </div>
                         <div className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-gray-500">
                             <span>→</span>
-                            <span>{stats?.doctorTrend || 'Stable'}</span>
+                            <span>{stats?.doctorTrend ?? 'Belum ada data'}</span>
                         </div>
                     </div>
                 </Link>
@@ -1467,11 +1465,10 @@ export default function Dashboard({
         <div className="space-y-6">
             <div>
                 <h1 className="mb-1 font-serif text-3xl text-[#0d4f42]">
-                    Selamat bertugas, Suster Ani Rahmawati
+                    Selamat bertugas, {user?.nama_lengkap || 'Perawat'}
                 </h1>
                 <p className="text-sm text-gray-500">
-                    Semoga hari menyenangkan. Berikut adalah ringkasan tugas
-                    Anda hari ini.
+                    Berikut adalah ringkasan tugas Anda hari ini.
                 </p>
             </div>
 
@@ -1481,26 +1478,23 @@ export default function Dashboard({
                     <div className="mb-4 flex items-start justify-between">
                         <i className="fa-solid fa-bed text-2xl text-[#0d4f42]"></i>
                         <span className="flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">
-                            <i className="fa-solid fa-triangle-exclamation text-xs"></i> 4 Perlu Perhatian
+                            <i className="fa-solid fa-triangle-exclamation text-xs"></i> {prjPerluPerhatian} Perlu Perhatian
                         </span>
                     </div>
-                    <p className="text-sm text-gray-600">Pasien Shift Ini</p>
+                    <p className="text-sm text-gray-600">Pasien Yang Dirawat</p>
                     <p className="mt-1 font-serif text-5xl text-[#0d4f42]">
-                        12
+                        {prjTotalPasien}
                     </p>
                 </div>
 
                 <div className="relative rounded-xl border border-gray-200 bg-[#d1fae5]/20 p-6">
-                    <span className="absolute top-4 right-4 rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">
-                        Berakhir dlm 4j 30m
-                    </span>
                     <i className="fa-regular fa-clock mb-4 block text-2xl text-[#0d4f42]"></i>
                     <p className="text-sm text-gray-600">Jadwal Shift Anda</p>
                     <p className="mt-1 text-2xl font-bold text-[#0d4f42]">
-                        Shift Pagi
+                        {prjShiftLabel || 'Belum ada shift hari ini'}
                     </p>
                     <p className="mt-2 text-xs text-gray-500">
-                        07:00 – 15:00 WIB
+                        {prjJamShift || 'Periksa jadwal shift Anda'}
                     </p>
                 </div>
 
@@ -1508,17 +1502,20 @@ export default function Dashboard({
                     <div className="mb-2 flex items-center gap-2">
                         <i className="fa-solid fa-triangle-exclamation text-2xl text-red-600"></i>
                         <span className="text-sm font-bold text-red-800">
-                            Peringatan Kritis
+                            Tugas Keperawatan
                         </span>
                     </div>
                     <p className="mb-4 text-xs leading-relaxed text-red-700">
-                        Pasien di Kamar 204 (Ibu Kartini) butuh pemeriksaan
-                        vitals segera. Tekanan darah fluktuatif pada pemeriksaan
-                        terakhir.
+                        {prjTugasPerawatan.length > 0
+                            ? 'Ada tugas perawatan yang perlu diselesaikan hari ini. Tinjau daftar di bawah dan tandai selesai setelah dikerjakan.'
+                            : 'Tidak ada tugas perawatan yang belum selesai hari ini.'}
                     </p>
-                    <button className="w-full rounded-md bg-red-700 py-2 text-xs font-bold text-white">
-                        Tindak Lanjuti Sekarang
-                    </button>
+                    <Link
+                        href="/jadwal-shift"
+                        className="block w-full rounded-md bg-red-700 py-2 text-center text-xs font-bold text-white hover:bg-red-800"
+                    >
+                        Buka Jadwal Shift
+                    </Link>
                 </div>
             </div>
 
@@ -1529,59 +1526,47 @@ export default function Dashboard({
                         <h3 className="font-bold text-gray-900">
                             Daftar Tugas Perawatan
                         </h3>
-                        <a
-                            href="#"
+                        <Link
+                            href="/jadwal-shift"
                             className="text-sm font-bold text-[#0d4f42] flex items-center gap-1"
                         >
                             Lihat Semua <i className="fa-solid fa-arrow-right text-xs"></i>
-                        </a>
+                        </Link>
                     </div>
-                    <div className="space-y-4">
-                        {[
-                            {
-                                task: 'Pemberian Obat Siang',
-                                desc: 'Kamar 201 • Paracetamol 500mg, Amoxicillin',
-                                time: '12:00 (Terlambat)',
-                                status: false,
-                            },
-                            {
-                                task: 'Cek Vitals Rutin',
-                                desc: 'Kamar 204 • Tensi, Suhu, Nadi',
-                                time: '14:00',
-                                status: false,
-                            },
-                        ].map((t, idx) => (
-                            <div
-                                key={idx}
-                                className="flex flex-col justify-between rounded-lg border border-gray-100 bg-gray-50/50 p-4 md:flex-row md:items-center"
-                            >
-                                <div className="mb-2 flex items-center gap-3 md:mb-0">
-                                    <input
-                                        type="checkbox"
-                                        className="h-5 w-5 rounded-md border-2 border-gray-300 accent-[#0d4f42]"
-                                    />
-                                    <div>
-                                        <p className="font-medium text-gray-900">
-                                            {t.task}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            {t.desc}
-                                        </p>
+                    {prjTugasPerawatan.length > 0 ? (
+                        <div className="space-y-4">
+                            {prjTugasPerawatan.map((t, idx) => (
+                                <div
+                                    key={idx}
+                                    className="flex flex-col justify-between rounded-lg border border-gray-100 bg-gray-50/50 p-4 md:flex-row md:items-center"
+                                >
+                                    <div className="mb-2 flex items-center gap-3 md:mb-0">
+                                        <input
+                                            type="checkbox"
+                                            className="h-5 w-5 rounded-md border-2 border-gray-300 accent-[#0d4f42]"
+                                        />
+                                        <div>
+                                            <p className="font-medium text-gray-900">
+                                                {t.task}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                {t.desc}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-xs text-gray-500">
+                                            {t.time}
+                                        </span>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <span
-                                        className={`text-xs ${t.time.includes('Terlambat') ? 'font-bold text-red-600' : 'text-gray-500'}`}
-                                    >
-                                        {t.time}
-                                    </span>
-                                    <button className="rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50">
-                                        Tandai Selesai
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-10 text-center text-sm text-gray-400">
+                            Belum ada tugas perawatan hari ini.
+                        </div>
+                    )}
                 </div>
 
                 {/* Aksi Cepat */}
@@ -1590,24 +1575,28 @@ export default function Dashboard({
                     <div className="space-y-3">
                         {[
                             {
-                                label: 'Catat Vital Pasien',
-                                desc: 'Input data TTV terbaru',
-                                icon: <i className="fa-solid fa-chart-line text-lg text-teal-700"></i>,
+                                label: 'Lihat Shift & Tukar Jadwal',
+                                desc: 'Kelola shift perawat',
+                                href: '/jadwal-shift',
+                                icon: <i className="fa-solid fa-calendar-days text-lg text-teal-700"></i>,
                             },
                             {
-                                label: 'Lihat Daftar Monitoring',
-                                desc: 'Jadwal observasi pasien',
-                                icon: <i className="fa-solid fa-clipboard-list text-lg text-teal-700"></i>,
+                                label: 'Registrasi Pasien',
+                                desc: 'Daftarkan pasien baru',
+                                href: '/pasien/pendaftaran',
+                                icon: <i className="fa-solid fa-user-plus text-lg text-teal-700"></i>,
                             },
                             {
-                                label: 'Request Obat Farmasi',
-                                desc: 'Isi ulang stok ruangan',
-                                icon: <i className="fa-solid fa-pills text-lg text-teal-700"></i>,
+                                label: 'Lihat Rekam Medis',
+                                desc: 'Akses data pemeriksaan',
+                                href: '/rme',
+                                icon: <i className="fa-solid fa-file-medical text-lg text-teal-700"></i>,
                             },
                         ].map((a, idx) => (
-                            <button
+                            <Link
                                 key={idx}
-                                className="w-full rounded-lg border border-gray-200 bg-[#f8fafc] p-3 text-left transition-colors hover:bg-gray-100"
+                                href={a.href}
+                                className="block w-full rounded-lg border border-gray-200 bg-[#f8fafc] p-3 text-left transition-colors hover:bg-gray-100"
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-lg">{a.icon}</span>
@@ -1620,7 +1609,7 @@ export default function Dashboard({
                                         </p>
                                     </div>
                                 </div>
-                            </button>
+                            </Link>
                         ))}
                     </div>
                 </div>
@@ -1628,187 +1617,146 @@ export default function Dashboard({
         </div>
     );
 
-    // 4. Dashboard Dokter (Gambar 3)
-    const DoctorDashboard = () => (
-        <div className="space-y-6">
-            <div>
-                <h1 className="mb-1 font-serif text-3xl text-[#0d4f42]">
-                    Selamat pagi, dr. Ahmad Fauzi, Sp.PD
-                </h1>
-                <p className="text-sm text-gray-500">
-                    Semoga hari Anda menyenangkan dan produktif.
-                </p>
-            </div>
+    // 4. Dashboard Dokter (Real - data dari database)
+    const DoctorDashboard = () => {
+        const nextPatient =
+            dktAntrianHariIni.find(
+                (a) => a.status === 'menunggu' || a.status === 'sedang_dilayani'
+            ) || dktAntrianHariIni[0];
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                {/* Pasien Berikutnya */}
-                <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm lg:col-span-2">
-                    <span className="text-xs font-bold tracking-widest text-[#0d4f42] uppercase">
-                        Pasien Berikutnya
-                    </span>
-                    <div className="mt-3 flex items-start justify-between">
-                        <div>
-                            <p className="font-serif text-3xl font-medium text-gray-900">
-                                Tn. Budi Santoso
-                            </p>
-                            <p className="mt-2 text-sm text-gray-500">
-                                09:00 - Konsultasi Rutin (Hipertensi)
-                            </p>
-                        </div>
-                        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-green-100 text-2xl font-bold text-[#0d4f42]">
-                            BS
-                        </div>
-                    </div>
-                    <button className="mt-8 flex w-fit items-center gap-2 rounded-lg bg-[#0d4f42] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#0a3d33]">
-                        <i className="fa-solid fa-user-doctor"></i> Mulai Konsultasi Pasien Berikutnya
-                    </button>
+        return (
+            <div className="space-y-6">
+                <div>
+                    <h1 className="mb-1 font-serif text-3xl text-[#0d4f42]">
+                        Selamat bertugas, {dktNama || 'Dokter'}
+                    </h1>
+                    <p className="text-sm text-gray-500">
+                        Semoga hari Anda menyenangkan dan produktif.
+                    </p>
                 </div>
 
-                {/* Jadwal Praktik Hari Ini */}
-                <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <div className="mb-4 flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-gray-900">
-                            Jadwal Praktik Hari Ini
-                        </h3>
-                        <span className="text-gray-400">...</span>
-                    </div>
-                    <div className="relative ml-3 space-y-6 border-l border-gray-200 pb-4">
-                        {[
-                            {
-                                time: '08:00',
-                                name: 'Ibu Ratna Sari',
-                                status: 'Selesai',
-                                type: 'Kontrol Diabetes',
-                                statusColor: 'bg-gray-100 text-gray-600',
-                                isSelected: false,
-                            },
-                            {
-                                time: '08:30',
-                                name: 'Tn. Agus Haryanto',
-                                status: 'Sedang Konsultasi',
-                                type: 'Keluhan Nyeri Dada',
-                                statusColor: 'bg-green-100 text-green-700',
-                                isSelected: true,
-                            },
-                            {
-                                time: '09:00',
-                                name: 'Tn. Budi Santoso',
-                                status: 'Menunggu',
-                                type: 'Konsultasi Rutin (Hipertensi)',
-                                statusColor: 'bg-gray-200 text-gray-700',
-                                isSelected: false,
-                            },
-                            {
-                                time: '09:30',
-                                name: 'Ny. Lilis Suryani',
-                                status: 'Menunggu',
-                                type: 'Check-up Pasca Rawat',
-                                statusColor: 'bg-gray-200 text-gray-700',
-                                isSelected: false,
-                            },
-                        ].map((j, idx) => (
-                            <div
-                                key={idx}
-                                className={`relative pl-6 ${j.isSelected ? '-ml-4 rounded-r-lg border-l-4 border-[#0d4f42] bg-[#e0f2f1] py-3 pl-8' : ''}`}
-                            >
-                                <div
-                                    className={`absolute top-2 left-[-5px] h-2.5 w-2.5 rounded-full ${j.isSelected ? 'bg-[#0d4f42]' : 'bg-gray-300'}`}
-                                ></div>
-                                <div className="flex items-center gap-3">
-                                    <span className="min-w-[40px] text-xs font-bold text-[#0d4f42]">
-                                        {j.time}
-                                    </span>
-                                    <div className="flex-1">
-                                        <p
-                                            className={`text-sm font-bold ${j.isSelected ? 'text-gray-900' : 'text-gray-800'}`}
-                                        >
-                                            {j.name}
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    {/* Pasien Berikutnya */}
+                    <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm lg:col-span-2">
+                        <span className="text-xs font-bold tracking-widest text-[#0d4f42] uppercase">
+                            Pasien Berikutnya
+                        </span>
+                        {nextPatient ? (
+                            <>
+                                <div className="mt-3 flex items-start justify-between">
+                                    <div>
+                                        <p className="font-serif text-3xl font-medium text-gray-900">
+                                            {nextPatient.nama}
                                         </p>
-                                        <p className="text-xs text-gray-500">
-                                            {j.type}
+                                        <p className="mt-2 text-sm text-gray-500">
+                                            {nextPatient.time} - {nextPatient.poli}
                                         </p>
                                     </div>
-                                    <span
-                                        className={`rounded-full px-2 py-1 text-[10px] font-bold ${j.statusColor}`}
-                                    >
-                                        {j.status}
-                                    </span>
+                                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-green-100 text-2xl font-bold text-[#0d4f42]">
+                                        {nextPatient.nomor_antrian?.replace(/[^A-Za-z0-9]/g, '').slice(0, 2) || 'PA'}
+                                    </div>
                                 </div>
+                                <button className="mt-8 flex w-fit items-center gap-2 rounded-lg bg-[#0d4f42] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#0a3d33]">
+                                    <i className="fa-solid fa-user-doctor"></i> Mulai Konsultasi Pasien Berikutnya
+                                </button>
+                            </>
+                        ) : (
+                            <div className="mt-6 py-10 text-center text-sm text-gray-400">
+                                Belum ada pasien dalam antrian hari ini.
                             </div>
-                        ))}
+                        )}
                     </div>
-                    <a
-                        href="#"
-                        className="mt-2 block text-center text-sm font-bold text-[#0d4f42]"
-                    >
-                        Lihat Jadwal Lengkap
-                    </a>
-                </div>
-            </div>
 
-            {/* Statistik Bawah */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-start justify-between rounded-xl border border-gray-200 bg-[#d1fae5]/20 p-6">
-                        <div>
-                            <p className="text-sm text-gray-600">
-                                Pasien Hari Ini
-                            </p>
-                            <p className="mt-1 font-serif text-4xl font-medium text-[#0d4f42]">
-                                18
-                            </p>
-                            <p className="mt-1 text-[10px] text-gray-400">
-                                ↑ 2 dari kemarin
-                            </p>
+                    {/* Jadwal Praktik Hari Ini */}
+                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                        <div className="mb-4 flex items-center justify-between">
+                            <h3 className="text-lg font-bold text-gray-900">
+                                Jadwal Praktik Hari Ini
+                            </h3>
+                            <span className="text-gray-400">...</span>
                         </div>
-                        <i className="fa-solid fa-users text-2xl text-[#0d4f42]"></i>
-                    </div>
-                    <div className="flex items-start justify-between rounded-xl border border-gray-200 bg-[#d1fae5]/20 p-6">
-                        <div>
-                            <p className="text-sm text-gray-600">
-                                Rata-rata Waktu Konsultasi
-                            </p>
-                            <p className="mt-1 font-serif text-4xl font-medium text-[#0d4f42]">
-                                15 mnt
-                            </p>
-                            <p className="mt-1 text-[10px] text-gray-400">
-                                ⊙ Tepat waktu
-                            </p>
-                        </div>
-                        <i className="fa-regular fa-clock text-2xl text-[#0d4f42]"></i>
-                    </div>
-                </div>
-
-                <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <div className="mb-4 flex items-center gap-2">
-                        <i className="fa-solid fa-bell text-lg text-orange-500"></i>
-                        <h3 className="font-bold text-gray-900">
-                            Pemberitahuan Penting
-                        </h3>
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg border-l-4 border-orange-400 bg-orange-50 p-4">
-                        <div className="flex items-center gap-3">
-                            <i className="fa-solid fa-flask-vial text-orange-500 text-lg"></i>
-                            <div>
-                                <p className="text-sm font-medium text-gray-800">
-                                    Hasil lab Ibu Siti Aminah sudah masuk.
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                    HbA1c menunjukkan perbaikan signifikan.
-                                </p>
+                        {dktJadwalPraktik.length > 0 ? (
+                            <div className="relative ml-3 space-y-6 border-l border-gray-200 pb-4">
+                                {dktJadwalPraktik.map((j, idx) => (
+                                    <div key={idx} className="relative pl-6">
+                                        <div className="absolute top-2 left-[-5px] h-2.5 w-2.5 rounded-full bg-[#0d4f42]"></div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="min-w-[110px] text-xs font-bold text-[#0d4f42]">
+                                                {j.jam}
+                                            </span>
+                                            <div className="flex-1">
+                                                <p className="text-xs text-gray-500">
+                                                    Kuota {j.kuota} pasien • {j.status}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
-                        <a
-                            href="#"
-                            className="text-sm font-bold text-[#0d4f42] hover:underline"
+                        ) : (
+                            <p className="py-8 text-center text-sm text-gray-400">
+                                Belum ada jadwal praktik hari ini.
+                            </p>
+                        )}
+                        <Link
+                            href="/jadwal-praktik"
+                            className="mt-2 block text-center text-sm font-bold text-[#0d4f42]"
                         >
-                            Lihat Hasil
-                        </a>
+                            Lihat Jadwal Lengkap
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Statistik Bawah */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-start justify-between rounded-xl border border-gray-200 bg-[#d1fae5]/20 p-6">
+                            <div>
+                                <p className="text-sm text-gray-600">
+                                    Pasien Hari Ini
+                                </p>
+                                <p className="mt-1 font-serif text-4xl font-medium text-[#0d4f42]">
+                                    {dktJmlPasienHariIni}
+                                </p>
+                            </div>
+                            <i className="fa-solid fa-users text-2xl text-[#0d4f42]"></i>
+                        </div>
+                        <div className="flex items-start justify-between rounded-xl border border-gray-200 bg-[#d1fae5]/20 p-6">
+                            <div>
+                                <p className="text-sm text-gray-600">
+                                    Pasien Selesai Hari Ini
+                                </p>
+                                <p className="mt-1 font-serif text-4xl font-medium text-[#0d4f42]">
+                                    {dktJmlSelesai}
+                                </p>
+                            </div>
+                            <i className="fa-regular fa-face-smile text-2xl text-[#0d4f42]"></i>
+                        </div>
+                    </div>
+
+                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                        <div className="mb-4 flex items-center gap-2">
+                            <i className="fa-solid fa-bell text-lg text-orange-500"></i>
+                            <h3 className="font-bold text-gray-900">
+                                Pemberitahuan Penting
+                            </h3>
+                        </div>
+                        {dktAntrianHariIni.length > 0 ? (
+                            <p className="text-sm text-gray-600">
+                                Ada {dktAntrianHariIni.length} pasien dalam daftar
+                                praktik Anda hari ini. Pastikan untuk mengecek
+                                rekam medis sebelum memulai konsultasi.
+                            </p>
+                        ) : (
+                            <p className="text-sm text-gray-500">
+                                Belum ada pemberitahuan baru.
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     // 5. Dashboard Apoteker (Real & Fungsional)
     const PharmacistDashboard = () => {
@@ -3029,36 +2977,11 @@ export default function Dashboard({
     // 7. Dashboard Resepsionis (Sesuai Mockup Gambar)
     // =======================================================================
     const ReceptionistDashboard = () => {
-        const queueList =
-            rcpLatestQueue.length > 0
-                ? rcpLatestQueue
-                : [
-                      {
-                          id: 'q-1',
-                          nomor_antrian: 'A-012',
-                          nama: 'Bpk. Budi Santoso',
-                          poli: 'Poli Umum',
-                          status: 'menunggu',
-                      },
-                      {
-                          id: 'q-2',
-                          nomor_antrian: 'B-005',
-                          nama: 'Ibu Siti Aminah',
-                          poli: 'Poli Gigi',
-                          status: 'menunggu',
-                      },
-                      {
-                          id: 'q-3',
-                          nomor_antrian: 'C-021',
-                          nama: 'An. Kevin Pratama',
-                          poli: 'Poli Anak',
-                          status: 'dipanggil',
-                      },
-                  ];
+        const queueList = rcpLatestQueue;
 
         const firstName = user?.nama_lengkap
             ? user.nama_lengkap.split(' ')[0]
-            : 'Putri';
+            : 'Petugas';
 
         return (
             <div className="-m-4 sm:-m-6 p-4 sm:p-8 space-y-6 sm:space-y-8 bg-[#f0f7f5] rounded-2xl min-h-[calc(100vh-5rem)]">
@@ -3183,6 +3106,13 @@ export default function Dashboard({
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 text-sm">
+                                {queueList.length === 0 && (
+                                    <tr>
+                                        <td colSpan={4} className="py-10 text-center text-sm text-gray-400">
+                                            Belum ada antrian hari ini.
+                                        </td>
+                                    </tr>
+                                )}
                                 {queueList.map((item, idx) => {
                                     const isMenunggu = item.status === 'menunggu' || item.status === 'skrining';
                                     const isDipanggil = item.status === 'dipanggil' || item.status === 'sedang_dilayani';

@@ -52,7 +52,7 @@ class AntrianApiController extends Controller
         $poliId = $request->query('poli_id');
 
         $antrian = Antrian::with(['pasien', 'poli', 'dokter', 'loket'])
-            ->whereDate('created_at', now()->toDateString())
+            ->whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', now()->toDateString()))
             ->when($jadwalDokterId, fn($q) => $q->where('jadwal_dokter_id', $jadwalDokterId))
             ->when($poliId, fn($q) => $q->where('poli_id', $poliId))
             ->orderBy('angka_antrian')
@@ -104,7 +104,7 @@ class AntrianApiController extends Controller
         $poliId = $request->query('poli_id');
 
         $sedangDipanggil = Antrian::with(['poli', 'dokter', 'pasien', 'loket'])
-            ->whereDate('created_at', now()->toDateString())
+            ->whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', now()->toDateString()))
             ->when($poliId, fn($q) => $q->where('poli_id', $poliId))
             ->whereIn('status', ['dipanggil', 'sedang_dilayani'])
             ->orderBy('waktu_dipanggil', 'desc')
@@ -116,7 +116,7 @@ class AntrianApiController extends Controller
 
         foreach ($polis as $p) {
             $antrianPoli = Antrian::with(['dokter', 'pasien', 'loket'])
-                ->whereDate('created_at', now()->toDateString())
+                ->whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', now()->toDateString()))
                 ->where('poli_id', $p->id)
                 ->whereIn('status', ['dipanggil', 'sedang_dilayani'])
                 ->orderBy('waktu_dipanggil', 'desc')
@@ -129,7 +129,7 @@ class AntrianApiController extends Controller
         }
 
         $daftarTunggu = Antrian::with(['pasien', 'poli', 'dokter'])
-            ->whereDate('created_at', now()->toDateString())
+            ->whereHas('jadwalDokter', fn($q) => $q->whereDate('tanggal', now()->toDateString()))
             ->when($poliId, fn($q) => $q->where('poli_id', $poliId))
             ->whereIn('status', ['menunggu', 'skrining'])
             ->orderBy('angka_antrian')

@@ -97,6 +97,10 @@ class AuthController extends Controller
                 'target_label' => 'Sistem',
             ]);
 
+            if ($request->role === 'pasien') {
+                return redirect()->route('portal.index');
+            }
+
             return redirect()->route('dashboard');
         }
 

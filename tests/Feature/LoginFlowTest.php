@@ -19,7 +19,7 @@ function portalLogin(string $email, string $role): void
         'email' => $email,
         'password' => 'password123',
         'role' => $role,
-    ])->assertRedirect(route('dashboard'));
+    ])->assertRedirect($role === 'pasien' ? route('portal.index') : route('dashboard'));
 }
 
 it('renders both login portals with their own components', function () {
@@ -164,7 +164,7 @@ it('forces the pasien role on the guest portal and ignores a supplied role', fun
         'email' => 'agus.pasien@simrs.id',
         'password' => 'password123',
         'role' => 'pasien',
-    ])->assertRedirect(route('dashboard'));
+    ])->assertRedirect(route('portal.index'));
 
     expect(session('simrs_role'))->toBe('pasien');
 });

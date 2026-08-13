@@ -110,7 +110,7 @@ export default function ManajemenAntrian({
     // Auto refresh
     useEffect(() => {
         const interval = setInterval(() => {
-            router.reload({ preserveState: true, preserveScroll: true });
+            router.reload();
         }, 10000);
         return () => clearInterval(interval);
     }, []);
@@ -129,7 +129,7 @@ export default function ManajemenAntrian({
             setToast({ message: `Berhasil! Nomor Antrian: ${res.data?.nomor_antrian || 'Sukses'}`, type: 'success' });
             setFormData({ jadwal_dokter_id: '', pasien_id: '', tipe_pasien: 'umum' });
             setIsFormOpen(false);
-            router.reload({ preserveScroll: true });
+            router.reload();
         } catch (err: any) {
             setToast({ message: err.message || 'Gagal mengambil nomor antrian', type: 'error' });
         } finally {
@@ -142,7 +142,7 @@ export default function ManajemenAntrian({
         try {
             const res = await apiCall(`/api/v1/antrian/${id}/status`, 'PATCH', { status: newStatus });
             if (res.error) throw new Error(res.error);
-            router.reload({ preserveScroll: true });
+            router.reload();
         } catch (err: any) {
             setToast({ message: err.message || 'Gagal mengubah status', type: 'error' });
             setTimeout(() => setToast(null), 5000);
@@ -155,7 +155,7 @@ export default function ManajemenAntrian({
             const res = await apiCall('/api/v1/antrian/panggil-berikutnya', 'POST', { jadwal_dokter_id: selectedJadwalId });
             if (res.error) throw new Error(res.error);
             setToast({ message: `Berhasil memanggil antrian berikutnya`, type: 'success' });
-            router.reload({ preserveScroll: true });
+            router.reload();
         } catch (err: any) {
             setToast({ message: err.message || 'Gagal memanggil antrian berikutnya', type: 'error' });
             setTimeout(() => setToast(null), 5000);

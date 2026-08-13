@@ -4,6 +4,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PatientPortalController;
 use App\Http\Controllers\RbacController;
 use App\Http\Controllers\AntrianWebController;
 use App\Http\Controllers\UserController;
@@ -24,6 +25,17 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Authenticated Routes
 Route::middleware(['web.auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Portal Pasien (Lihat Rekam Medis, Riwayat Kunjungan, & Booking Online)
+    Route::prefix('portal')->middleware('web.role:pasien')->group(function () {
+        Route::get('/', [PatientPortalController::class, 'portal'])->name('portal.index');
+        Route::get('/rekam-medis', [PatientPortalController::class, 'rekamMedis'])->name('portal.rekam-medis');
+        Route::get('/rekam-medis/{id}', [PatientPortalController::class, 'rekamMedisShow'])->name('portal.rekam-medis.show');
+        Route::get('/riwayat', [PatientPortalController::class, 'riwayat'])->name('portal.riwayat');
+        Route::get('/booking', [PatientPortalController::class, 'booking'])->name('portal.booking');
+        Route::post('/booking', [PatientPortalController::class, 'bookingStore'])->name('portal.booking.store');
+        Route::post('/booking/{id}/batal', [PatientPortalController::class, 'bookingCancel'])->name('portal.booking.cancel');
+    });
 
     // Modul Jadwal Praktik & Shift (Dokter, Perawat, Admin)
     Route::get('/jadwal-praktik', [\App\Http\Controllers\ScheduleWebController::class, 'dokterSchedule'])->name('jadwal.praktik');
@@ -86,6 +98,7 @@ Route::middleware(['web.auth'])->group(function () {
     // Modul Manajemen Inventaris & Aset (Admin, Manajemen, Apoteker)
     Route::middleware('web.role:admin,manajemen,apoteker')->group(function () {
         Route::get('/inventaris', [\App\Http\Controllers\InventarisWebController::class, 'index'])->name('inventaris.index');
+        Route::get('/inventaris/export', [\App\Http\Controllers\InventarisWebController::class, 'export'])->name('inventaris.export');
     });
     Route::middleware('web.role:admin,manajemen')->group(function () {
         Route::get('/aset', [\App\Http\Controllers\AsetWebController::class, 'index'])->name('aset.index');

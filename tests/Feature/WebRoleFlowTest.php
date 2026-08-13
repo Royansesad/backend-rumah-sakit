@@ -18,7 +18,7 @@ function webLogin(string $email, string $role): void
         'email' => $email,
         'password' => 'password123',
         'role' => $role,
-    ])->assertRedirect(route('dashboard'));
+    ])->assertRedirect($role === 'pasien' ? route('portal.index') : route('dashboard'));
 }
 
 it('redirects guests away from authenticated pages', function () {
