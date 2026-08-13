@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import {
     Users,
@@ -55,9 +55,9 @@ export default function LoginStaff() {
     };
 
     return (
-        <div className="flex min-h-screen w-full flex-col bg-[#eef7f6] font-sans text-gray-900">
+        <div className="flex h-screen max-h-screen w-full flex-col bg-[#eef7f6] font-sans text-gray-900 overflow-hidden">
             {/* Top Navbar */}
-            <header className="flex h-16 w-full shrink-0 items-center justify-between border-b border-[#B8D4D5] bg-[#eef7f6] px-6 md:px-12">
+            <header className="flex h-14 w-full shrink-0 items-center justify-between border-b border-[#B8D4D5] bg-[#eef7f6] px-6 md:h-16 md:px-12">
                 {/* Brand Logo */}
                 <div className="flex items-center gap-2.5">
                     <div className="flex h-7 w-7 items-center justify-center rounded bg-[#174e48] text-white shadow-xs">
@@ -82,25 +82,25 @@ export default function LoginStaff() {
             </header>
 
             {/* Main Content Split Layout */}
-            <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+            <div className="flex min-h-0 flex-1 flex-col lg:flex-row overflow-hidden">
                 {/* Left Column: Login Form */}
-                <div className="flex w-full flex-1 items-center justify-center bg-[#eef7f6] p-6 lg:w-1/2 lg:p-12">
-                    <div className="w-full max-w-md">
-                        <h1 className="font-serif text-4xl font-bold text-[#174e48] lg:text-5xl">
+                <div className="flex w-full flex-1 items-center justify-center bg-[#eef7f6] p-6 lg:w-1/2 lg:p-10 overflow-y-auto">
+                    <div className="w-full max-w-md my-auto">
+                        <h1 className="font-serif text-3xl font-bold text-[#174e48] lg:text-4xl">
                             Selamat Datang
                         </h1>
-                        <p className="mt-2 mb-8 text-sm font-normal text-gray-600 md:text-base">
+                        <p className="mt-1 mb-4 text-xs font-normal text-gray-600 md:text-sm">
                             Silakan masuk menggunakan kredensial internal Anda.
                         </p>
 
-                        <form onSubmit={handleSubmit} className="space-y-5">
+                        <form onSubmit={handleSubmit} className="space-y-3">
                             {/* Role Dropdown */}
                             <div>
-                                <label className="mb-1.5 block text-xs font-semibold text-gray-700">
+                                <label className="mb-1 block text-xs font-semibold text-gray-700">
                                     Login sebagai
                                 </label>
                                 <div className="relative">
-                                    <Users className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-600" />
+                                    <Users className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
                                     <select
                                         value={data.role}
                                         onChange={(e) =>
@@ -108,7 +108,7 @@ export default function LoginStaff() {
                                                 e.target.value as Role
                                             )
                                         }
-                                        className="w-full appearance-none rounded-md border border-gray-300 bg-[#f4faf9] py-2.5 pr-10 pl-10 text-sm text-gray-800 focus:border-[#174e48] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#174e48]"
+                                        className="w-full appearance-none rounded-md border border-gray-300 bg-[#f4faf9] py-2 pr-10 pl-9 text-sm text-gray-800 focus:border-[#174e48] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#174e48]"
                                     >
                                         {STAFF_ROLES.map((r) => (
                                             <option key={r} value={r}>
@@ -117,10 +117,10 @@ export default function LoginStaff() {
                                             </option>
                                         ))}
                                     </select>
-                                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-600" />
+                                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
                                 </div>
                                 {errors.role && (
-                                    <p className="mt-1 text-xs text-red-500">
+                                    <p className="mt-0.5 text-xs text-red-500">
                                         {errors.role}
                                     </p>
                                 )}
@@ -128,7 +128,7 @@ export default function LoginStaff() {
 
                             {/* Email Input */}
                             <div>
-                                <label className="mb-1.5 block text-xs font-semibold text-gray-700">
+                                <label className="mb-1 block text-xs font-semibold text-gray-700">
                                     Email Kerja / NIP
                                 </label>
                                 <div className="relative">
@@ -138,14 +138,14 @@ export default function LoginStaff() {
                                         onChange={(e) =>
                                             setData('email', e.target.value)
                                         }
-                                        className="w-full rounded-md border border-gray-300 bg-[#f4faf9] py-2.5 pr-10 pl-3.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-[#174e48] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#174e48]"
+                                        className="w-full rounded-md border border-gray-300 bg-[#f4faf9] py-2 pr-10 pl-3.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-[#174e48] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#174e48]"
                                         placeholder="Masukkan Email atau NIP"
                                         required
                                     />
-                                    <Mail className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-600" />
+                                    <Mail className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
                                 </div>
                                 {errors.email && (
-                                    <p className="mt-1 text-xs text-red-500">
+                                    <p className="mt-0.5 text-xs text-red-500">
                                         {errors.email}
                                     </p>
                                 )}
@@ -153,16 +153,16 @@ export default function LoginStaff() {
 
                             {/* Password Input */}
                             <div>
-                                <div className="mb-1.5 flex items-center justify-between">
+                                <div className="mb-1 flex items-center justify-between">
                                     <label className="text-xs font-semibold text-gray-700">
                                         Password
                                     </label>
-                                    <a
-                                        href="#"
-                                        className="text-xs font-semibold text-[#174e48] hover:underline"
+                                    <Link
+                                        href="/admin-forgot-password"
+                                        className="text-xs font-semibold text-[#174e48] hover:underline cursor-pointer"
                                     >
                                         Lupa Password?
-                                    </a>
+                                    </Link>
                                 </div>
                                 <div className="relative">
                                     <input
@@ -171,7 +171,7 @@ export default function LoginStaff() {
                                         onChange={(e) =>
                                             setData('password', e.target.value)
                                         }
-                                        className="w-full rounded-md border border-gray-300 bg-[#f4faf9] py-2.5 pr-10 pl-3.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-[#174e48] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#174e48]"
+                                        className="w-full rounded-md border border-gray-300 bg-[#f4faf9] py-2 pr-10 pl-3.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-[#174e48] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#174e48]"
                                         placeholder="••••••••"
                                         required
                                     />
@@ -183,21 +183,21 @@ export default function LoginStaff() {
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-800 cursor-pointer"
                                     >
                                         {showPassword ? (
-                                            <EyeOff className="h-5 w-5" />
+                                            <EyeOff className="h-4 w-4" />
                                         ) : (
-                                            <Eye className="h-5 w-5" />
+                                            <Eye className="h-4 w-4" />
                                         )}
                                     </button>
                                 </div>
                                 {errors.password && (
-                                    <p className="mt-1 text-xs text-red-500">
+                                    <p className="mt-0.5 text-xs text-red-500">
                                         {errors.password}
                                     </p>
                                 )}
                             </div>
 
                             {/* Checkbox */}
-                            <div className="flex items-center gap-2 pt-1">
+                            <div className="flex items-center gap-2 pt-0.5">
                                 <input
                                     type="checkbox"
                                     id="remember"
@@ -219,20 +219,20 @@ export default function LoginStaff() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="mt-2 w-full rounded-md bg-[#1b5e5a] py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#154b48] disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+                                className="mt-1 w-full rounded-md bg-[#1b5e5a] py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#154b48] disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
                             >
                                 {processing ? 'Memproses...' : 'Login'}
                             </button>
                         </form>
 
-                        <div className="mt-6 text-center text-xs text-gray-700">
+                        <div className="mt-4 text-center text-xs text-gray-700">
                             Lupa akses?{' '}
-                            <a
-                                href="#"
-                                className="font-bold text-[#174e48] hover:underline"
+                            <Link
+                                href="/admin-request-access"
+                                className="font-bold text-[#174e48] hover:underline cursor-pointer"
                             >
                                 Hubungi Admin IT
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -245,11 +245,11 @@ export default function LoginStaff() {
                     }}
                 >
                     {/* Glassmorphic Quote Box */}
-                    <div className="relative z-10 w-full rounded-r-md border-l-4 border-[#009688] bg-white/80 p-6 shadow-md backdrop-blur-md">
+                    <div className="relative z-10 w-full rounded-r-md border-l-4 border-[#009688] bg-white/75 p-5 shadow-md backdrop-blur-sm">
                         <p className="font-serif text-sm leading-relaxed text-gray-800 md:text-base">
                             "Pelayanan kesehatan terbaik dimulai dari kolaborasi tim yang kuat dan komunikasi yang jelas."
                         </p>
-                        <p className="mt-2.5 text-xs font-semibold text-[#174e48] md:text-sm">
+                        <p className="mt-2 text-xs font-semibold text-[#174e48] md:text-sm">
                             — Manajemen RS Sentosa Medika
                         </p>
                     </div>
@@ -257,14 +257,17 @@ export default function LoginStaff() {
             </div>
 
             {/* Bottom Footer */}
-            <footer className="flex h-16 w-full shrink-0 flex-col items-center justify-between gap-4 border-t border-[#B8D4D5] bg-[#eef7f6] px-6 py-4 text-xs md:flex-row md:px-12 md:text-sm">
+            <footer className="flex h-14 w-full shrink-0 flex-col items-center justify-between gap-4 border-t border-[#B8D4D5] bg-[#eef7f6] px-6 py-3 text-xs md:h-15 md:flex-row md:px-12 md:text-sm">
                 <span className="font-serif font-bold text-gray-900">
                     © 2024 RS Sentosa Medika. Internal Use Only.
                 </span>
                 <div className="flex flex-wrap items-center justify-center gap-6 font-normal text-gray-700 md:gap-8">
-                    <a href="#" className="transition-colors hover:text-gray-900">
+                    <Link
+                        href="/admin-request-access"
+                        className="transition-colors hover:text-gray-900 cursor-pointer"
+                    >
                         Hubungi IT Admin
-                    </a>
+                    </Link>
                     <a href="#" className="transition-colors hover:text-gray-900">
                         Panduan Keamanan
                     </a>

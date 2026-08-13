@@ -19,6 +19,17 @@ Route::post('/login', [AuthController::class, 'loginGuest']);
 Route::get('/admin-login', [AuthController::class, 'showAdminLogin'])->name('login.admin');
 Route::post('/admin-login', [AuthController::class, 'loginAdmin']);
 
+// 3. Permintaan Akses Akun Staf (/admin-request-access)
+Route::get('/admin-request-access', [AuthController::class, 'showRequestAccess'])->name('admin.request-access');
+Route::post('/admin-request-access', [AuthController::class, 'submitRequestAccess']);
+Route::get('/hubungi-admin', [AuthController::class, 'showRequestAccess']);
+
+// 4. Reset Kata Sandi Staf (/admin-forgot-password)
+Route::get('/admin-forgot-password', [AuthController::class, 'showForgotPassword'])->name('admin.forgot-password');
+Route::post('/admin-forgot-password', [AuthController::class, 'submitForgotPassword']);
+Route::post('/admin-reset-password', [AuthController::class, 'resetPassword'])->name('admin.reset-password');
+Route::get('/lupa-password', [AuthController::class, 'showForgotPassword']);
+
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
