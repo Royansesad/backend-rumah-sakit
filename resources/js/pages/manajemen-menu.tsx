@@ -46,7 +46,14 @@ export default function ManajemenMenu({
             case 'users':
                 return <UsersView users={users} selectedRole={selectedRole} />;
             case 'audit-logs':
-                return <AuditLogsView logs={logs || []} filters={filters} aksiOptions={aksiOptions} roleOptions={roleOptions} />;
+                return (
+                    <AuditLogsView
+                        logs={logs || []}
+                        filters={filters}
+                        aksiOptions={aksiOptions}
+                        roleOptions={roleOptions}
+                    />
+                );
             default:
                 return <FallbackView menu={menu} />;
         }

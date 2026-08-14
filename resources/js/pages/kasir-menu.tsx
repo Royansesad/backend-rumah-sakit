@@ -23,7 +23,8 @@ export default function KasirMenu({
                             Modul {menu}
                         </h1>
                         <p className="mt-1 text-sm text-gray-500">
-                            Pusat pengelolaan transaksi kasir, pembayaran invoice, dan laporan keuangan.
+                            Pusat pengelolaan transaksi kasir, pembayaran
+                            invoice, dan laporan keuangan.
                         </p>
                     </div>
                     <Link
@@ -34,17 +35,29 @@ export default function KasirMenu({
                     </Link>
                 </div>
 
-                <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xs text-center space-y-4">
+                <div className="space-y-4 rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-xs">
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-800">
-                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        <svg
+                            className="h-8 w-8"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                            />
                         </svg>
                     </div>
                     <h2 className="text-xl font-bold text-gray-900">
                         Sistem Kasir SIMRS Sentosa Medika Aktif
                     </h2>
-                    <p className="max-w-md mx-auto text-xs text-gray-500 leading-relaxed">
-                        Semua fitur billing, pemrosesan transaksi lunas, pembuatan invoice baru, dan pencetakan kuitansi telah terintegrasi di Dashboard Kasir.
+                    <p className="mx-auto max-w-md text-xs leading-relaxed text-gray-500">
+                        Semua fitur billing, pemrosesan transaksi lunas,
+                        pembuatan invoice baru, dan pencetakan kuitansi telah
+                        terintegrasi di Dashboard Kasir.
                     </p>
                     <div>
                         <Link

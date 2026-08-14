@@ -29,7 +29,10 @@ export default function JadwalPraktik({
     const [tanggalSelesai, setTanggalSelesai] = useState(tomorrowStr);
     const [alasan, setAlasan] = useState('');
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null);
+    const [message, setMessage] = useState<{
+        type: 'success' | 'warning' | 'error';
+        text: string;
+    } | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,9 +42,9 @@ export default function JadwalPraktik({
         try {
             const res = await fetch('/api/v1/pengajuan-cuti', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    Accept: 'application/json',
                 },
                 body: JSON.stringify({
                     jenis_pengajuan: jenisPengajuan,
@@ -52,21 +55,38 @@ export default function JadwalPraktik({
             });
             const data = await res.json();
             if (res.ok || data.success) {
-                setMessage({ type: 'success', text: 'Pengajuan cuti berhasil dikirim ke database!' });
+                setMessage({
+                    type: 'success',
+                    text: 'Pengajuan cuti berhasil dikirim ke database!',
+                });
                 setAlasan('');
                 router.reload();
             } else {
-                setMessage({ type: 'warning', text: data.message || 'Gagal mengirim pengajuan cuti.' });
+                setMessage({
+                    type: 'warning',
+                    text: data.message || 'Gagal mengirim pengajuan cuti.',
+                });
             }
         } catch (err) {
-            setMessage({ type: 'error', text: 'Terjadi kesalahan jaringan saat mengirim pengajuan cuti.' });
+            setMessage({
+                type: 'error',
+                text: 'Terjadi kesalahan jaringan saat mengirim pengajuan cuti.',
+            });
         } finally {
             setLoading(false);
         }
     };
 
-    const dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-    
+    const dayNames = [
+        'Senin',
+        'Selasa',
+        'Rabu',
+        'Kamis',
+        'Jumat',
+        'Sabtu',
+        'Minggu',
+    ];
+
     // Map schedules from database or provide structured fallback
     const days = dayNames.map((label, index) => {
         const dayNum = index + 1; // 1 = Senin, 7 = Minggu
@@ -97,25 +117,26 @@ export default function JadwalPraktik({
             <div className="space-y-6">
                 {/* Header Title */}
                 <div>
-                    <h1 className="text-2xl font-bold text-[#145e5b] font-serif tracking-tight">
+                    <h1 className="font-serif text-2xl font-bold tracking-tight text-[#145e5b]">
                         Manajemen Jadwal Praktik
                     </h1>
                     <p className="mt-1 text-xs text-gray-500">
-                        Atur ketersediaan jam praktik dan ajukan cuti atau perubahan jadwal mingguan.
+                        Atur ketersediaan jam praktik dan ajukan cuti atau
+                        perubahan jadwal mingguan.
                     </p>
                 </div>
 
                 {/* Card 1: Jadwal Minggu Ini */}
                 <div className="rounded-2xl border border-[#d3ece7] bg-white p-6 shadow-xs">
                     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-4">
-                        <h2 className="text-base font-bold text-[#145e5b] font-serif">
+                        <h2 className="font-serif text-base font-bold text-[#145e5b]">
                             Jadwal Praktik Mingguan
                         </h2>
                         <div className="flex items-center gap-2 text-xs font-semibold">
-                            <span className="rounded-full bg-[#dcfce7] px-3 py-1 text-emerald-800 border border-emerald-200">
+                            <span className="rounded-full border border-emerald-200 bg-[#dcfce7] px-3 py-1 text-emerald-800">
                                 Tersedia
                             </span>
-                            <span className="rounded-full bg-[#fee2e2] px-3 py-1 text-rose-800 border border-rose-200">
+                            <span className="rounded-full border border-rose-200 bg-[#fee2e2] px-3 py-1 text-rose-800">
                                 Cuti / Inaktif
                             </span>
                         </div>
@@ -123,33 +144,55 @@ export default function JadwalPraktik({
 
                     <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-7">
                         {days.map((d, idx) => (
-                            <div key={idx} className="flex flex-col items-center gap-3">
+                            <div
+                                key={idx}
+                                className="flex flex-col items-center gap-3"
+                            >
                                 <span className="text-xs font-bold text-gray-700">
                                     {d.label}
                                 </span>
                                 {d.schedules.length > 0 ? (
                                     <div className="flex w-full flex-col gap-2">
-                                        {d.schedules.map((s: any, sIdx: number) => {
-                                            const isCuti = s.status === 'cuti' || s.status === 'inaktif';
-                                            return (
-                                                <div
-                                                    key={sIdx}
-                                                    className={`rounded-xl p-2 text-center text-[11px] font-semibold transition-all ${
-                                                        isCuti
-                                                            ? 'bg-[#fee2e2] text-rose-800 border border-rose-200'
-                                                            : 'bg-[#dcfce7] text-emerald-900 border border-emerald-200'
-                                                    }`}
-                                                >
-                                                    <div>{s.jam_mulai?.substring(0, 5)} - {s.jam_selesai?.substring(0, 5)}</div>
-                                                    {s.poli?.nama_poli && (
-                                                        <div className="text-[10px] opacity-75 font-normal truncate">{s.poli.nama_poli}</div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
+                                        {d.schedules.map(
+                                            (s: any, sIdx: number) => {
+                                                const isCuti =
+                                                    s.status === 'cuti' ||
+                                                    s.status === 'inaktif';
+                                                return (
+                                                    <div
+                                                        key={sIdx}
+                                                        className={`rounded-xl p-2 text-center text-[11px] font-semibold transition-all ${
+                                                            isCuti
+                                                                ? 'border border-rose-200 bg-[#fee2e2] text-rose-800'
+                                                                : 'border border-emerald-200 bg-[#dcfce7] text-emerald-900'
+                                                        }`}
+                                                    >
+                                                        <div>
+                                                            {s.jam_mulai?.substring(
+                                                                0,
+                                                                5,
+                                                            )}{' '}
+                                                            -{' '}
+                                                            {s.jam_selesai?.substring(
+                                                                0,
+                                                                5,
+                                                            )}
+                                                        </div>
+                                                        {s.poli?.nama_poli && (
+                                                            <div className="truncate text-[10px] font-normal opacity-75">
+                                                                {
+                                                                    s.poli
+                                                                        .nama_poli
+                                                                }
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            },
+                                        )}
                                     </div>
                                 ) : d.isHoliday ? (
-                                    <div className="flex h-24 w-full items-center justify-center rounded-xl bg-[#eef8f6] font-semibold text-[#145e5b] text-xs border border-[#d3ece7]">
+                                    <div className="flex h-24 w-full items-center justify-center rounded-xl border border-[#d3ece7] bg-[#eef8f6] text-xs font-semibold text-[#145e5b]">
                                         Libur
                                     </div>
                                 ) : (
@@ -157,7 +200,7 @@ export default function JadwalPraktik({
                                         {d.defaultSlots.map((slot, sIdx) => (
                                             <div
                                                 key={sIdx}
-                                                className="rounded-xl px-2 py-2 text-center text-xs font-semibold bg-[#dcfce7] text-emerald-900 border border-emerald-200"
+                                                className="rounded-xl border border-emerald-200 bg-[#dcfce7] px-2 py-2 text-center text-xs font-semibold text-emerald-900"
                                             >
                                                 {slot}
                                             </div>
@@ -172,58 +215,82 @@ export default function JadwalPraktik({
                 {/* Bottom Section: 2 Columns */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     {/* Form Pengajuan Cuti / Tukar Jadwal */}
-                    <div className="rounded-2xl border border-[#d3ece7] bg-white p-6 shadow-xs space-y-4">
-                        <h3 className="text-base font-bold text-[#145e5b] font-serif">
+                    <div className="space-y-4 rounded-2xl border border-[#d3ece7] bg-white p-6 shadow-xs">
+                        <h3 className="font-serif text-base font-bold text-[#145e5b]">
                             Form Pengajuan Cuti / Tukar Jadwal
                         </h3>
 
                         {message && (
-                            <div className={`rounded-xl p-3 text-xs font-bold border flex items-center gap-2 ${
-                                message.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
-                                message.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-800' :
-                                'bg-[#eef8f6] border-[#b5e2db] text-[#145e5b]'
-                            }`}>
-                                <i className={`fa-solid ${
-                                    message.type === 'warning' ? 'fa-triangle-exclamation' :
-                                    message.type === 'error' ? 'fa-circle-xmark' :
-                                    'fa-circle-check'
-                                }`}></i>
+                            <div
+                                className={`flex items-center gap-2 rounded-xl border p-3 text-xs font-bold ${
+                                    message.type === 'warning'
+                                        ? 'border-amber-200 bg-amber-50 text-amber-800'
+                                        : message.type === 'error'
+                                          ? 'border-rose-200 bg-rose-50 text-rose-800'
+                                          : 'border-[#b5e2db] bg-[#eef8f6] text-[#145e5b]'
+                                }`}
+                            >
+                                <i
+                                    className={`fa-solid ${
+                                        message.type === 'warning'
+                                            ? 'fa-triangle-exclamation'
+                                            : message.type === 'error'
+                                              ? 'fa-circle-xmark'
+                                              : 'fa-circle-check'
+                                    }`}
+                                ></i>
                                 <span>{message.text}</span>
                             </div>
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-1">
+                                <label className="mb-1 block text-xs font-bold text-gray-700">
                                     Jenis Pengajuan
                                 </label>
                                 <select
                                     value={jenisPengajuan}
-                                    onChange={(e) => setJenisPengajuan(e.target.value)}
+                                    onChange={(e) =>
+                                        setJenisPengajuan(e.target.value)
+                                    }
                                     className="w-full rounded-xl border border-[#b5e2db] bg-[#f7fcfb] px-4 py-3 text-xs font-semibold text-gray-800 outline-none focus:border-[#145e5b] focus:bg-white"
                                 >
-                                    <option value="Cuti Tahunan">Cuti Tahunan</option>
-                                    <option value="Tukar Jadwal">Tukar Jadwal</option>
-                                    <option value="Izin Acara Keluarga">Izin Acara Keluarga</option>
-                                    <option value="Izin Sakit">Izin Sakit</option>
+                                    <option value="Cuti Tahunan">
+                                        Cuti Tahunan
+                                    </option>
+                                    <option value="Tukar Jadwal">
+                                        Tukar Jadwal
+                                    </option>
+                                    <option value="Izin Acara Keluarga">
+                                        Izin Acara Keluarga
+                                    </option>
+                                    <option value="Izin Sakit">
+                                        Izin Sakit
+                                    </option>
                                 </select>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <label className="text-xs font-bold text-gray-700">Tanggal Mulai</label>
+                                    <div className="mb-1 flex items-center justify-between">
+                                        <label className="text-xs font-bold text-gray-700">
+                                            Tanggal Mulai
+                                        </label>
                                         <div className="flex items-center gap-1">
                                             <button
                                                 type="button"
-                                                onClick={() => setTanggalMulai(todayStr)}
+                                                onClick={() =>
+                                                    setTanggalMulai(todayStr)
+                                                }
                                                 className="rounded-md bg-[#d7f2ee] px-2 py-0.5 text-[10px] font-bold text-[#145e5b] hover:bg-[#b5e2db]"
                                             >
                                                 Hari Ini
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => setTanggalMulai(tomorrowStr)}
+                                                onClick={() =>
+                                                    setTanggalMulai(tomorrowStr)
+                                                }
                                                 className="rounded-md bg-[#d7f2ee] px-2 py-0.5 text-[10px] font-bold text-[#145e5b] hover:bg-[#b5e2db]"
                                             >
                                                 Besok
@@ -234,25 +301,37 @@ export default function JadwalPraktik({
                                         type="date"
                                         required
                                         value={tanggalMulai}
-                                        onChange={(e) => setTanggalMulai(e.target.value)}
-                                        className="w-full min-h-[46px] rounded-xl border border-[#b5e2db] bg-[#f7fcfb] px-4 py-3 text-xs font-bold text-gray-800 outline-none focus:border-[#145e5b] focus:bg-white shadow-xs"
+                                        onChange={(e) =>
+                                            setTanggalMulai(e.target.value)
+                                        }
+                                        className="min-h-[46px] w-full rounded-xl border border-[#b5e2db] bg-[#f7fcfb] px-4 py-3 text-xs font-bold text-gray-800 shadow-xs outline-none focus:border-[#145e5b] focus:bg-white"
                                     />
                                 </div>
 
                                 <div>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <label className="text-xs font-bold text-gray-700">Tanggal Selesai</label>
+                                    <div className="mb-1 flex items-center justify-between">
+                                        <label className="text-xs font-bold text-gray-700">
+                                            Tanggal Selesai
+                                        </label>
                                         <div className="flex items-center gap-1">
                                             <button
                                                 type="button"
-                                                onClick={() => setTanggalSelesai(tomorrowStr)}
+                                                onClick={() =>
+                                                    setTanggalSelesai(
+                                                        tomorrowStr,
+                                                    )
+                                                }
                                                 className="rounded-md bg-[#d7f2ee] px-2 py-0.5 text-[10px] font-bold text-[#145e5b] hover:bg-[#b5e2db]"
                                             >
                                                 Besok
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => setTanggalSelesai(nextWeekStr)}
+                                                onClick={() =>
+                                                    setTanggalSelesai(
+                                                        nextWeekStr,
+                                                    )
+                                                }
                                                 className="rounded-md bg-[#d7f2ee] px-2 py-0.5 text-[10px] font-bold text-[#145e5b] hover:bg-[#b5e2db]"
                                             >
                                                 +7 Hari
@@ -263,14 +342,16 @@ export default function JadwalPraktik({
                                         type="date"
                                         required
                                         value={tanggalSelesai}
-                                        onChange={(e) => setTanggalSelesai(e.target.value)}
-                                        className="w-full min-h-[46px] rounded-xl border border-[#b5e2db] bg-[#f7fcfb] px-4 py-3 text-xs font-bold text-gray-800 outline-none focus:border-[#145e5b] focus:bg-white shadow-xs"
+                                        onChange={(e) =>
+                                            setTanggalSelesai(e.target.value)
+                                        }
+                                        className="min-h-[46px] w-full rounded-xl border border-[#b5e2db] bg-[#f7fcfb] px-4 py-3 text-xs font-bold text-gray-800 shadow-xs outline-none focus:border-[#145e5b] focus:bg-white"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-1">
+                                <label className="mb-1 block text-xs font-bold text-gray-700">
                                     Alasan
                                 </label>
                                 <textarea
@@ -293,21 +374,25 @@ export default function JadwalPraktik({
                     </div>
 
                     {/* Riwayat Pengajuan */}
-                    <div className="rounded-2xl border border-[#d3ece7] bg-white p-6 shadow-xs space-y-4">
-                        <h3 className="text-base font-bold text-[#145e5b] font-serif">
+                    <div className="space-y-4 rounded-2xl border border-[#d3ece7] bg-white p-6 shadow-xs">
+                        <h3 className="font-serif text-base font-bold text-[#145e5b]">
                             Riwayat Pengajuan
                         </h3>
 
                         <div className="divide-y divide-gray-100">
                             {riwayatPengajuan.length > 0 ? (
                                 riwayatPengajuan.map((r, idx) => (
-                                    <div key={idx} className="flex items-center justify-between py-3.5">
+                                    <div
+                                        key={idx}
+                                        className="flex items-center justify-between py-3.5"
+                                    >
                                         <div>
                                             <h4 className="text-xs font-bold text-gray-900">
                                                 {r.jenis_pengajuan}
                                             </h4>
                                             <p className="mt-0.5 text-[11px] text-gray-500">
-                                                {r.tanggal_mulai} s/d {r.tanggal_selesai}
+                                                {r.tanggal_mulai} s/d{' '}
+                                                {r.tanggal_selesai}
                                             </p>
                                         </div>
                                         <span
@@ -315,15 +400,15 @@ export default function JadwalPraktik({
                                                 r.status === 'disetujui'
                                                     ? 'bg-[#dcfce7] text-emerald-800'
                                                     : r.status === 'ditolak'
-                                                    ? 'bg-[#fee2e2] text-rose-800'
-                                                    : 'bg-sky-100 text-sky-800'
+                                                      ? 'bg-[#fee2e2] text-rose-800'
+                                                      : 'bg-sky-100 text-sky-800'
                                             }`}
                                         >
                                             {r.status === 'disetujui'
                                                 ? 'Disetujui'
                                                 : r.status === 'ditolak'
-                                                ? 'Ditolak'
-                                                : 'Menunggu'}
+                                                  ? 'Ditolak'
+                                                  : 'Menunggu'}
                                         </span>
                                     </div>
                                 ))

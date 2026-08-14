@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import { Shield, Eye, EyeOff, CheckCircle2, ArrowLeft } from 'lucide-react';
 
 export default function ForgotPassword() {
-    const { flash } = usePage<{ flash?: { success?: string; step?: number; identifier?: string } }>().props;
+    const { flash } = usePage<{
+        flash?: { success?: string; step?: number; identifier?: string };
+    }>().props;
     const [currentStep, setCurrentStep] = useState<number>(flash?.step ?? 1);
     const [showPassword, setShowPassword] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -41,7 +43,7 @@ export default function ForgotPassword() {
     };
 
     return (
-        <div className="flex h-screen max-h-screen w-full flex-col items-center justify-center bg-[#f8f7f4] px-3 py-2 font-sans text-gray-900 overflow-hidden selection:bg-[#174e48] selection:text-white sm:px-4 sm:py-3">
+        <div className="flex h-screen max-h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#f8f7f4] px-3 py-2 font-sans text-gray-900 selection:bg-[#174e48] selection:text-white sm:px-4 sm:py-3">
             {/* Main Reset Password Card */}
             <div className="w-full max-w-[340px] rounded-xl border border-[#d2e7e3] bg-[#f3f8f7] p-4 shadow-xs sm:max-w-[360px] sm:p-5">
                 {/* Header Icon: Medical Kit / Briefcase */}
@@ -96,7 +98,8 @@ export default function ForgotPassword() {
                             Kata Sandi Berhasil Direset!
                         </h3>
                         <p className="mt-1 text-[10.5px] text-gray-600 sm:text-xs">
-                            Silakan masuk kembali ke portal internal RS Sentosa Medika menggunakan kata sandi baru Anda.
+                            Silakan masuk kembali ke portal internal RS Sentosa
+                            Medika menggunakan kata sandi baru Anda.
                         </p>
                         <Link
                             href="/admin-login"
@@ -120,7 +123,7 @@ export default function ForgotPassword() {
                                     onChange={(e) =>
                                         formOtp.setData(
                                             'identifier',
-                                            e.target.value
+                                            e.target.value,
                                         )
                                     }
                                     className="w-full rounded-md border border-[#c6e1dc] bg-[#f4faf9] px-2.5 py-1 text-xs text-gray-800 placeholder:text-gray-400 focus:border-[#1c6460] focus:bg-white focus:ring-1 focus:ring-[#1c6460] focus:outline-none sm:py-1.5 sm:text-sm"
@@ -139,7 +142,9 @@ export default function ForgotPassword() {
                                 disabled={formOtp.processing}
                                 className="mt-2.5 w-full cursor-pointer rounded-md bg-[#1c6460] py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#154e4a] disabled:cursor-not-allowed disabled:opacity-70 sm:mt-3 sm:py-2 sm:text-sm"
                             >
-                                {formOtp.processing ? 'Mengirim OTP...' : 'Kirim OTP'}
+                                {formOtp.processing
+                                    ? 'Mengirim OTP...'
+                                    : 'Kirim OTP'}
                             </button>
                         </form>
 
@@ -158,7 +163,10 @@ export default function ForgotPassword() {
                                 {flash.success}
                             </div>
                         )}
-                        <form onSubmit={handleResetPassword} className="space-y-2">
+                        <form
+                            onSubmit={handleResetPassword}
+                            className="space-y-2"
+                        >
                             <div>
                                 <label className="mb-0.5 block text-[10.5px] font-semibold text-gray-700 sm:text-xs">
                                     Kode OTP (Cek Email / WhatsApp)
@@ -187,12 +195,14 @@ export default function ForgotPassword() {
                                 </label>
                                 <div className="relative">
                                     <input
-                                        type={showPassword ? 'text' : 'password'}
+                                        type={
+                                            showPassword ? 'text' : 'password'
+                                        }
                                         value={formReset.data.password}
                                         onChange={(e) =>
                                             formReset.setData(
                                                 'password',
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                         className="w-full rounded-md border border-[#c6e1dc] bg-[#f4faf9] py-1 pr-8 pl-2.5 text-xs text-gray-800 placeholder:text-gray-400 focus:border-[#1c6460] focus:bg-white focus:ring-1 focus:ring-[#1c6460] focus:outline-none sm:py-1.5 sm:text-sm"
@@ -204,7 +214,7 @@ export default function ForgotPassword() {
                                         onClick={() =>
                                             setShowPassword(!showPassword)
                                         }
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                        className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                                     >
                                         {showPassword ? (
                                             <EyeOff className="h-3.5 w-3.5" />
@@ -230,7 +240,7 @@ export default function ForgotPassword() {
                                     onChange={(e) =>
                                         formReset.setData(
                                             'password_confirmation',
-                                            e.target.value
+                                            e.target.value,
                                         )
                                     }
                                     className="w-full rounded-md border border-[#c6e1dc] bg-[#f4faf9] px-2.5 py-1 text-xs text-gray-800 placeholder:text-gray-400 focus:border-[#1c6460] focus:bg-white focus:ring-1 focus:ring-[#1c6460] focus:outline-none sm:py-1.5 sm:text-sm"

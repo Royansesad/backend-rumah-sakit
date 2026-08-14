@@ -41,11 +41,15 @@ Route::middleware(['web.auth'])->group(function () {
     Route::prefix('portal')->middleware('web.role:pasien')->group(function () {
         Route::get('/', [PatientPortalController::class, 'portal'])->name('portal.index');
         Route::get('/rekam-medis', [PatientPortalController::class, 'rekamMedis'])->name('portal.rekam-medis');
+        Route::post('/rekam-medis/refill', [PatientPortalController::class, 'requestRefill'])->name('portal.rekam-medis.refill');
+        Route::post('/rekam-medis/snapshot', [PatientPortalController::class, 'updateSnapshot'])->name('portal.rekam-medis.snapshot');
         Route::get('/rekam-medis/{id}', [PatientPortalController::class, 'rekamMedisShow'])->name('portal.rekam-medis.show');
         Route::get('/riwayat', [PatientPortalController::class, 'riwayat'])->name('portal.riwayat');
         Route::get('/booking', [PatientPortalController::class, 'booking'])->name('portal.booking');
         Route::post('/booking', [PatientPortalController::class, 'bookingStore'])->name('portal.booking.store');
         Route::post('/booking/{id}/batal', [PatientPortalController::class, 'bookingCancel'])->name('portal.booking.cancel');
+        Route::post('/profil', [PatientPortalController::class, 'updateProfile'])->name('portal.profil.update');
+        Route::post('/tagihan/{id}/bayar', [PatientPortalController::class, 'bayarTagihan'])->name('portal.tagihan.bayar');
     });
 
     // Modul Jadwal Praktik & Shift (Dokter, Perawat, Admin)

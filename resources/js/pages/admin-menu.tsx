@@ -16,7 +16,10 @@ interface AdminMenuProps {
     aksiOptions?: string[];
     roleOptions?: string[];
     staffList?: string[];
-    staffByRole?: Record<string, Array<{ id: string; nama_lengkap: string; email?: string }>>;
+    staffByRole?: Record<
+        string,
+        Array<{ id: string; nama_lengkap: string; email?: string }>
+    >;
     lastUpdatedInfo?: string;
 }
 
@@ -66,7 +69,9 @@ export default function AdminMenu({
                     <RbacView
                         staffList={staffList}
                         staffByRole={staffByRole}
-                        initialRole={selectedRole === 'admin' ? 'dokter' : selectedRole}
+                        initialRole={
+                            selectedRole === 'admin' ? 'dokter' : selectedRole
+                        }
                         lastUpdatedInfo={lastUpdatedInfo}
                     />
                 );
@@ -81,4 +86,3 @@ export default function AdminMenu({
         </Layout>
     );
 }
-

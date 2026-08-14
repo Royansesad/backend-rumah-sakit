@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('aturan_pakai');
             $table->integer('jumlah_dosis');
             $table->string('catatan')->nullable();
+            $table->string('kategori_obat', 50)->default('Rutin');
+            $table->integer('sisa_tablet')->nullable();
             $table->timestamps();
         });
     }

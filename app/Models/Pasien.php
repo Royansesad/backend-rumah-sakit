@@ -71,6 +71,18 @@ class Pasien extends Authenticatable implements HasSimrsRole
         return $this->hasMany(RawatInapAdmission::class, 'pasien_id');
     }
 
+    /** @return HasMany<PemeriksaanRadiologi, $this> */
+    public function pemeriksaanRadiologi(): HasMany
+    {
+        return $this->hasMany(PemeriksaanRadiologi::class, 'pasien_id');
+    }
+
+    /** @return HasMany<PermintaanRefillObat, $this> */
+    public function permintaanRefill(): HasMany
+    {
+        return $this->hasMany(PermintaanRefillObat::class, 'pasien_id');
+    }
+
     // --- Query Scopes ---
 
     /** @param Builder<Pasien> $query */

@@ -32,7 +32,9 @@ class UserStaffSeeder extends Seeder
                 'nama_lengkap' => 'Dr. Siti Rahayu',
                 'email' => 'siti.rahayu@simrs.id',
                 'password' => $password,
+                'no_hp' => '081234567801',
                 'nomor_str' => 'STR-DK-001',
+                'nomor_sip' => 'SIP-2023-0011',
                 'spesialisasi' => 'Umum',
                 'poli_id' => '00000000-0000-0000-0000-000000000001', // Poli Umum
                 'status_praktik' => 'aktif',
@@ -45,7 +47,9 @@ class UserStaffSeeder extends Seeder
                 'nama_lengkap' => 'Dr. Ahmad Fauzi, Sp.A',
                 'email' => 'ahmad.fauzi@simrs.id',
                 'password' => $password,
+                'no_hp' => '081234567802',
                 'nomor_str' => 'STR-DK-002',
+                'nomor_sip' => 'SIP-2023-0012',
                 'spesialisasi' => 'Spesialis Anak',
                 'poli_id' => '00000000-0000-0000-0000-000000000003', // Poli Anak
                 'status_praktik' => 'aktif',
@@ -58,7 +62,9 @@ class UserStaffSeeder extends Seeder
                 'nama_lengkap' => 'Dr. Ratna Sari, Sp.KG',
                 'email' => 'ratna.sari@simrs.id',
                 'password' => $password,
+                'no_hp' => '081234567803',
                 'nomor_str' => 'STR-DK-003',
+                'nomor_sip' => 'SIP-2023-0019',
                 'spesialisasi' => 'Konservasi Gigi',
                 'poli_id' => '00000000-0000-0000-0000-000000000002', // Poli Gigi
                 'status_praktik' => 'aktif',
@@ -71,7 +77,9 @@ class UserStaffSeeder extends Seeder
                 'nama_lengkap' => 'Dr. Maya Indah, Sp.OG',
                 'email' => 'maya.indah@simrs.id',
                 'password' => $password,
+                'no_hp' => '081234567804',
                 'nomor_str' => 'STR-DK-004',
+                'nomor_sip' => 'SIP-2023-0020',
                 'spesialisasi' => 'Kebidanan & Kandungan',
                 'poli_id' => '00000000-0000-0000-0000-000000000004', // Poli Kandungan
                 'status_praktik' => 'aktif',
@@ -84,7 +92,9 @@ class UserStaffSeeder extends Seeder
                 'nama_lengkap' => 'Dr. Hendra Wijaya, Sp.M',
                 'email' => 'hendra.wijaya.dokter@simrs.id',
                 'password' => $password,
+                'no_hp' => '081234567805',
                 'nomor_str' => 'STR-DK-005',
+                'nomor_sip' => 'SIP-2023-0021',
                 'spesialisasi' => 'Spesialis Mata',
                 'poli_id' => '00000000-0000-0000-0000-000000000005', // Poli Mata
                 'status_praktik' => 'aktif',
@@ -97,9 +107,11 @@ class UserStaffSeeder extends Seeder
                 'nama_lengkap' => 'Dr. Bambang Hermanto, Sp.PD',
                 'email' => 'bambang.hermanto@simrs.id',
                 'password' => $password,
+                'no_hp' => '081234567806',
                 'nomor_str' => 'STR-DK-006',
+                'nomor_sip' => 'SIP-2023-0022',
                 'spesialisasi' => 'Penyakit Dalam',
-                'poli_id' => '00000000-0000-0000-0000-000000000001', // Poli Umum / Penyakit Dalam
+                'poli_id' => '00000000-0000-0000-0000-000000000001', // Poli Penyakit Dalam
                 'status_praktik' => 'aktif',
                 'status_akun' => 'aktif',
                 'created_at' => $now,

@@ -445,9 +445,10 @@ export const RbacView: React.FC<RbacViewProps> = ({
     const currentStaffList: StaffMember[] = staffByRole[selectedRole] || [];
 
     // Selected staff state
-    const [selectedStaffMember, setSelectedStaffMember] = useState<StaffMember | null>(() => {
-        return currentStaffList.length > 0 ? currentStaffList[0] : null;
-    });
+    const [selectedStaffMember, setSelectedStaffMember] =
+        useState<StaffMember | null>(() => {
+            return currentStaffList.length > 0 ? currentStaffList[0] : null;
+        });
 
     // Update selected staff when role changes or list updates
     useEffect(() => {
@@ -494,7 +495,9 @@ export const RbacView: React.FC<RbacViewProps> = ({
         action: 'lihat' | 'tambah' | 'edit' | 'hapus',
     ) => {
         setPermissionsByRole((prev) => {
-            const rolePerms = [...(prev[selectedRole] || activeConfig.defaultPermissions)];
+            const rolePerms = [
+                ...(prev[selectedRole] || activeConfig.defaultPermissions),
+            ];
             const targetIndex = rolePerms.findIndex((p) => p.key === moduleKey);
             if (targetIndex === -1) return prev;
 
@@ -518,12 +521,12 @@ export const RbacView: React.FC<RbacViewProps> = ({
         const nextValue = !allChecked;
 
         setPermissionsByRole((prev) => {
-            const rolePerms = (prev[selectedRole] || activeConfig.defaultPermissions).map(
-                (p) => ({
-                    ...p,
-                    [action]: nextValue,
-                }),
-            );
+            const rolePerms = (
+                prev[selectedRole] || activeConfig.defaultPermissions
+            ).map((p) => ({
+                ...p,
+                [action]: nextValue,
+            }));
 
             return {
                 ...prev,
@@ -534,7 +537,9 @@ export const RbacView: React.FC<RbacViewProps> = ({
 
     const handleSave = () => {
         setIsSaving(true);
-        const staffName = selectedStaffMember ? selectedStaffMember.nama_lengkap : activeConfig.roleTitle;
+        const staffName = selectedStaffMember
+            ? selectedStaffMember.nama_lengkap
+            : activeConfig.roleTitle;
 
         router.post(
             '/rbac',
@@ -577,17 +582,17 @@ export const RbacView: React.FC<RbacViewProps> = ({
                 type="button"
                 onClick={onClick}
                 aria-label={ariaLabel}
-                className={`inline-flex items-center justify-center w-5 h-5 rounded-[4px] transition-all focus:outline-none focus:ring-2 focus:ring-blue-400/40 cursor-pointer ${
+                className={`inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-[4px] transition-all focus:ring-2 focus:ring-blue-400/40 focus:outline-none ${
                     checked
                         ? isMuted
                             ? 'bg-[#8eb6ea] text-white hover:bg-[#7aa7e3]'
-                            : 'bg-[#1e62d0] text-white hover:bg-[#1853b3] shadow-xs'
+                            : 'bg-[#1e62d0] text-white shadow-xs hover:bg-[#1853b3]'
                         : 'border border-gray-300 bg-white hover:border-gray-400'
                 }`}
             >
                 {checked && (
                     <svg
-                        className="w-3.5 h-3.5 stroke-[3]"
+                        className="h-3.5 w-3.5 stroke-[3]"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -611,33 +616,40 @@ export const RbacView: React.FC<RbacViewProps> = ({
         <div className="w-full pb-10">
             <ToastContainer
                 toasts={toasts}
-                onClose={(id) => setToasts((prev) => prev.filter((t) => t.id !== id))}
+                onClose={(id) =>
+                    setToasts((prev) => prev.filter((t) => t.id !== id))
+                }
             />
 
             {/* Page Header */}
             <div className="mb-6 md:mb-8">
-                <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 tracking-tight">
+                <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
                     Manajemen Hak Akses
                 </h1>
-                <p className="mt-1.5 text-sm md:text-base text-gray-600 font-sans">
-                    Atur akses untuk staf dalam sistem. Perubahan ini akan segera berlaku untuk staf.
+                <p className="mt-1.5 font-sans text-sm text-gray-600 md:text-base">
+                    Atur akses untuk staf dalam sistem. Perubahan ini akan
+                    segera berlaku untuk staf.
                 </p>
             </div>
 
             {/* Main Content Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
                 {/* Left Column: Role Filter & Staff User List */}
-                <div className="lg:col-span-4 xl:col-span-3 space-y-4">
+                <div className="space-y-4 lg:col-span-4 xl:col-span-3">
                     {/* Role Filter Pill / Selector Button */}
                     <div className="relative">
                         <button
                             type="button"
-                            onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-                            className="w-full flex items-center justify-between rounded-xl border border-[#83cdc1] bg-[#f0faf7] py-2.5 px-4 text-xs font-bold text-[#145e5b] uppercase tracking-wider shadow-xs hover:bg-[#e4f6f2] transition-colors"
+                            onClick={() =>
+                                setRoleDropdownOpen(!roleDropdownOpen)
+                            }
+                            className="flex w-full items-center justify-between rounded-xl border border-[#83cdc1] bg-[#f0faf7] px-4 py-2.5 text-xs font-bold tracking-wider text-[#145e5b] uppercase shadow-xs transition-colors hover:bg-[#e4f6f2]"
                         >
-                            <span className="truncate">{activeConfig.label}</span>
+                            <span className="truncate">
+                                {activeConfig.label}
+                            </span>
                             <svg
-                                className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+                                className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
                                     roleDropdownOpen ? 'rotate-180' : ''
                                 }`}
                                 fill="none"
@@ -645,59 +657,76 @@ export const RbacView: React.FC<RbacViewProps> = ({
                                 stroke="currentColor"
                                 strokeWidth={2.5}
                             >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19 9l-7 7-7-7"
+                                />
                             </svg>
                         </button>
 
                         {/* Dropdown Menu for Roles */}
                         {roleDropdownOpen && (
-                            <div className="absolute left-0 right-0 top-full mt-1.5 z-30 rounded-xl border border-gray-200 bg-white shadow-lg py-1.5 animate-in fade-in zoom-in-95">
-                                {Object.keys(DEFAULT_ROLE_CONFIGS).map((rKey) => {
-                                    const staffCount = (staffByRole[rKey] || []).length;
-                                    return (
-                                        <button
-                                            key={rKey}
-                                            type="button"
-                                            onClick={() => {
-                                                setSelectedRole(rKey);
-                                                setRoleDropdownOpen(false);
-                                            }}
-                                            className={`w-full flex items-center justify-between px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
-                                                selectedRole === rKey
-                                                    ? 'bg-[#edf8f6] text-[#145e5b]'
-                                                    : 'text-gray-700 hover:bg-gray-50'
-                                            }`}
-                                        >
-                                            <span>{DEFAULT_ROLE_CONFIGS[rKey].label}</span>
-                                            <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                                                {staffCount} staf
-                                            </span>
-                                        </button>
-                                    );
-                                })}
+                            <div className="animate-in fade-in zoom-in-95 absolute top-full right-0 left-0 z-30 mt-1.5 rounded-xl border border-gray-200 bg-white py-1.5 shadow-lg">
+                                {Object.keys(DEFAULT_ROLE_CONFIGS).map(
+                                    (rKey) => {
+                                        const staffCount = (
+                                            staffByRole[rKey] || []
+                                        ).length;
+                                        return (
+                                            <button
+                                                key={rKey}
+                                                type="button"
+                                                onClick={() => {
+                                                    setSelectedRole(rKey);
+                                                    setRoleDropdownOpen(false);
+                                                }}
+                                                className={`flex w-full items-center justify-between px-4 py-2 text-xs font-bold tracking-wider uppercase transition-colors ${
+                                                    selectedRole === rKey
+                                                        ? 'bg-[#edf8f6] text-[#145e5b]'
+                                                        : 'text-gray-700 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                <span>
+                                                    {
+                                                        DEFAULT_ROLE_CONFIGS[
+                                                            rKey
+                                                        ].label
+                                                    }
+                                                </span>
+                                                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-normal text-gray-600">
+                                                    {staffCount} staf
+                                                </span>
+                                            </button>
+                                        );
+                                    },
+                                )}
                             </div>
                         )}
                     </div>
 
                     {/* Staff List Box (Directly from Database) */}
-                    <div className="rounded-2xl border border-gray-200 bg-white shadow-xs divide-y divide-gray-100 overflow-hidden">
+                    <div className="divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs">
                         {currentStaffList.length > 0 ? (
                             currentStaffList.map((staff) => {
-                                const isSelected = selectedStaffMember?.id === staff.id;
+                                const isSelected =
+                                    selectedStaffMember?.id === staff.id;
 
                                 return (
                                     <div
                                         key={staff.id}
-                                        onClick={() => setSelectedStaffMember(staff)}
-                                        className={`flex items-center justify-between px-4 py-3.5 cursor-pointer transition-colors ${
+                                        onClick={() =>
+                                            setSelectedStaffMember(staff)
+                                        }
+                                        className={`flex cursor-pointer items-center justify-between px-4 py-3.5 transition-colors ${
                                             isSelected
-                                                ? 'bg-gray-100/90 border-l-4 border-[#145e5b]'
-                                                : 'hover:bg-gray-50 text-gray-700'
+                                                ? 'border-l-4 border-[#145e5b] bg-gray-100/90'
+                                                : 'text-gray-700 hover:bg-gray-50'
                                         }`}
                                     >
                                         <div className="min-w-0 flex-1 pr-2">
                                             <div
-                                                className={`text-sm truncate ${
+                                                className={`truncate text-sm ${
                                                     isSelected
                                                         ? 'font-bold text-gray-900'
                                                         : 'font-medium text-gray-700'
@@ -706,7 +735,7 @@ export const RbacView: React.FC<RbacViewProps> = ({
                                                 {staff.nama_lengkap}
                                             </div>
                                             {staff.email && (
-                                                <div className="text-[11px] text-gray-400 truncate mt-0.5">
+                                                <div className="mt-0.5 truncate text-[11px] text-gray-400">
                                                     {staff.email}
                                                 </div>
                                             )}
@@ -714,19 +743,23 @@ export const RbacView: React.FC<RbacViewProps> = ({
 
                                         {isSelected && (
                                             <svg
-                                                className="w-3.5 h-3.5 text-gray-500 shrink-0 stroke-[2.5]"
+                                                className="h-3.5 w-3.5 shrink-0 stroke-[2.5] text-gray-500"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
                                             >
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M9 5l7 7-7 7"
+                                                />
                                             </svg>
                                         )}
                                     </div>
                                 );
                             })
                         ) : (
-                            <div className="p-6 text-center text-xs text-gray-500 space-y-2">
+                            <div className="space-y-2 p-6 text-center text-xs text-gray-500">
                                 <p>
                                     Belum ada staf terdaftar dengan role{' '}
                                     <strong className="text-gray-800">
@@ -747,14 +780,14 @@ export const RbacView: React.FC<RbacViewProps> = ({
 
                 {/* Right Column: Permission Matrix Card */}
                 <div className="lg:col-span-8 xl:col-span-9">
-                    <div className="rounded-2xl border border-gray-200 bg-white shadow-xs overflow-hidden flex flex-col">
+                    <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs">
                         {/* Card Header Section */}
-                        <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-start md:justify-between gap-5">
-                            <div className="flex-1 min-w-0">
+                        <div className="flex flex-col gap-5 p-6 md:flex-row md:items-start md:justify-between md:p-8">
+                            <div className="min-w-0 flex-1">
                                 {/* Small User Avatar & Name */}
                                 <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-800">
                                     <svg
-                                        className="w-3.5 h-3.5 text-gray-800 shrink-0"
+                                        className="h-3.5 w-3.5 shrink-0 text-gray-800"
                                         viewBox="0 0 24 24"
                                         fill="currentColor"
                                     >
@@ -764,16 +797,18 @@ export const RbacView: React.FC<RbacViewProps> = ({
                                             clipRule="evenodd"
                                         />
                                     </svg>
-                                    <span className="truncate">{currentStaffDisplayName}</span>
+                                    <span className="truncate">
+                                        {currentStaffDisplayName}
+                                    </span>
                                 </div>
 
                                 {/* Large Role Title */}
-                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mt-1.5">
+                                <h2 className="mt-1.5 text-2xl font-bold text-gray-900 md:text-3xl">
                                     Role: {activeConfig.roleTitle}
                                 </h2>
 
                                 {/* Role Description */}
-                                <p className="text-xs md:text-sm text-gray-500 mt-2 max-w-2xl leading-relaxed">
+                                <p className="mt-2 max-w-2xl text-xs leading-relaxed text-gray-500 md:text-sm">
                                     {activeConfig.description}
                                 </p>
                             </div>
@@ -784,13 +819,28 @@ export const RbacView: React.FC<RbacViewProps> = ({
                                     type="button"
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#145e5b] px-6 py-2.5 text-xs font-bold text-white uppercase tracking-wider shadow-xs hover:bg-[#0f4a47] active:scale-[0.98] transition-all disabled:opacity-75 cursor-pointer"
+                                    className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#145e5b] px-6 py-2.5 text-xs font-bold tracking-wider text-white uppercase shadow-xs transition-all hover:bg-[#0f4a47] active:scale-[0.98] disabled:opacity-75 md:w-auto"
                                 >
                                     {isSaving ? (
                                         <>
-                                            <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            <svg
+                                                className="h-3.5 w-3.5 animate-spin text-white"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="4"
+                                                ></circle>
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                                ></path>
                                             </svg>
                                             <span>MENYIMPAN...</span>
                                         </>
@@ -803,27 +853,40 @@ export const RbacView: React.FC<RbacViewProps> = ({
 
                         {/* Permission Matrix Table */}
                         <div className="overflow-x-auto border-t border-gray-100">
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full border-collapse text-left">
                                 <thead>
                                     <tr className="border-b border-gray-100">
-                                        <th className="py-4 px-6 text-xs font-bold text-gray-800 uppercase tracking-wider min-w-[220px]">
+                                        <th className="min-w-[220px] px-6 py-4 text-xs font-bold tracking-wider text-gray-800 uppercase">
                                             MODUL SISTEM
                                         </th>
-                                        {(['lihat', 'tambah', 'edit', 'hapus'] as const).map((action) => {
-                                            const allChecked = currentPermissions.every(
-                                                (p) => p[action],
-                                            );
+                                        {(
+                                            [
+                                                'lihat',
+                                                'tambah',
+                                                'edit',
+                                                'hapus',
+                                            ] as const
+                                        ).map((action) => {
+                                            const allChecked =
+                                                currentPermissions.every(
+                                                    (p) => p[action],
+                                                );
 
                                             return (
                                                 <th
                                                     key={action}
-                                                    className="py-4 px-4 text-center text-xs font-bold text-gray-800 uppercase tracking-wider min-w-[90px]"
+                                                    className="min-w-[90px] px-4 py-4 text-center text-xs font-bold tracking-wider text-gray-800 uppercase"
                                                 >
                                                     <div className="flex flex-col items-center gap-1.5">
-                                                        <span>{action.toUpperCase()}</span>
+                                                        <span>
+                                                            {action.toUpperCase()}
+                                                        </span>
                                                         {renderCheckbox(
                                                             allChecked,
-                                                            () => handleToggleColumnAll(action),
+                                                            () =>
+                                                                handleToggleColumnAll(
+                                                                    action,
+                                                                ),
                                                             `Toggle all ${action}`,
                                                         )}
                                                     </div>
@@ -836,27 +899,27 @@ export const RbacView: React.FC<RbacViewProps> = ({
                                     {currentPermissions.map((mod) => (
                                         <tr
                                             key={mod.key}
-                                            className="hover:bg-gray-50/70 transition-colors"
+                                            className="transition-colors hover:bg-gray-50/70"
                                         >
                                             {/* Module Title & Subtitle */}
-                                            <td className="py-4 px-6">
+                                            <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-sm font-semibold text-gray-900">
                                                         {mod.label}
                                                     </span>
                                                     {mod.isSensitive && (
-                                                        <span className="inline-flex items-center rounded-[3px] bg-[#fee8e8] border border-[#fcd0d0] px-1.5 py-0.5 text-[9px] font-bold text-[#e04545] uppercase tracking-wider leading-none">
+                                                        <span className="inline-flex items-center rounded-[3px] border border-[#fcd0d0] bg-[#fee8e8] px-1.5 py-0.5 text-[9px] leading-none font-bold tracking-wider text-[#e04545] uppercase">
                                                             DATA SENSITIF
                                                         </span>
                                                     )}
                                                 </div>
-                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                <p className="mt-0.5 text-xs text-gray-500">
                                                     {mod.sublabel}
                                                 </p>
                                             </td>
 
                                             {/* LIHAT Checkbox */}
-                                            <td className="py-4 px-4 text-center">
+                                            <td className="px-4 py-4 text-center">
                                                 {renderCheckbox(
                                                     mod.lihat,
                                                     () =>
@@ -865,12 +928,14 @@ export const RbacView: React.FC<RbacViewProps> = ({
                                                             'lihat',
                                                         ),
                                                     `Lihat ${mod.label}`,
-                                                    mod.key === 'medical_records' && mod.lihat,
+                                                    mod.key ===
+                                                        'medical_records' &&
+                                                        mod.lihat,
                                                 )}
                                             </td>
 
                                             {/* TAMBAH Checkbox */}
-                                            <td className="py-4 px-4 text-center">
+                                            <td className="px-4 py-4 text-center">
                                                 {renderCheckbox(
                                                     mod.tambah,
                                                     () =>
@@ -879,12 +944,14 @@ export const RbacView: React.FC<RbacViewProps> = ({
                                                             'tambah',
                                                         ),
                                                     `Tambah ${mod.label}`,
-                                                    mod.key === 'medical_records' && mod.tambah,
+                                                    mod.key ===
+                                                        'medical_records' &&
+                                                        mod.tambah,
                                                 )}
                                             </td>
 
                                             {/* EDIT Checkbox */}
-                                            <td className="py-4 px-4 text-center">
+                                            <td className="px-4 py-4 text-center">
                                                 {renderCheckbox(
                                                     mod.edit,
                                                     () =>
@@ -893,12 +960,14 @@ export const RbacView: React.FC<RbacViewProps> = ({
                                                             'edit',
                                                         ),
                                                     `Edit ${mod.label}`,
-                                                    mod.key === 'medical_records' && mod.edit,
+                                                    mod.key ===
+                                                        'medical_records' &&
+                                                        mod.edit,
                                                 )}
                                             </td>
 
                                             {/* HAPUS Checkbox */}
-                                            <td className="py-4 px-4 text-center">
+                                            <td className="px-4 py-4 text-center">
                                                 {renderCheckbox(
                                                     mod.hapus,
                                                     () =>
@@ -916,10 +985,10 @@ export const RbacView: React.FC<RbacViewProps> = ({
                         </div>
 
                         {/* Card Bottom Footer Info */}
-                        <div className="px-6 py-4 bg-[#fcfdfd] border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                        <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 bg-[#fcfdfd] px-6 py-4 text-xs sm:flex-row">
                             <div className="flex items-center gap-2 text-gray-500">
                                 <svg
-                                    className="w-4 h-4 text-gray-500 shrink-0"
+                                    className="h-4 w-4 shrink-0 text-gray-500"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -936,7 +1005,7 @@ export const RbacView: React.FC<RbacViewProps> = ({
 
                             <Link
                                 href="/audit-logs"
-                                className="font-bold text-[#145e5b] hover:text-[#0f4a47] hover:underline uppercase tracking-wider transition-colors"
+                                className="font-bold tracking-wider text-[#145e5b] uppercase transition-colors hover:text-[#0f4a47] hover:underline"
                             >
                                 LIHAT AUDIT LOG
                             </Link>

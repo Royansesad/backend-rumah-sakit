@@ -3,16 +3,22 @@ import { router } from '@inertiajs/react';
 import { AuditLog } from '../../types/simrs';
 
 interface AuditLogsViewProps {
-    logs: {
-        data: AuditLog[];
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-        from: number;
-        to: number;
-        links: Array<{ url: string | null; label: string; active: boolean }>;
-    } | AuditLog[];
+    logs:
+        | {
+              data: AuditLog[];
+              current_page: number;
+              last_page: number;
+              per_page: number;
+              total: number;
+              from: number;
+              to: number;
+              links: Array<{
+                  url: string | null;
+                  label: string;
+                  active: boolean;
+              }>;
+          }
+        | AuditLog[];
     filters?: {
         date_from?: string;
         date_to?: string;
@@ -66,7 +72,16 @@ const parseUserAgent = (ua: string = '') => {
     return `${os} / ${browser}`;
 };
 
-type AksiType = 'AKSES_DATA' | 'EDIT_DATA' | 'HAPUS_PERMANEN' | 'CREATE' | 'LOGIN' | 'LOGOUT' | 'UPDATE_STATUS' | 'EXPORT_DATA' | string;
+type AksiType =
+    | 'AKSES_DATA'
+    | 'EDIT_DATA'
+    | 'HAPUS_PERMANEN'
+    | 'CREATE'
+    | 'LOGIN'
+    | 'LOGOUT'
+    | 'UPDATE_STATUS'
+    | 'EXPORT_DATA'
+    | string;
 
 const renderAksiBadge = (aksi: AksiType) => {
     const norm = (aksi || '').toUpperCase();
@@ -74,9 +89,23 @@ const renderAksiBadge = (aksi: AksiType) => {
     if (norm === 'AKSES_DATA') {
         return (
             <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-300 bg-[#fff9ee] px-2.5 py-1 text-[11px] font-semibold text-[#b45309]">
-                <svg className="w-3.5 h-3.5 text-[#b45309]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <svg
+                    className="h-3.5 w-3.5 text-[#b45309]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
                 </svg>
                 Akses Data
             </span>
@@ -86,19 +115,43 @@ const renderAksiBadge = (aksi: AksiType) => {
     if (norm === 'EDIT_DATA' || norm.includes('UPDATE')) {
         return (
             <span className="inline-flex items-center gap-1.5 rounded-md border border-[#99f6e4] bg-[#f0fdfa] px-2.5 py-1 text-[11px] font-semibold text-[#0f766e]">
-                <svg className="w-3.5 h-3.5 text-[#0f766e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                <svg
+                    className="h-3.5 w-3.5 text-[#0f766e]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                    />
                 </svg>
                 Edit Data
             </span>
         );
     }
 
-    if (norm === 'HAPUS_PERMANEN' || norm.includes('DELETE') || norm.includes('BATALKAN')) {
+    if (
+        norm === 'HAPUS_PERMANEN' ||
+        norm.includes('DELETE') ||
+        norm.includes('BATALKAN')
+    ) {
         return (
             <span className="inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-[#fef2f2] px-2.5 py-1 text-[11px] font-semibold text-[#dc2626]">
-                <svg className="w-3.5 h-3.5 text-[#dc2626]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <svg
+                    className="h-3.5 w-3.5 text-[#dc2626]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
                 </svg>
                 Hapus Permanen
             </span>
@@ -108,8 +161,18 @@ const renderAksiBadge = (aksi: AksiType) => {
     if (norm === 'CREATE' || norm.includes('CREATE_')) {
         return (
             <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-                <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                <svg
+                    className="h-3.5 w-3.5 text-emerald-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4v16m8-8H4"
+                    />
                 </svg>
                 Buat Data
             </span>
@@ -119,8 +182,18 @@ const renderAksiBadge = (aksi: AksiType) => {
     if (norm === 'LOGIN') {
         return (
             <span className="inline-flex items-center gap-1.5 rounded-md border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
-                <svg className="w-3.5 h-3.5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                <svg
+                    className="h-3.5 w-3.5 text-sky-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                    />
                 </svg>
                 Login
             </span>
@@ -130,19 +203,41 @@ const renderAksiBadge = (aksi: AksiType) => {
     if (norm === 'LOGOUT') {
         return (
             <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-600">
-                <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                <svg
+                    className="h-3.5 w-3.5 text-gray-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
                 </svg>
                 Logout
             </span>
         );
     }
 
-    const label = norm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const label = norm
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (l) => l.toUpperCase());
     return (
         <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-700">
-            <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg
+                className="h-3.5 w-3.5 text-gray-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+            >
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
             </svg>
             {label}
         </span>
@@ -187,7 +282,7 @@ const getInitials = (name: string = '', role: string = '') => {
 
 const formatTargetInfo = (log: AuditLog) => {
     let title = log.target_label || log.modul || 'Sistem';
-    title = title.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    title = title.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
     let subtitle = log.target_id || '';
 
@@ -286,7 +381,10 @@ const parseAuditData = (raw: any): Record<string, any> | null => {
     }
     if (typeof raw === 'string') {
         const trimmed = raw.trim();
-        if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+        if (
+            (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+            (trimmed.startsWith('[') && trimmed.endsWith(']'))
+        ) {
             try {
                 let parsed = JSON.parse(trimmed);
                 if (typeof parsed === 'string') {
@@ -330,15 +428,20 @@ const formatValueDisplay = (val: any): React.ReactNode => {
             return (
                 <div className="flex flex-wrap gap-1">
                     {val.map((item, idx) => (
-                        <span key={idx} className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-700 shadow-2xs">
-                            {typeof item === 'object' ? JSON.stringify(item) : String(item)}
+                        <span
+                            key={idx}
+                            className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-700 shadow-2xs"
+                        >
+                            {typeof item === 'object'
+                                ? JSON.stringify(item)
+                                : String(item)}
                         </span>
                     ))}
                 </div>
             );
         }
         return (
-            <pre className="max-h-28 overflow-auto rounded-md bg-gray-50 p-2 font-mono text-[11px] text-gray-700 border border-gray-200">
+            <pre className="max-h-28 overflow-auto rounded-md border border-gray-200 bg-gray-50 p-2 font-mono text-[11px] text-gray-700">
                 {JSON.stringify(val, null, 2)}
             </pre>
         );
@@ -350,13 +453,22 @@ const formatValueDisplay = (val: any): React.ReactNode => {
     if (/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?Z?)?$/.test(strVal)) {
         const dateObj = new Date(strVal);
         if (!isNaN(dateObj.getTime())) {
-            const hasTime = !strVal.endsWith('T00:00:00.000000Z') && !strVal.endsWith('T00:00:00Z') && strVal.includes('T');
+            const hasTime =
+                !strVal.endsWith('T00:00:00.000000Z') &&
+                !strVal.endsWith('T00:00:00Z') &&
+                strVal.includes('T');
             const formatted = hasTime
                 ? dateObj.toLocaleDateString('id-ID', {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric',
-                  }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
+                  }) +
+                  ', ' +
+                  dateObj.toLocaleTimeString('id-ID', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                  }) +
+                  ' WIB'
                 : dateObj.toLocaleDateString('id-ID', {
                       day: 'numeric',
                       month: 'short',
@@ -365,8 +477,18 @@ const formatValueDisplay = (val: any): React.ReactNode => {
 
             return (
                 <span className="inline-flex items-center gap-1 font-mono text-xs text-gray-800">
-                    <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <svg
+                        className="h-3.5 w-3.5 shrink-0 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
                     </svg>
                     {formatted}
                 </span>
@@ -377,21 +499,38 @@ const formatValueDisplay = (val: any): React.ReactNode => {
     const lowerVal = strVal.toLowerCase();
 
     // Badges for common statuses
-    if (['aktif', 'active', 'selesai', 'paid', 'sukses', 'success'].includes(lowerVal)) {
+    if (
+        ['aktif', 'active', 'selesai', 'paid', 'sukses', 'success'].includes(
+            lowerVal,
+        )
+    ) {
         return (
             <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
                 ✓ {strVal}
             </span>
         );
     }
-    if (['menunggu', 'pending', 'unpaid', 'disiapkan', 'proses'].includes(lowerVal)) {
+    if (
+        ['menunggu', 'pending', 'unpaid', 'disiapkan', 'proses'].includes(
+            lowerVal,
+        )
+    ) {
         return (
             <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
                 ⏱ {strVal}
             </span>
         );
     }
-    if (['batal', 'nonaktif', 'inactive', 'dibatalkan', 'deleted', 'hapus permanen'].includes(lowerVal)) {
+    if (
+        [
+            'batal',
+            'nonaktif',
+            'inactive',
+            'dibatalkan',
+            'deleted',
+            'hapus permanen',
+        ].includes(lowerVal)
+    ) {
         return (
             <span className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700">
                 ✕ {strVal}
@@ -413,7 +552,11 @@ const formatValueDisplay = (val: any): React.ReactNode => {
         );
     }
 
-    return <span className="text-xs text-gray-800 break-words font-medium">{strVal}</span>;
+    return (
+        <span className="text-xs font-medium break-words text-gray-800">
+            {strVal}
+        </span>
+    );
 };
 
 const isEqualValue = (a: any, b: any): boolean => {
@@ -426,7 +569,10 @@ const isEqualValue = (a: any, b: any): boolean => {
     if (isEmptyA !== isEmptyB) return false;
 
     // Numbers vs numeric strings
-    if ((typeof a === 'number' || typeof a === 'string') && (typeof b === 'number' || typeof b === 'string')) {
+    if (
+        (typeof a === 'number' || typeof a === 'string') &&
+        (typeof b === 'number' || typeof b === 'string')
+    ) {
         const strA = String(a).trim();
         const strB = String(b).trim();
         if (strA === strB) return true;
@@ -450,8 +596,12 @@ const isEqualValue = (a: any, b: any): boolean => {
         if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
             if (dateA.getTime() === dateB.getTime()) return true;
             if (
-                dateA.toISOString().slice(0, 10) === dateB.toISOString().slice(0, 10) &&
-                (a.includes('00:00:00') || b.includes('00:00:00') || !a.includes(':') || !b.includes(':'))
+                dateA.toISOString().slice(0, 10) ===
+                    dateB.toISOString().slice(0, 10) &&
+                (a.includes('00:00:00') ||
+                    b.includes('00:00:00') ||
+                    !a.includes(':') ||
+                    !b.includes(':'))
             ) {
                 return true;
             }
@@ -460,14 +610,24 @@ const isEqualValue = (a: any, b: any): boolean => {
     }
 
     // Objects / Arrays deep comparison
-    if (typeof a === 'object' && typeof b === 'object' && a !== null && b !== null) {
+    if (
+        typeof a === 'object' &&
+        typeof b === 'object' &&
+        a !== null &&
+        b !== null
+    ) {
         return JSON.stringify(a) === JSON.stringify(b);
     }
 
     return String(a).trim() === String(b).trim();
 };
 
-const TECHNICAL_NOISE_KEYS = new Set(['updated_at', 'created_at', 'deleted_at', 'id']);
+const TECHNICAL_NOISE_KEYS = new Set([
+    'updated_at',
+    'created_at',
+    'deleted_at',
+    'id',
+]);
 
 interface DiffItem {
     key: string;
@@ -478,7 +638,9 @@ interface DiffItem {
 }
 
 const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
-    const [viewMode, setViewMode] = useState<'side-by-side' | 'table' | 'json'>('side-by-side');
+    const [viewMode, setViewMode] = useState<'side-by-side' | 'table' | 'json'>(
+        'side-by-side',
+    );
     const [copiedBefore, setCopiedBefore] = useState(false);
     const [copiedAfter, setCopiedAfter] = useState(false);
 
@@ -486,12 +648,17 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
     const afterObj = parseAuditData(log.data_sesudah);
 
     const allKeys = Array.from(
-        new Set([...(beforeObj ? Object.keys(beforeObj) : []), ...(afterObj ? Object.keys(afterObj) : [])])
+        new Set([
+            ...(beforeObj ? Object.keys(beforeObj) : []),
+            ...(afterObj ? Object.keys(afterObj) : []),
+        ]),
     );
 
     const diffItems: DiffItem[] = allKeys.map((k) => {
-        const hasBefore = beforeObj && Object.prototype.hasOwnProperty.call(beforeObj, k);
-        const hasAfter = afterObj && Object.prototype.hasOwnProperty.call(afterObj, k);
+        const hasBefore =
+            beforeObj && Object.prototype.hasOwnProperty.call(beforeObj, k);
+        const hasAfter =
+            afterObj && Object.prototype.hasOwnProperty.call(afterObj, k);
         const beforeVal = hasBefore ? beforeObj[k] : undefined;
         const afterVal = hasAfter ? afterObj[k] : undefined;
 
@@ -518,26 +685,34 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
     const rawChangedItems = diffItems.filter((d) => d.status !== 'unchanged');
 
     // Filter out technical noise keys (updated_at/created_at) if actual business fields changed
-    const businessChanges = rawChangedItems.filter((d) => !TECHNICAL_NOISE_KEYS.has(d.key.toLowerCase()));
-    const finalChanges = businessChanges.length > 0 ? businessChanges : rawChangedItems;
+    const businessChanges = rawChangedItems.filter(
+        (d) => !TECHNICAL_NOISE_KEYS.has(d.key.toLowerCase()),
+    );
+    const finalChanges =
+        businessChanges.length > 0 ? businessChanges : rawChangedItems;
 
-    const changedCount = finalChanges.filter((d) => d.status === 'changed').length;
+    const changedCount = finalChanges.filter(
+        (d) => d.status === 'changed',
+    ).length;
     const addedCount = finalChanges.filter((d) => d.status === 'added').length;
-    const removedCount = finalChanges.filter((d) => d.status === 'removed').length;
+    const removedCount = finalChanges.filter(
+        (d) => d.status === 'removed',
+    ).length;
     const totalChanges = changedCount + addedCount + removedCount;
 
     // STRICTLY display ONLY changed, added, or removed items (never display unchanged data)
-    const displayedItems = totalChanges > 0
-        ? finalChanges
-        : (beforeObj && !afterObj) || (!beforeObj && afterObj)
-        ? diffItems
-        : [];
+    const displayedItems =
+        totalChanges > 0
+            ? finalChanges
+            : (beforeObj && !afterObj) || (!beforeObj && afterObj)
+              ? diffItems
+              : [];
 
     const beforeFilteredObj = beforeObj
         ? Object.fromEntries(
               displayedItems
                   .filter((item) => item.beforeVal !== undefined)
-                  .map((item) => [item.key, item.beforeVal])
+                  .map((item) => [item.key, item.beforeVal]),
           )
         : null;
 
@@ -545,7 +720,7 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
         ? Object.fromEntries(
               displayedItems
                   .filter((item) => item.afterVal !== undefined)
-                  .map((item) => [item.key, item.afterVal])
+                  .map((item) => [item.key, item.afterVal]),
           )
         : null;
 
@@ -563,11 +738,21 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
     return (
         <div className="space-y-4">
             {/* Top Toolbar: Title, stats chips & view switcher */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-gray-100">
+            <div className="flex flex-col gap-3 border-b border-gray-100 pb-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap items-center gap-2">
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-gray-800 uppercase tracking-wider">
-                        <svg className="w-4 h-4 text-[#145e5b]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-gray-800 uppercase">
+                        <svg
+                            className="h-4 w-4 text-[#145e5b]"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                            />
                         </svg>
                         Perubahan Data
                     </span>
@@ -576,27 +761,27 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
                     {totalChanges > 0 ? (
                         <div className="flex items-center gap-1.5">
                             {changedCount > 0 && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-800">
+                                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500"></span>
                                     {changedCount} Kolom Diubah
                                 </span>
                             )}
                             {addedCount > 0 && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
                                     +{addedCount} Ditambah
                                 </span>
                             )}
                             {removedCount > 0 && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-800 border border-red-200">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-800">
                                     -{removedCount} Dihapus
                                 </span>
                             )}
-                            <span className="text-[11px] text-gray-400 font-medium">
+                            <span className="text-[11px] font-medium text-gray-400">
                                 (Hanya menampilkan kolom yang berubah)
                             </span>
                         </div>
                     ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600">
+                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-600">
                             Tidak ada perubahan nilai
                         </span>
                     )}
@@ -608,42 +793,72 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
                         <button
                             type="button"
                             onClick={() => setViewMode('side-by-side')}
-                            className={`flex items-center gap-1 rounded-md px-2.5 py-1 font-medium transition-all cursor-pointer ${
+                            className={`flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 font-medium transition-all ${
                                 viewMode === 'side-by-side'
-                                    ? 'bg-white text-gray-900 shadow-2xs font-bold'
+                                    ? 'bg-white font-bold text-gray-900 shadow-2xs'
                                     : 'text-gray-600 hover:text-gray-900'
                             }`}
                         >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                            <svg
+                                className="h-3.5 w-3.5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
+                                />
                             </svg>
                             Berdampingan
                         </button>
                         <button
                             type="button"
                             onClick={() => setViewMode('table')}
-                            className={`flex items-center gap-1 rounded-md px-2.5 py-1 font-medium transition-all cursor-pointer ${
+                            className={`flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 font-medium transition-all ${
                                 viewMode === 'table'
-                                    ? 'bg-white text-gray-900 shadow-2xs font-bold'
+                                    ? 'bg-white font-bold text-gray-900 shadow-2xs'
                                     : 'text-gray-600 hover:text-gray-900'
                             }`}
                         >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            <svg
+                                className="h-3.5 w-3.5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
                             </svg>
                             Tabel Diff
                         </button>
                         <button
                             type="button"
                             onClick={() => setViewMode('json')}
-                            className={`flex items-center gap-1 rounded-md px-2.5 py-1 font-medium transition-all cursor-pointer ${
+                            className={`flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 font-medium transition-all ${
                                 viewMode === 'json'
-                                    ? 'bg-white text-gray-900 shadow-2xs font-bold'
+                                    ? 'bg-white font-bold text-gray-900 shadow-2xs'
                                     : 'text-gray-600 hover:text-gray-900'
                             }`}
                         >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            <svg
+                                className="h-3.5 w-3.5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                                />
                             </svg>
                             JSON Mentah
                         </button>
@@ -654,7 +869,8 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
             {/* Empty changes state */}
             {displayedItems.length === 0 && (
                 <div className="rounded-xl border border-gray-200 bg-gray-50/70 p-6 text-center text-xs text-gray-500">
-                    Tidak ada perubahan kolom yang terdeteksi antara data sebelum dan sesudah.
+                    Tidak ada perubahan kolom yang terdeteksi antara data
+                    sebelum dan sesudah.
                 </div>
             )}
 
@@ -662,64 +878,71 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
                 <>
                     {/* View Mode 1: Berdampingan (Side by Side) */}
                     {viewMode === 'side-by-side' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             {/* SEBELUMNYA (BEFORE) */}
-                            <div className="flex flex-col rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
-                                <div className="flex items-center justify-between bg-slate-50 px-4 py-3 border-b border-slate-200">
+                            <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xs">
+                                <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
                                     <div className="flex items-center gap-2">
-                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-slate-700 text-xs font-bold">
+                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-slate-700">
                                             ←
                                         </span>
-                                        <span className="text-xs font-bold text-slate-800 tracking-wider">
+                                        <span className="text-xs font-bold tracking-wider text-slate-800">
                                             SEBELUMNYA (BEFORE)
                                         </span>
                                     </div>
-                                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-200/80 text-slate-700">
+                                    <span className="rounded bg-slate-200/80 px-2 py-0.5 text-[10px] font-bold text-slate-700 uppercase">
                                         Nilai Lama
                                     </span>
                                 </div>
 
-                                <div className="p-4 flex-1">
-                                    {beforeObj && Object.keys(beforeObj).length > 0 ? (
+                                <div className="flex-1 p-4">
+                                    {beforeObj &&
+                                    Object.keys(beforeObj).length > 0 ? (
                                         <div className="space-y-2.5">
                                             {displayedItems.map((item) => {
-                                                const isChanged = item.status === 'changed';
-                                                const isRemoved = item.status === 'removed';
-                                                const isMissing = item.beforeVal === undefined;
+                                                const isChanged =
+                                                    item.status === 'changed';
+                                                const isRemoved =
+                                                    item.status === 'removed';
+                                                const isMissing =
+                                                    item.beforeVal ===
+                                                    undefined;
 
                                                 return (
                                                     <div
                                                         key={item.key}
-                                                        className={`p-3.5 rounded-xl transition-colors border ${
+                                                        className={`rounded-xl border p-3.5 transition-colors ${
                                                             isChanged
-                                                                ? 'bg-rose-50/50 border-rose-200 ring-1 ring-rose-300/30'
+                                                                ? 'border-rose-200 bg-rose-50/50 ring-1 ring-rose-300/30'
                                                                 : isRemoved
-                                                                ? 'bg-red-50/50 border-red-200'
-                                                                : 'bg-gray-50/60 border-gray-100'
+                                                                  ? 'border-red-200 bg-red-50/50'
+                                                                  : 'border-gray-100 bg-gray-50/60'
                                                         }`}
                                                     >
-                                                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                                                        <div className="mb-1.5 flex items-center justify-between gap-2">
                                                             <span className="text-xs font-bold text-slate-700">
                                                                 {item.label}
                                                             </span>
                                                             {isChanged && (
-                                                                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-rose-100 text-rose-800">
+                                                                <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-rose-800 uppercase">
                                                                     Lama
                                                                 </span>
                                                             )}
                                                             {isRemoved && (
-                                                                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-red-100 text-red-800">
+                                                                <span className="rounded bg-red-100 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-red-800 uppercase">
                                                                     Dihapus
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <div className="text-xs text-gray-800 break-words font-medium">
+                                                        <div className="text-xs font-medium break-words text-gray-800">
                                                             {isMissing ? (
-                                                                <span className="text-[11px] text-gray-400 italic font-mono bg-gray-50 px-2 py-0.5 rounded border border-dashed border-gray-200">
+                                                                <span className="rounded border border-dashed border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-[11px] text-gray-400 italic">
                                                                     (Tidak ada)
                                                                 </span>
                                                             ) : (
-                                                                formatValueDisplay(item.beforeVal)
+                                                                formatValueDisplay(
+                                                                    item.beforeVal,
+                                                                )
                                                             )}
                                                         </div>
                                                     </div>
@@ -727,76 +950,97 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
                                             })}
                                         </div>
                                     ) : (
-                                        <div className="h-full min-h-[120px] flex flex-col items-center justify-center p-6 text-center text-gray-400">
-                                            <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-1.5">
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                        <div className="flex h-full min-h-[120px] flex-col items-center justify-center p-6 text-center text-gray-400">
+                                            <div className="mb-1.5 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                                                <svg
+                                                    className="h-4 w-4"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                    strokeWidth={2}
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M12 4v16m8-8H4"
+                                                    />
                                                 </svg>
                                             </div>
-                                            <p className="text-xs font-semibold text-gray-700">Entri Baru Dibuat</p>
-                                            <p className="text-[11px] text-gray-400 mt-0.5">Tidak ada data sebelum perubahan ini.</p>
+                                            <p className="text-xs font-semibold text-gray-700">
+                                                Entri Baru Dibuat
+                                            </p>
+                                            <p className="mt-0.5 text-[11px] text-gray-400">
+                                                Tidak ada data sebelum perubahan
+                                                ini.
+                                            </p>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
                             {/* SESUDAHNYA (AFTER) */}
-                            <div className="flex flex-col rounded-2xl border-2 border-[#145e5b] bg-white overflow-hidden shadow-xs">
+                            <div className="flex flex-col overflow-hidden rounded-2xl border-2 border-[#145e5b] bg-white shadow-xs">
                                 <div className="flex items-center justify-between bg-[#145e5b] px-4 py-3 text-white">
                                     <div className="flex items-center gap-2">
-                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-white text-xs font-bold">
+                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white">
                                             ✓
                                         </span>
-                                        <span className="text-xs font-bold text-white tracking-wider">
+                                        <span className="text-xs font-bold tracking-wider text-white">
                                             SESUDAHNYA (AFTER)
                                         </span>
                                     </div>
-                                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-white/20 text-emerald-100">
+                                    <span className="rounded bg-white/20 px-2 py-0.5 text-[10px] font-bold text-emerald-100 uppercase">
                                         Nilai Baru
                                     </span>
                                 </div>
 
-                                <div className="p-4 flex-1">
-                                    {afterObj && Object.keys(afterObj).length > 0 ? (
+                                <div className="flex-1 p-4">
+                                    {afterObj &&
+                                    Object.keys(afterObj).length > 0 ? (
                                         <div className="space-y-2.5">
                                             {displayedItems.map((item) => {
-                                                const isChanged = item.status === 'changed';
-                                                const isAdded = item.status === 'added';
-                                                const isMissing = item.afterVal === undefined;
+                                                const isChanged =
+                                                    item.status === 'changed';
+                                                const isAdded =
+                                                    item.status === 'added';
+                                                const isMissing =
+                                                    item.afterVal === undefined;
 
                                                 return (
                                                     <div
                                                         key={item.key}
-                                                        className={`p-3.5 rounded-xl transition-colors border ${
+                                                        className={`rounded-xl border p-3.5 transition-colors ${
                                                             isChanged
-                                                                ? 'bg-[#eef9f5] border-emerald-300 ring-1 ring-[#145e5b]/15'
+                                                                ? 'border-emerald-300 bg-[#eef9f5] ring-1 ring-[#145e5b]/15'
                                                                 : isAdded
-                                                                ? 'bg-emerald-50/60 border-emerald-200'
-                                                                : 'bg-gray-50/60 border-gray-100'
+                                                                  ? 'border-emerald-200 bg-emerald-50/60'
+                                                                  : 'border-gray-100 bg-gray-50/60'
                                                         }`}
                                                     >
-                                                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                                                        <div className="mb-1.5 flex items-center justify-between gap-2">
                                                             <span className="text-xs font-bold text-gray-800">
                                                                 {item.label}
                                                             </span>
                                                             {isChanged && (
-                                                                <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-[#0f766e]">
+                                                                <span className="inline-flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-[#0f766e] uppercase">
                                                                     ✓ Diperbarui
                                                                 </span>
                                                             )}
                                                             {isAdded && (
-                                                                <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-[#0f766e]">
+                                                                <span className="inline-flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-[#0f766e] uppercase">
                                                                     + Ditambah
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <div className="text-xs text-gray-900 break-words font-medium">
+                                                        <div className="text-xs font-medium break-words text-gray-900">
                                                             {isMissing ? (
-                                                                <span className="text-[11px] text-red-500 italic font-mono bg-red-50 px-2 py-0.5 rounded border border-dashed border-red-200">
+                                                                <span className="rounded border border-dashed border-red-200 bg-red-50 px-2 py-0.5 font-mono text-[11px] text-red-500 italic">
                                                                     (Dihapus)
                                                                 </span>
                                                             ) : (
-                                                                formatValueDisplay(item.afterVal)
+                                                                formatValueDisplay(
+                                                                    item.afterVal,
+                                                                )
                                                             )}
                                                         </div>
                                                     </div>
@@ -804,14 +1048,29 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
                                             })}
                                         </div>
                                     ) : (
-                                        <div className="h-full min-h-[120px] flex flex-col items-center justify-center p-6 text-center text-gray-400">
-                                            <div className="h-9 w-9 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-1.5">
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        <div className="flex h-full min-h-[120px] flex-col items-center justify-center p-6 text-center text-gray-400">
+                                            <div className="mb-1.5 flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-red-500">
+                                                <svg
+                                                    className="h-4 w-4"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                    strokeWidth={2}
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                    />
                                                 </svg>
                                             </div>
-                                            <p className="text-xs font-semibold text-gray-700">Data Dihapus Permanen</p>
-                                            <p className="text-[11px] text-gray-400 mt-0.5">Data telah dihilangkan dari sistem.</p>
+                                            <p className="text-xs font-semibold text-gray-700">
+                                                Data Dihapus Permanen
+                                            </p>
+                                            <p className="mt-0.5 text-[11px] text-gray-400">
+                                                Data telah dihilangkan dari
+                                                sistem.
+                                            </p>
                                         </div>
                                     )}
                                 </div>
@@ -825,18 +1084,28 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
                             <table className="w-full text-left text-xs">
                                 <thead className="border-b border-gray-200 bg-gray-50 text-[11px] font-bold text-gray-700">
                                     <tr>
-                                        <th className="p-3.5 w-1/4">Kolom / Atribut</th>
-                                        <th className="p-3.5 w-1/3">Sebelumnya (Lama)</th>
-                                        <th className="p-3.5 w-10 text-center"></th>
-                                        <th className="p-3.5 w-1/3">Sesudahnya (Baru)</th>
-                                        <th className="p-3.5 text-center">Status</th>
+                                        <th className="w-1/4 p-3.5">
+                                            Kolom / Atribut
+                                        </th>
+                                        <th className="w-1/3 p-3.5">
+                                            Sebelumnya (Lama)
+                                        </th>
+                                        <th className="w-10 p-3.5 text-center"></th>
+                                        <th className="w-1/3 p-3.5">
+                                            Sesudahnya (Baru)
+                                        </th>
+                                        <th className="p-3.5 text-center">
+                                            Status
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
                                     {displayedItems.map((item) => {
-                                        const isChanged = item.status === 'changed';
+                                        const isChanged =
+                                            item.status === 'changed';
                                         const isAdded = item.status === 'added';
-                                        const isRemoved = item.status === 'removed';
+                                        const isRemoved =
+                                            item.status === 'removed';
 
                                         return (
                                             <tr
@@ -845,59 +1114,90 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
                                                     isChanged
                                                         ? 'bg-amber-50/40 hover:bg-amber-50/60'
                                                         : isAdded
-                                                        ? 'bg-emerald-50/40 hover:bg-emerald-50/60'
-                                                        : isRemoved
-                                                        ? 'bg-red-50/40 hover:bg-red-50/60'
-                                                        : 'hover:bg-gray-50/50'
+                                                          ? 'bg-emerald-50/40 hover:bg-emerald-50/60'
+                                                          : isRemoved
+                                                            ? 'bg-red-50/40 hover:bg-red-50/60'
+                                                            : 'hover:bg-gray-50/50'
                                                 }`}
                                             >
                                                 <td className="p-3.5 align-top">
-                                                    <div className="font-bold text-gray-900 text-xs">{item.label}</div>
-                                                    <div className="text-[10px] font-mono text-gray-400">{item.key}</div>
+                                                    <div className="text-xs font-bold text-gray-900">
+                                                        {item.label}
+                                                    </div>
+                                                    <div className="font-mono text-[10px] text-gray-400">
+                                                        {item.key}
+                                                    </div>
                                                 </td>
                                                 <td className="p-3.5 align-top">
-                                                    {item.beforeVal !== undefined ? (
-                                                        <div className={isChanged ? 'text-rose-700' : ''}>
-                                                            {formatValueDisplay(item.beforeVal)}
+                                                    {item.beforeVal !==
+                                                    undefined ? (
+                                                        <div
+                                                            className={
+                                                                isChanged
+                                                                    ? 'text-rose-700'
+                                                                    : ''
+                                                            }
+                                                        >
+                                                            {formatValueDisplay(
+                                                                item.beforeVal,
+                                                            )}
                                                         </div>
                                                     ) : (
-                                                        <span className="text-gray-300 italic text-[11px]">—</span>
+                                                        <span className="text-[11px] text-gray-300 italic">
+                                                            —
+                                                        </span>
                                                     )}
                                                 </td>
                                                 <td className="p-3.5 text-center align-middle">
                                                     {isChanged ? (
-                                                        <span className="text-amber-500 font-bold text-sm">→</span>
+                                                        <span className="text-sm font-bold text-amber-500">
+                                                            →
+                                                        </span>
                                                     ) : (
-                                                        <span className="text-gray-300 text-sm">→</span>
+                                                        <span className="text-sm text-gray-300">
+                                                            →
+                                                        </span>
                                                     )}
                                                 </td>
                                                 <td className="p-3.5 align-top">
-                                                    {item.afterVal !== undefined ? (
-                                                        <div className={isChanged ? 'text-[#0f766e] font-semibold' : ''}>
-                                                            {formatValueDisplay(item.afterVal)}
+                                                    {item.afterVal !==
+                                                    undefined ? (
+                                                        <div
+                                                            className={
+                                                                isChanged
+                                                                    ? 'font-semibold text-[#0f766e]'
+                                                                    : ''
+                                                            }
+                                                        >
+                                                            {formatValueDisplay(
+                                                                item.afterVal,
+                                                            )}
                                                         </div>
                                                     ) : (
-                                                        <span className="text-red-400 italic text-[11px]">(Dihapus)</span>
+                                                        <span className="text-[11px] text-red-400 italic">
+                                                            (Dihapus)
+                                                        </span>
                                                     )}
                                                 </td>
                                                 <td className="p-3.5 text-center align-middle whitespace-nowrap">
                                                     {isChanged && (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                                                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-800">
                                                             Diubah
                                                         </span>
                                                     )}
                                                     {isAdded && (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                                        <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
                                                             Ditambah
                                                         </span>
                                                     )}
                                                     {isRemoved && (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800">
+                                                        <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-bold text-red-800">
                                                             Dihapus
                                                         </span>
                                                     )}
-                                                    {item.status === 'unchanged' && (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500">
+                                                    {item.status ===
+                                                        'unchanged' && (
+                                                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-medium text-gray-500">
                                                             Sama
                                                         </span>
                                                     )}
@@ -912,63 +1212,100 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
 
                     {/* View Mode 3: JSON Mentah (Light Mode) */}
                     {viewMode === 'json' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             {/* JSON Sebelumnya */}
-                            <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
-                                <div className="flex items-center justify-between bg-slate-50 px-4 py-2.5 border-b border-slate-200">
+                            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xs">
+                                <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2.5">
                                     <div className="flex items-center gap-2">
-                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold">
+                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-700">
                                             ←
                                         </span>
-                                        <span className="text-[11px] font-mono font-bold text-slate-700 uppercase tracking-wide">
+                                        <span className="font-mono text-[11px] font-bold tracking-wide text-slate-700 uppercase">
                                             JSON Sebelumnya (Berubah)
                                         </span>
                                     </div>
-                                    {beforeFilteredObj && Object.keys(beforeFilteredObj).length > 0 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => copyToClipboard(JSON.stringify(beforeFilteredObj, null, 2), true)}
-                                            className="inline-flex items-center gap-1 rounded-md bg-white border border-slate-200 px-2.5 py-1 text-[10px] font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer"
-                                        >
-                                            {copiedBefore ? '✓ Tersalin' : 'Salin JSON'}
-                                        </button>
-                                    )}
+                                    {beforeFilteredObj &&
+                                        Object.keys(beforeFilteredObj).length >
+                                            0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    copyToClipboard(
+                                                        JSON.stringify(
+                                                            beforeFilteredObj,
+                                                            null,
+                                                            2,
+                                                        ),
+                                                        true,
+                                                    )
+                                                }
+                                                className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50 hover:text-slate-900"
+                                            >
+                                                {copiedBefore
+                                                    ? '✓ Tersalin'
+                                                    : 'Salin JSON'}
+                                            </button>
+                                        )}
                                 </div>
-                                <div className="p-4 max-h-80 overflow-auto bg-[#fafbfc]">
-                                    <pre className="font-mono text-xs text-rose-700 whitespace-pre-wrap break-all leading-relaxed font-semibold">
-                                        {beforeFilteredObj && Object.keys(beforeFilteredObj).length > 0
-                                             ? JSON.stringify(beforeFilteredObj, null, 2)
-                                             : '// Tidak ada data sebelumnya'}
+                                <div className="max-h-80 overflow-auto bg-[#fafbfc] p-4">
+                                    <pre className="font-mono text-xs leading-relaxed font-semibold break-all whitespace-pre-wrap text-rose-700">
+                                        {beforeFilteredObj &&
+                                        Object.keys(beforeFilteredObj).length >
+                                            0
+                                            ? JSON.stringify(
+                                                  beforeFilteredObj,
+                                                  null,
+                                                  2,
+                                              )
+                                            : '// Tidak ada data sebelumnya'}
                                     </pre>
                                 </div>
                             </div>
 
                             {/* JSON Sesudahnya */}
-                            <div className="rounded-2xl border-2 border-[#145e5b] bg-white overflow-hidden shadow-2xs">
+                            <div className="overflow-hidden rounded-2xl border-2 border-[#145e5b] bg-white shadow-2xs">
                                 <div className="flex items-center justify-between bg-[#145e5b] px-4 py-2.5 text-white">
                                     <div className="flex items-center gap-2">
-                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-white text-[10px] font-bold">
+                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold text-white">
                                             ✓
                                         </span>
-                                        <span className="text-[11px] font-mono font-bold text-white uppercase tracking-wide">
+                                        <span className="font-mono text-[11px] font-bold tracking-wide text-white uppercase">
                                             JSON Sesudahnya (Berubah)
                                         </span>
                                     </div>
-                                    {afterFilteredObj && Object.keys(afterFilteredObj).length > 0 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => copyToClipboard(JSON.stringify(afterFilteredObj, null, 2), false)}
-                                            className="inline-flex items-center gap-1 rounded-md bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-white/30 transition-colors cursor-pointer"
-                                        >
-                                            {copiedAfter ? '✓ Tersalin' : 'Salin JSON'}
-                                        </button>
-                                    )}
+                                    {afterFilteredObj &&
+                                        Object.keys(afterFilteredObj).length >
+                                            0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    copyToClipboard(
+                                                        JSON.stringify(
+                                                            afterFilteredObj,
+                                                            null,
+                                                            2,
+                                                        ),
+                                                        false,
+                                                    )
+                                                }
+                                                className="inline-flex cursor-pointer items-center gap-1 rounded-md bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-white transition-colors hover:bg-white/30"
+                                            >
+                                                {copiedAfter
+                                                    ? '✓ Tersalin'
+                                                    : 'Salin JSON'}
+                                            </button>
+                                        )}
                                 </div>
-                                <div className="p-4 max-h-80 overflow-auto bg-[#f6fcfb]">
-                                    <pre className="font-mono text-xs text-[#0f766e] whitespace-pre-wrap break-all leading-relaxed font-semibold">
-                                        {afterFilteredObj && Object.keys(afterFilteredObj).length > 0
-                                             ? JSON.stringify(afterFilteredObj, null, 2)
-                                             : '// Data dihapus'}
+                                <div className="max-h-80 overflow-auto bg-[#f6fcfb] p-4">
+                                    <pre className="font-mono text-xs leading-relaxed font-semibold break-all whitespace-pre-wrap text-[#0f766e]">
+                                        {afterFilteredObj &&
+                                        Object.keys(afterFilteredObj).length > 0
+                                            ? JSON.stringify(
+                                                  afterFilteredObj,
+                                                  null,
+                                                  2,
+                                              )
+                                            : '// Data dihapus'}
                                     </pre>
                                 </div>
                             </div>
@@ -980,11 +1317,23 @@ const AuditDataDiffViewer: React.FC<{ log: AuditLog }> = ({ log }) => {
             {/* Alasan Perubahan Callout */}
             {log.alasan && (
                 <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 text-xs text-amber-900 shadow-2xs">
-                    <svg className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                        className="mt-0.5 h-4 w-4 shrink-0 text-amber-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                     </svg>
                     <div>
-                        <span className="font-bold text-amber-950">Catatan / Alasan Perubahan:</span>{' '}
+                        <span className="font-bold text-amber-950">
+                            Catatan / Alasan Perubahan:
+                        </span>{' '}
                         <span className="text-amber-900">{log.alasan}</span>
                     </div>
                 </div>
@@ -1008,7 +1357,9 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
         const initial = new Set<string>();
         if (logsData && logsData.length > 1) {
             // Find a log with data_sebelum/data_sesudah or default to the second log
-            const diffLog = logsData.find((l: AuditLog) => l.data_sebelum && l.data_sesudah);
+            const diffLog = logsData.find(
+                (l: AuditLog) => l.data_sebelum && l.data_sesudah,
+            );
             if (diffLog) initial.add(diffLog.id);
             else if (logsData[1]) initial.add(logsData[1].id);
         }
@@ -1028,7 +1379,10 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
     const updateFilter = (key: string, value: string) => {
         const newFilters = { ...localFilters, [key]: value };
         setLocalFilters(newFilters);
-        router.get('/audit-logs', newFilters, { preserveState: true, preserveScroll: true });
+        router.get('/audit-logs', newFilters, {
+            preserveState: true,
+            preserveScroll: true,
+        });
     };
 
     useEffect(() => {
@@ -1042,9 +1396,12 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
 
     // Construct export URL
     const exportParams = new URLSearchParams();
-    if (localFilters.date_from) exportParams.append('date_from', localFilters.date_from);
-    if (localFilters.date_to) exportParams.append('date_to', localFilters.date_to);
-    if (localFilters.pembuat_type) exportParams.append('pembuat_type', localFilters.pembuat_type);
+    if (localFilters.date_from)
+        exportParams.append('date_from', localFilters.date_from);
+    if (localFilters.date_to)
+        exportParams.append('date_to', localFilters.date_to);
+    if (localFilters.pembuat_type)
+        exportParams.append('pembuat_type', localFilters.pembuat_type);
     if (localFilters.aksi) exportParams.append('aksi', localFilters.aksi);
     if (localFilters.search) exportParams.append('search', localFilters.search);
     const exportUrl = `/audit-logs/export?${exportParams.toString()}`;
@@ -1052,21 +1409,32 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
     return (
         <div className="space-y-6">
             {/* Page Header: Title + Export Excel Button */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-serif font-bold text-gray-900 tracking-tight">
+                    <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-900">
                         Audit Log
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Pantau dan audit seluruh aktivitas pengguna dalam sistem RS Sentosa Medika.
+                    <p className="mt-1 text-sm text-gray-500">
+                        Pantau dan audit seluruh aktivitas pengguna dalam sistem
+                        RS Sentosa Medika.
                     </p>
                 </div>
                 <a
                     href={exportUrl}
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#145e5b] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-[#0f4a47] shrink-0"
+                    className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#145e5b] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-[#0f4a47]"
                 >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                        />
                     </svg>
                     Ekspor EXCEL
                 </a>
@@ -1074,29 +1442,45 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
 
             {/* Filter Section Card */}
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {/* 1. Rentang Waktu */}
                     <div className="flex flex-col">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label className="mb-1.5 text-[10px] font-bold tracking-wider text-gray-500 uppercase">
                             Rentang Waktu
                         </label>
-                        <div className="relative flex items-center rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs text-gray-700 hover:border-gray-300 focus-within:border-[#145e5b] focus-within:ring-1 focus-within:ring-[#145e5b] transition-all">
-                            <svg className="w-4 h-4 text-gray-400 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <div className="relative flex items-center rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs text-gray-700 transition-all focus-within:border-[#145e5b] focus-within:ring-1 focus-within:ring-[#145e5b] hover:border-gray-300">
+                            <svg
+                                className="mr-2 h-4 w-4 shrink-0 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
                             </svg>
                             <input
                                 type="date"
                                 value={localFilters.date_from || ''}
-                                onChange={(e) => updateFilter('date_from', e.target.value)}
-                                className="w-full bg-transparent border-0 p-0 text-xs text-gray-700 focus:ring-0 cursor-pointer"
+                                onChange={(e) =>
+                                    updateFilter('date_from', e.target.value)
+                                }
+                                className="w-full cursor-pointer border-0 bg-transparent p-0 text-xs text-gray-700 focus:ring-0"
                                 placeholder="Mulai"
                             />
-                            <span className="text-gray-400 px-1 text-xs">-</span>
+                            <span className="px-1 text-xs text-gray-400">
+                                -
+                            </span>
                             <input
                                 type="date"
                                 value={localFilters.date_to || ''}
-                                onChange={(e) => updateFilter('date_to', e.target.value)}
-                                className="w-full bg-transparent border-0 p-0 text-xs text-gray-700 focus:ring-0 cursor-pointer"
+                                onChange={(e) =>
+                                    updateFilter('date_to', e.target.value)
+                                }
+                                className="w-full cursor-pointer border-0 bg-transparent p-0 text-xs text-gray-700 focus:ring-0"
                                 placeholder="Selesai"
                             />
                         </div>
@@ -1104,14 +1488,16 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
 
                     {/* 2. Pengguna / Peran */}
                     <div className="flex flex-col">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label className="mb-1.5 text-[10px] font-bold tracking-wider text-gray-500 uppercase">
                             Pengguna / Peran
                         </label>
                         <div className="relative">
                             <select
                                 value={localFilters.pembuat_type || ''}
-                                onChange={(e) => updateFilter('pembuat_type', e.target.value)}
-                                className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 pr-9 text-xs text-gray-700 hover:border-gray-300 focus:border-[#145e5b] focus:ring-1 focus:ring-[#145e5b] focus:outline-none cursor-pointer transition-all"
+                                onChange={(e) =>
+                                    updateFilter('pembuat_type', e.target.value)
+                                }
+                                className="w-full cursor-pointer appearance-none rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 pr-9 text-xs text-gray-700 transition-all hover:border-gray-300 focus:border-[#145e5b] focus:ring-1 focus:ring-[#145e5b] focus:outline-none"
                             >
                                 <option value="">Semua Pengguna</option>
                                 <option value="admin">Administrator</option>
@@ -1122,54 +1508,90 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
                                 <option value="resepsionis">Resepsionis</option>
                                 <option value="manajemen">Manajemen</option>
                             </select>
-                            <svg className="pointer-events-none absolute right-3 top-3 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            <svg
+                                className="pointer-events-none absolute top-3 right-3 h-4 w-4 text-gray-500"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19 9l-7 7-7-7"
+                                />
                             </svg>
                         </div>
                     </div>
 
                     {/* 3. Jenis Tindakan */}
                     <div className="flex flex-col">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label className="mb-1.5 text-[10px] font-bold tracking-wider text-gray-500 uppercase">
                             Jenis Tindakan
                         </label>
                         <div className="relative">
                             <select
                                 value={localFilters.aksi || ''}
-                                onChange={(e) => updateFilter('aksi', e.target.value)}
-                                className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 pr-9 text-xs text-gray-700 hover:border-gray-300 focus:border-[#145e5b] focus:ring-1 focus:ring-[#145e5b] focus:outline-none cursor-pointer transition-all"
+                                onChange={(e) =>
+                                    updateFilter('aksi', e.target.value)
+                                }
+                                className="w-full cursor-pointer appearance-none rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 pr-9 text-xs text-gray-700 transition-all hover:border-gray-300 focus:border-[#145e5b] focus:ring-1 focus:ring-[#145e5b] focus:outline-none"
                             >
                                 <option value="">Semua Tindakan</option>
                                 <option value="AKSES_DATA">Akses Data</option>
                                 <option value="EDIT_DATA">Edit Data</option>
-                                <option value="HAPUS_PERMANEN">Hapus Permanen</option>
+                                <option value="HAPUS_PERMANEN">
+                                    Hapus Permanen
+                                </option>
                                 <option value="CREATE">Buat Data</option>
                                 <option value="LOGIN">Login</option>
                                 <option value="LOGOUT">Logout</option>
-                                <option value="UPDATE_STATUS">Update Status</option>
+                                <option value="UPDATE_STATUS">
+                                    Update Status
+                                </option>
                                 <option value="EXPORT_DATA">Ekspor Data</option>
                             </select>
-                            <svg className="pointer-events-none absolute right-3 top-3 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            <svg
+                                className="pointer-events-none absolute top-3 right-3 h-4 w-4 text-gray-500"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19 9l-7 7-7-7"
+                                />
                             </svg>
                         </div>
                     </div>
 
                     {/* 4. Cari Spesifik */}
                     <div className="flex flex-col">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        <label className="mb-1.5 text-[10px] font-bold tracking-wider text-gray-500 uppercase">
                             Cari Spesifik
                         </label>
                         <div className="relative">
-                            <svg className="absolute left-3.5 top-2.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            <svg
+                                className="absolute top-2.5 left-3.5 h-4 w-4 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
                             </svg>
                             <input
                                 type="text"
                                 placeholder="ID Pasien, Modul..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full rounded-xl border border-gray-200 bg-white pl-10 pr-3.5 py-2.5 text-xs text-gray-700 placeholder-gray-400 hover:border-gray-300 focus:border-[#145e5b] focus:ring-1 focus:ring-[#145e5b] focus:outline-none transition-all"
+                                className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pr-3.5 pl-10 text-xs text-gray-700 placeholder-gray-400 transition-all hover:border-gray-300 focus:border-[#145e5b] focus:ring-1 focus:ring-[#145e5b] focus:outline-none"
                             />
                         </div>
                     </div>
@@ -1182,49 +1604,82 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
                     <table className="w-full text-left text-xs text-gray-600">
                         <thead className="border-b border-gray-200 bg-white font-bold text-gray-900">
                             <tr>
-                                <th className="p-4 text-left font-bold text-gray-800">Waktu (WIB)</th>
-                                <th className="p-4 text-left font-bold text-gray-800">Pengguna</th>
-                                <th className="p-4 text-left font-bold text-gray-800">Tindakan</th>
-                                <th className="p-4 text-left font-bold text-gray-800">Modul / Target</th>
-                                <th className="p-4 text-left font-bold text-gray-800">IP & Perangkat</th>
-                                <th className="p-4 text-center font-bold text-gray-800">Detail</th>
+                                <th className="p-4 text-left font-bold text-gray-800">
+                                    Waktu (WIB)
+                                </th>
+                                <th className="p-4 text-left font-bold text-gray-800">
+                                    Pengguna
+                                </th>
+                                <th className="p-4 text-left font-bold text-gray-800">
+                                    Tindakan
+                                </th>
+                                <th className="p-4 text-left font-bold text-gray-800">
+                                    Modul / Target
+                                </th>
+                                <th className="p-4 text-left font-bold text-gray-800">
+                                    IP & Perangkat
+                                </th>
+                                <th className="p-4 text-center font-bold text-gray-800">
+                                    Detail
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {logsData && logsData.length > 0 ? (
                                 logsData.map((log: AuditLog) => {
-                                    const hasDetails = Boolean(log.data_sebelum || log.data_sesudah || log.alasan);
+                                    const hasDetails = Boolean(
+                                        log.data_sebelum ||
+                                        log.data_sesudah ||
+                                        log.alasan,
+                                    );
                                     const isExpanded = expandedRows.has(log.id);
-                                    const userName = log.pembuat?.nama_lengkap || 'System User';
-                                    const userJabatan = log.pembuat?.jabatan || (log.pembuat_type ? ucfirst(log.pembuat_type) : 'Staff');
-                                    const avatarInitials = getInitials(userName, log.pembuat_type);
-                                    const avatarStyle = getAvatarStyle(log.pembuat_type);
+                                    const userName =
+                                        log.pembuat?.nama_lengkap ||
+                                        'System User';
+                                    const userJabatan =
+                                        log.pembuat?.jabatan ||
+                                        (log.pembuat_type
+                                            ? ucfirst(log.pembuat_type)
+                                            : 'Staff');
+                                    const avatarInitials = getInitials(
+                                        userName,
+                                        log.pembuat_type,
+                                    );
+                                    const avatarStyle = getAvatarStyle(
+                                        log.pembuat_type,
+                                    );
                                     const targetInfo = formatTargetInfo(log);
 
                                     return (
                                         <React.Fragment key={log.id}>
-                                            <tr className="hover:bg-[#fcfdfd] transition-colors">
+                                            <tr className="transition-colors hover:bg-[#fcfdfd]">
                                                 {/* Waktu (WIB) */}
-                                                <td className="p-4 whitespace-nowrap align-middle">
-                                                    <div className="font-semibold text-gray-900 text-xs">
-                                                        {formatDate(log.created_at)}
+                                                <td className="p-4 align-middle whitespace-nowrap">
+                                                    <div className="text-xs font-semibold text-gray-900">
+                                                        {formatDate(
+                                                            log.created_at,
+                                                        )}
                                                     </div>
-                                                    <div className="text-[11px] text-gray-400 font-mono mt-0.5">
-                                                        {formatTime(log.created_at)}
+                                                    <div className="mt-0.5 font-mono text-[11px] text-gray-400">
+                                                        {formatTime(
+                                                            log.created_at,
+                                                        )}
                                                     </div>
                                                 </td>
 
                                                 {/* Pengguna */}
-                                                <td className="p-4 whitespace-nowrap align-middle">
+                                                <td className="p-4 align-middle whitespace-nowrap">
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs shadow-2xs shrink-0 ${avatarStyle}`}>
+                                                        <div
+                                                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold shadow-2xs ${avatarStyle}`}
+                                                        >
                                                             {avatarInitials}
                                                         </div>
                                                         <div>
-                                                            <div className="font-bold text-gray-900 text-xs leading-tight">
+                                                            <div className="text-xs leading-tight font-bold text-gray-900">
                                                                 {userName}
                                                             </div>
-                                                            <div className="text-[11px] text-gray-500 mt-0.5">
+                                                            <div className="mt-0.5 text-[11px] text-gray-500">
                                                                 {userJabatan}
                                                             </div>
                                                         </div>
@@ -1232,29 +1687,34 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
                                                 </td>
 
                                                 {/* Tindakan */}
-                                                <td className="p-4 whitespace-nowrap align-middle">
+                                                <td className="p-4 align-middle whitespace-nowrap">
                                                     {renderAksiBadge(log.aksi)}
                                                 </td>
 
                                                 {/* Modul / Target */}
                                                 <td className="p-4 align-middle">
-                                                    <div className="font-semibold text-gray-900 text-xs">
+                                                    <div className="text-xs font-semibold text-gray-900">
                                                         {targetInfo.title}
                                                     </div>
                                                     {targetInfo.subtitle && (
-                                                        <div className="text-[11px] text-gray-500 mt-0.5">
-                                                            {targetInfo.subtitle}
+                                                        <div className="mt-0.5 text-[11px] text-gray-500">
+                                                            {
+                                                                targetInfo.subtitle
+                                                            }
                                                         </div>
                                                     )}
                                                 </td>
 
                                                 {/* IP & Perangkat */}
-                                                <td className="p-4 whitespace-nowrap align-middle">
-                                                    <div className="text-xs text-gray-800 font-mono">
-                                                        {log.ip_address || '127.0.0.1'}
+                                                <td className="p-4 align-middle whitespace-nowrap">
+                                                    <div className="font-mono text-xs text-gray-800">
+                                                        {log.ip_address ||
+                                                            '127.0.0.1'}
                                                     </div>
-                                                    <div className="text-[11px] text-gray-500 mt-0.5">
-                                                        {parseUserAgent(log.user_agent)}
+                                                    <div className="mt-0.5 text-[11px] text-gray-500">
+                                                        {parseUserAgent(
+                                                            log.user_agent,
+                                                        )}
                                                     </div>
                                                 </td>
 
@@ -1263,24 +1723,36 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
                                                     {hasDetails ? (
                                                         <button
                                                             type="button"
-                                                            onClick={() => toggleRow(log.id)}
-                                                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#145e5b] hover:bg-[#e4f6f2] transition-colors"
+                                                            onClick={() =>
+                                                                toggleRow(
+                                                                    log.id,
+                                                                )
+                                                            }
+                                                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#145e5b] transition-colors hover:bg-[#e4f6f2]"
                                                             aria-label="Toggle detail perubahan"
                                                         >
                                                             <svg
                                                                 className={`h-4 w-4 transform transition-transform duration-200 ${
-                                                                    isExpanded ? 'rotate-180 text-[#145e5b]' : 'text-gray-400'
+                                                                    isExpanded
+                                                                        ? 'rotate-180 text-[#145e5b]'
+                                                                        : 'text-gray-400'
                                                                 }`}
                                                                 fill="none"
                                                                 viewBox="0 0 24 24"
                                                                 stroke="currentColor"
                                                                 strokeWidth={2}
                                                             >
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    d="M19 9l-7 7-7-7"
+                                                                />
                                                             </svg>
                                                         </button>
                                                     ) : (
-                                                        <span className="text-gray-300 text-xs">—</span>
+                                                        <span className="text-xs text-gray-300">
+                                                            —
+                                                        </span>
                                                     )}
                                                 </td>
                                             </tr>
@@ -1288,8 +1760,13 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
                                             {/* Expandable Diff Row */}
                                             {isExpanded && hasDetails && (
                                                 <tr className="bg-[#fcfdfd]/90">
-                                                    <td colSpan={6} className="px-6 py-5 border-b border-gray-100 bg-slate-50/40">
-                                                        <AuditDataDiffViewer log={log} />
+                                                    <td
+                                                        colSpan={6}
+                                                        className="border-b border-gray-100 bg-slate-50/40 px-6 py-5"
+                                                    >
+                                                        <AuditDataDiffViewer
+                                                            log={log}
+                                                        />
                                                     </td>
                                                 </tr>
                                             )}
@@ -1298,8 +1775,12 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan={6} className="p-12 text-center text-gray-400 text-xs">
-                                        Tidak ada catatan audit log yang sesuai dengan filter.
+                                    <td
+                                        colSpan={6}
+                                        className="p-12 text-center text-xs text-gray-400"
+                                    >
+                                        Tidak ada catatan audit log yang sesuai
+                                        dengan filter.
                                     </td>
                                 </tr>
                             )}
@@ -1308,89 +1789,179 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({
                 </div>
 
                 {/* Pagination Footer */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border-t border-gray-100 bg-white">
+                <div className="flex flex-col gap-4 border-t border-gray-100 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="text-xs text-gray-500">
-                        Menampilkan {pagination?.from || (logsData.length > 0 ? 1 : 0)}–{pagination?.to || logsData.length} dari {(pagination?.total || 2451).toLocaleString('id-ID')} log
+                        Menampilkan{' '}
+                        {pagination?.from || (logsData.length > 0 ? 1 : 0)}–
+                        {pagination?.to || logsData.length} dari{' '}
+                        {(pagination?.total || 2451).toLocaleString('id-ID')}{' '}
+                        log
                     </div>
 
                     {/* Pagination Links / Buttons */}
                     <div className="flex items-center gap-1">
                         {pagination?.links && pagination.links.length > 0 ? (
-                            pagination.links.map((link: { url: string | null; label: string; active: boolean }, i: number) => {
-                                let label = link.label;
-                                const isPrev = label.includes('Previous');
-                                const isNext = label.includes('Next');
+                            pagination.links.map(
+                                (
+                                    link: {
+                                        url: string | null;
+                                        label: string;
+                                        active: boolean;
+                                    },
+                                    i: number,
+                                ) => {
+                                    let label = link.label;
+                                    const isPrev = label.includes('Previous');
+                                    const isNext = label.includes('Next');
 
-                                if (isPrev) {
-                                    return (
+                                    if (isPrev) {
+                                        return (
+                                            <button
+                                                key={i}
+                                                disabled={!link.url}
+                                                onClick={() =>
+                                                    link.url &&
+                                                    router.get(
+                                                        link.url,
+                                                        localFilters,
+                                                        {
+                                                            preserveState: true,
+                                                            preserveScroll: true,
+                                                        },
+                                                    )
+                                                }
+                                                className={`rounded-md p-1.5 text-xs ${link.url ? 'text-gray-600 hover:bg-gray-100' : 'cursor-not-allowed text-gray-300'}`}
+                                                aria-label="Halaman Sebelumnya"
+                                            >
+                                                <svg
+                                                    className="h-4 w-4"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                    strokeWidth={2}
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M15 19l-7-7 7-7"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        );
+                                    }
+
+                                    if (isNext) {
+                                        return (
+                                            <button
+                                                key={i}
+                                                disabled={!link.url}
+                                                onClick={() =>
+                                                    link.url &&
+                                                    router.get(
+                                                        link.url,
+                                                        localFilters,
+                                                        {
+                                                            preserveState: true,
+                                                            preserveScroll: true,
+                                                        },
+                                                    )
+                                                }
+                                                className={`rounded-md p-1.5 text-xs ${link.url ? 'text-gray-600 hover:bg-gray-100' : 'cursor-not-allowed text-gray-300'}`}
+                                                aria-label="Halaman Berikutnya"
+                                            >
+                                                <svg
+                                                    className="h-4 w-4"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                    strokeWidth={2}
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M9 5l7 7-7 7"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        );
+                                    }
+
+                                    return link.url ? (
                                         <button
                                             key={i}
-                                            disabled={!link.url}
-                                            onClick={() => link.url && router.get(link.url, localFilters, { preserveState: true, preserveScroll: true })}
-                                            className={`p-1.5 text-xs rounded-md ${link.url ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed'}`}
-                                            aria-label="Halaman Sebelumnya"
+                                            onClick={() =>
+                                                router.get(
+                                                    link.url!,
+                                                    localFilters,
+                                                    {
+                                                        preserveState: true,
+                                                        preserveScroll: true,
+                                                    },
+                                                )
+                                            }
+                                            className={`flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold transition-all ${
+                                                link.active
+                                                    ? 'bg-[#145e5b] font-bold text-white shadow-2xs'
+                                                    : 'text-gray-700 hover:bg-gray-100'
+                                            }`}
                                         >
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                                            </svg>
+                                            {label}
                                         </button>
-                                    );
-                                }
-
-                                if (isNext) {
-                                    return (
-                                        <button
+                                    ) : (
+                                        <span
                                             key={i}
-                                            disabled={!link.url}
-                                            onClick={() => link.url && router.get(link.url, localFilters, { preserveState: true, preserveScroll: true })}
-                                            className={`p-1.5 text-xs rounded-md ${link.url ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed'}`}
-                                            aria-label="Halaman Berikutnya"
+                                            className="px-1.5 text-xs text-gray-400"
                                         >
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </button>
+                                            {label}
+                                        </span>
                                     );
-                                }
-
-                                return link.url ? (
-                                    <button
-                                        key={i}
-                                        onClick={() => router.get(link.url!, localFilters, { preserveState: true, preserveScroll: true })}
-                                        className={`h-7 w-7 rounded-md text-xs font-semibold transition-all flex items-center justify-center ${
-                                            link.active
-                                                ? 'bg-[#145e5b] text-white shadow-2xs font-bold'
-                                                : 'text-gray-700 hover:bg-gray-100'
-                                        }`}
-                                    >
-                                        {label}
-                                    </button>
-                                ) : (
-                                    <span key={i} className="px-1.5 text-xs text-gray-400">
-                                        {label}
-                                    </span>
-                                );
-                            })
+                                },
+                            )
                         ) : (
                             <>
-                                <button className="p-1.5 text-xs rounded-md text-gray-300 cursor-not-allowed" disabled>
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                                <button
+                                    className="cursor-not-allowed rounded-md p-1.5 text-xs text-gray-300"
+                                    disabled
+                                >
+                                    <svg
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M15 19l-7-7 7-7"
+                                        />
                                     </svg>
                                 </button>
-                                <button className="h-7 w-7 rounded-md bg-[#145e5b] text-white text-xs font-bold shadow-2xs flex items-center justify-center">
+                                <button className="flex h-7 w-7 items-center justify-center rounded-md bg-[#145e5b] text-xs font-bold text-white shadow-2xs">
                                     1
                                 </button>
-                                <button className="h-7 w-7 rounded-md text-gray-700 hover:bg-gray-100 text-xs font-semibold flex items-center justify-center">
+                                <button className="flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold text-gray-700 hover:bg-gray-100">
                                     2
                                 </button>
-                                <button className="h-7 w-7 rounded-md text-gray-700 hover:bg-gray-100 text-xs font-semibold flex items-center justify-center">
+                                <button className="flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold text-gray-700 hover:bg-gray-100">
                                     3
                                 </button>
-                                <span className="px-1.5 text-xs text-gray-400">...</span>
-                                <button className="p-1.5 text-xs rounded-md text-gray-600 hover:bg-gray-100">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                <span className="px-1.5 text-xs text-gray-400">
+                                    ...
+                                </span>
+                                <button className="rounded-md p-1.5 text-xs text-gray-600 hover:bg-gray-100">
+                                    <svg
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M9 5l7 7-7 7"
+                                        />
                                     </svg>
                                 </button>
                             </>

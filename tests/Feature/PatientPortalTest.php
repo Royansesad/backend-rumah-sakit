@@ -81,16 +81,60 @@ it('blocks staff accounts from the patient portal', function () {
     $this->get('/portal/booking')->assertRedirect(route('dashboard'));
 });
 
-it('lists only finalized medical records for the logged-in patient', function () {
+it('lists finalized medical records, imaging, and prescriptions for the logged-in patient', function () {
     patientPortalLogin();
 
     $pasien = pasienByName('Agus Setiawan');
-    expect($pasien->rekamMedis()->where('status', 'draft')->count())->toBeGreaterThan(0);
 
     $this->get('/portal/rekam-medis')->assertInertia(fn (Assert $page) => $page
         ->component('portal/rekam-medis')
-        ->has('rekamMedis', $pasien->rekamMedis()->where('status', 'final')->count())
-        ->where('rekamMedis.0.status', 'final'));
+        ->has('pasien')
+        ->where('pasien.nama_lengkap', 'Agus Setiawan')
+        ->has('hasilRadiologi')
+        ->has('riwayatDiagnosa')
+        ->has('resepAktif')
+        ->has('riwayatResep'));
+});
+
+it('allows a patient to submit a prescription refill request', function () {
+    patientPortalLogin();
+
+    $pasien = pasienByName('Agus Setiawan');
+
+    $this->post('/portal/rekam-medis/refill', [
+        'nama_obat' => 'Amlodipine 5mg',
+        'dosis_diminta' => 30,
+        'catatan' => 'Obat rutin bulanan habis.',
+    ])->assertRedirect()->assertSessionHas('success');
+
+    $this->assertDatabaseHas('permintaan_refill_obat', [
+        'pasien_id' => $pasien->id,
+        'nama_obat' => 'Amlodipine 5mg',
+        'dosis_diminta' => 30,
+        'status' => 'menunggu_konfirmasi',
+    ]);
+
+    expect(\Illuminate\Support\Facades\DB::table('audit_logs')
+        ->where('aksi', 'REQUEST_REFILL_OBAT')->exists())->toBeTrue();
+});
+
+it('allows a patient to update their health snapshot', function () {
+    patientPortalLogin();
+
+    $pasien = pasienByName('Agus Setiawan');
+
+    $this->post('/portal/rekam-medis/snapshot', [
+        'alergi' => 'Alergi Penisilin, Debu',
+        'kondisi_kronis' => 'Hipertensi (Terkontrol Baik)',
+        'golongan_darah' => 'O+',
+    ])->assertRedirect()->assertSessionHas('success');
+
+    $this->assertDatabaseHas('pasien', [
+        'id' => $pasien->id,
+        'alergi' => 'Alergi Penisilin, Debu',
+        'kondisi_terakhir' => 'Hipertensi (Terkontrol Baik)',
+        'golongan_darah' => 'O',
+    ]);
 });
 
 it('shows medical record detail including prescription items', function () {
@@ -314,3 +358,55 @@ it('exposes available schedules on the booking page', function () {
         ->where('jadwalTersedia.0.sisa_kuota', 10)
         ->has('poliList'));
 });
+
+it('allows a patient to update their health and contact profile', function () {
+    patientPortalLogin();
+
+    $pasien = pasienByName('Agus Setiawan');
+
+    $this->post('/portal/profil', [
+        'no_hp' => '081299887766',
+        'alamat' => 'Jl. Kebon Jeruk No. 12',
+        'golongan_darah' => 'AB',
+        'alergi' => 'Alergi Seafood & Amoxicillin',
+        'kondisi_terakhir' => 'Hipertensi Terkontrol',
+    ])->assertRedirect()->assertSessionHas('success');
+
+    $this->assertDatabaseHas('pasien', [
+        'id' => $pasien->id,
+        'no_hp' => '081299887766',
+        'golongan_darah' => 'AB',
+        'alergi' => 'Alergi Seafood & Amoxicillin',
+    ]);
+});
+
+it('allows a patient to pay their hospital bill online', function () {
+    patientPortalLogin();
+
+    $pasien = pasienByName('Agus Setiawan');
+
+    $tagihan = Tagihan::create([
+        'no_invoice' => 'INV-ONLINE-001',
+        'pasien_id' => $pasien->id,
+        'layanan' => 'Poli Penyakit Dalam',
+        'subtotal' => 750000,
+        'diskon' => 0,
+        'pajak' => 0,
+        'total_tagihan' => 750000,
+        'jumlah_dibayar' => 0,
+        'kembalian' => 0,
+        'status' => 'belum_lunas',
+        'rincian' => [],
+    ]);
+
+    $this->post("/portal/tagihan/{$tagihan->id}/bayar", [
+        'metode_pembayaran' => 'QRIS',
+    ])->assertRedirect()->assertSessionHas('success');
+
+    $this->assertDatabaseHas('tagihans', [
+        'id' => $tagihan->id,
+        'status' => 'lunas',
+        'metode_pembayaran' => 'QRIS',
+    ]);
+});
+

@@ -23,11 +23,18 @@ class SimrsOperatorService
             ];
         }
 
-        $sessionUser = $request->session()->get('simrs_user', null);
+        if ($request->hasSession()) {
+            $sessionUser = $request->session()->get('simrs_user', null);
+
+            return [
+                'id' => $sessionUser['id'] ?? null,
+                'role' => (string) $request->session()->get('simrs_role', 'admin'),
+            ];
+        }
 
         return [
-            'id' => $sessionUser['id'] ?? null,
-            'role' => (string) $request->session()->get('simrs_role', 'admin'),
+            'id' => null,
+            'role' => 'admin',
         ];
     }
 }

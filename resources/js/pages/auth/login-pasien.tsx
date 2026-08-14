@@ -1,6 +1,12 @@
 import { useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
-import { Eye, EyeOff, AlertCircle, ShieldCheck, Smartphone } from 'lucide-react';
+import {
+    Eye,
+    EyeOff,
+    AlertCircle,
+    ShieldCheck,
+    Smartphone,
+} from 'lucide-react';
 
 export default function LoginPasien() {
     const [showPassword, setShowPassword] = useState(false);
@@ -18,9 +24,9 @@ export default function LoginPasien() {
     };
 
     return (
-        <div className="flex h-screen max-h-screen w-full flex-col bg-white font-sans text-gray-900 overflow-hidden">
+        <div className="flex h-screen max-h-screen w-full flex-col overflow-hidden bg-white font-sans text-gray-900">
             {/* Header Top Navbar */}
-            <header className="flex h-12 w-full items-center justify-between border-b border-[#e2efe9] bg-[#f2f9f7] px-6 md:px-12 shrink-0">
+            <header className="flex h-12 w-full shrink-0 items-center justify-between border-b border-[#e2efe9] bg-[#f2f9f7] px-6 md:px-12">
                 <div className="font-serif text-lg font-bold tracking-tight text-[#17524c]">
                     RS Sentosa Medika
                 </div>
@@ -33,10 +39,10 @@ export default function LoginPasien() {
             </header>
 
             {/* Main Content Split Layout */}
-            <div className="flex flex-1 flex-col lg:flex-row min-h-0 overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
                 {/* Left Side: Form Container */}
-                <div className="flex w-full items-center justify-center bg-[#f2f9f7] p-4 lg:w-1/2 lg:p-8 overflow-y-auto">
-                    <div className="w-full max-w-[380px] rounded-sm border border-[#dce8e4] bg-white p-5 shadow-none sm:p-6 my-auto">
+                <div className="flex w-full items-center justify-center overflow-y-auto bg-[#f2f9f7] p-4 lg:w-1/2 lg:p-8">
+                    <div className="my-auto w-full max-w-[380px] rounded-sm border border-[#dce8e4] bg-white p-5 shadow-none sm:p-6">
                         {/* Header inside Card */}
                         <h3 className="font-serif text-xs font-bold text-[#17524c]">
                             RS Sentosa Medika
@@ -53,13 +59,18 @@ export default function LoginPasien() {
                             <div className="mt-3 flex items-center gap-2.5 rounded-[3px] border border-[#fca5a5] bg-[#fde8e8] p-2 text-xs font-medium text-[#c53030]">
                                 <AlertCircle className="h-4 w-4 shrink-0 text-[#e53e3e]" />
                                 <span>
-                                    {errors.email || errors.password || 'Email atau kata sandi salah'}
+                                    {errors.email ||
+                                        errors.password ||
+                                        'Email atau kata sandi salah'}
                                 </span>
                             </div>
                         )}
 
                         {/* Login Form */}
-                        <form onSubmit={handleSubmit} className="mt-3 space-y-2.5">
+                        <form
+                            onSubmit={handleSubmit}
+                            className="mt-3 space-y-2.5"
+                        >
                             <div>
                                 <label className="mb-1 block text-[11px] font-bold text-gray-600">
                                     Email atau Nomor Rekam Medis
@@ -90,12 +101,14 @@ export default function LoginPasien() {
                                 </div>
                                 <div className="relative">
                                     <input
-                                        type={showPassword ? 'text' : 'password'}
+                                        type={
+                                            showPassword ? 'text' : 'password'
+                                        }
                                         value={data.password}
                                         onChange={(e) =>
                                             setData('password', e.target.value)
                                         }
-                                        className="w-full rounded-[4px] border border-gray-200 bg-[#fbfcfc] py-1.5 pl-3 pr-8 text-xs text-gray-800 placeholder:text-gray-400 focus:border-[#257a72] focus:bg-white focus:outline-none"
+                                        className="w-full rounded-[4px] border border-gray-200 bg-[#fbfcfc] py-1.5 pr-8 pl-3 text-xs text-gray-800 placeholder:text-gray-400 focus:border-[#257a72] focus:bg-white focus:outline-none"
                                         placeholder="Masukkan kata sandi Anda"
                                         required
                                     />
@@ -104,7 +117,7 @@ export default function LoginPasien() {
                                         onClick={() =>
                                             setShowPassword(!showPassword)
                                         }
-                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                     >
                                         {showPassword ? (
                                             <EyeOff className="h-4 w-4" />
@@ -128,7 +141,7 @@ export default function LoginPasien() {
                                 />
                                 <label
                                     htmlFor="remember"
-                                    className="select-none text-[11px] text-gray-600 cursor-pointer"
+                                    className="cursor-pointer text-[11px] text-gray-600 select-none"
                                 >
                                     Ingat saya di perangkat ini
                                 </label>
@@ -138,7 +151,7 @@ export default function LoginPasien() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="mt-1 w-full rounded-[4px] bg-[#3d8b87] py-2 text-xs font-bold uppercase tracking-wider text-white shadow-none transition-colors hover:bg-[#317773] disabled:opacity-70 cursor-pointer"
+                                className="mt-1 w-full cursor-pointer rounded-[4px] bg-[#3d8b87] py-2 text-xs font-bold tracking-wider text-white uppercase shadow-none transition-colors hover:bg-[#317773] disabled:opacity-70"
                             >
                                 {processing ? 'Memproses...' : 'MASUK SEKARANG'}
                             </button>
@@ -158,9 +171,12 @@ export default function LoginPasien() {
                         <div className="grid grid-cols-2 gap-2.5">
                             <button
                                 type="button"
-                                className="flex items-center justify-center gap-1.5 rounded-[4px] border border-gray-200 bg-white py-1.5 px-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
+                                className="flex cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
                             >
-                                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24">
+                                <svg
+                                    className="h-3.5 w-3.5"
+                                    viewBox="0 0 24 24"
+                                >
                                     <path
                                         fill="#4285F4"
                                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -182,7 +198,7 @@ export default function LoginPasien() {
                             </button>
                             <button
                                 type="button"
-                                className="flex items-center justify-center gap-1.5 rounded-[4px] border border-gray-200 bg-white py-1.5 px-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
+                                className="flex cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
                             >
                                 <Smartphone className="h-3.5 w-3.5 text-gray-500" />
                                 <span>Kode OTP</span>
@@ -205,17 +221,21 @@ export default function LoginPasien() {
                 {/* Right Side: Hero Image Banner */}
                 <div
                     className="relative hidden w-1/2 flex-col justify-center bg-cover bg-center p-8 lg:flex lg:p-10"
-                    style={{ backgroundImage: "url('/images/pasien-login.jpg')" }}
+                    style={{
+                        backgroundImage: "url('/images/pasien-login.jpg')",
+                    }}
                 >
                     {/* Contrast overlay for readability */}
                     <div className="absolute inset-0 bg-black/20" />
 
                     <div className="relative z-10 max-w-lg">
-                        <h2 className="font-serif text-3xl font-bold leading-tight text-white xl:text-4xl drop-shadow-sm">
+                        <h2 className="font-serif text-3xl leading-tight font-bold text-white drop-shadow-sm xl:text-4xl">
                             Melayani dengan Sepenuh Hati
                         </h2>
-                        <p className="mt-2 text-xs font-normal leading-relaxed text-white/95 drop-shadow-sm max-w-md">
-                            Selamat datang kembali di portal pasien RS Sentosa Medika. Kami hadir untuk memudahkan akses informasi kesehatan Anda dengan rasa aman dan nyaman.
+                        <p className="mt-2 max-w-md text-xs leading-relaxed font-normal text-white/95 drop-shadow-sm">
+                            Selamat datang kembali di portal pasien RS Sentosa
+                            Medika. Kami hadir untuk memudahkan akses informasi
+                            kesehatan Anda dengan rasa aman dan nyaman.
                         </p>
 
                         {/* Accreditation Badge */}
@@ -237,7 +257,7 @@ export default function LoginPasien() {
             </div>
 
             {/* Footer Bottom Bar */}
-            <footer className="flex h-13 w-full flex-col items-center justify-between gap-2 border-t border-[#dbe8e2] bg-[#e2efe9] px-6 py-2 text-[11px] text-gray-600 md:flex-row md:px-12 shrink-0">
+            <footer className="flex h-13 w-full shrink-0 flex-col items-center justify-between gap-2 border-t border-[#dbe8e2] bg-[#e2efe9] px-6 py-2 text-[11px] text-gray-600 md:flex-row md:px-12">
                 <div className="font-serif text-xs font-bold text-[#17524c]">
                     RS Sentosa Medika
                 </div>
@@ -255,12 +275,10 @@ export default function LoginPasien() {
                         Privacy Policy
                     </a>
                 </div>
-                <div className="text-gray-500 text-[10px]">
+                <div className="text-[10px] text-gray-500">
                     © 2024 RS Sentosa Medika. All rights reserved.
                 </div>
             </footer>
         </div>
     );
 }
-
-

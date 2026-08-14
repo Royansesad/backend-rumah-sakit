@@ -23,7 +23,8 @@ export default function ApotekerMenu({
                             Modul {menu}
                         </h1>
                         <p className="mt-1 text-sm text-gray-500">
-                            Pusat pelayanan resep digital, penebusan obat, dan pengelolaan stok inventaris apotek.
+                            Pusat pelayanan resep digital, penebusan obat, dan
+                            pengelolaan stok inventaris apotek.
                         </p>
                     </div>
                     <Link
@@ -34,18 +35,31 @@ export default function ApotekerMenu({
                     </Link>
                 </div>
 
-                <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xs text-center space-y-6">
+                <div className="space-y-6 rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-xs">
                     <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-800">
-                        <svg className="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.6 15.12a2 2 0 00-1.022.547l-1.3 1.3a2 2 0 00-.578 1.414V20a2 2 0 002 2h16a2 2 0 002-2v-1.618a2 2 0 00-.578-1.414l-1.3-1.3zM12 4a4 4 0 100 8 4 4 0 000-8z" />
+                        <svg
+                            className="h-9 w-9"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.6 15.12a2 2 0 00-1.022.547l-1.3 1.3a2 2 0 00-.578 1.414V20a2 2 0 002 2h16a2 2 0 002-2v-1.618a2 2 0 00-.578-1.414l-1.3-1.3zM12 4a4 4 0 100 8 4 4 0 000-8z"
+                            />
                         </svg>
                     </div>
-                    <div className="max-w-md mx-auto space-y-2">
+                    <div className="mx-auto max-w-md space-y-2">
                         <h2 className="text-xl font-bold text-gray-900">
                             Sistem Farmasi SIMRS Sentosa Medika
                         </h2>
-                        <p className="text-xs text-gray-500 leading-relaxed">
-                            Seluruh fungsi penebusan resep real-time (pemotongan stok otomatis), manajemen katalog obat master, pencatatan pengeluaran stok, dan riwayat transaksi telah aktif secara penuh di Dashboard Apoteker.
+                        <p className="text-xs leading-relaxed text-gray-500">
+                            Seluruh fungsi penebusan resep real-time (pemotongan
+                            stok otomatis), manajemen katalog obat master,
+                            pencatatan pengeluaran stok, dan riwayat transaksi
+                            telah aktif secara penuh di Dashboard Apoteker.
                         </p>
                     </div>
 

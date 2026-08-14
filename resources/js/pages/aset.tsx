@@ -676,99 +676,179 @@ export default function Aset({
             `}</style>
 
             {/* Printable Report (Visible ONLY in Print Mode - Designed to fit 1 Page) */}
-            <div id="print-area" className="hidden print:block font-sans text-black p-0 m-0">
+            <div
+                id="print-area"
+                className="m-0 hidden p-0 font-sans text-black print:block"
+            >
                 {/* Kop RS */}
-                <div className="flex items-center justify-between border-b-2 border-[#0d5c58] pb-1.5 mb-2">
+                <div className="mb-2 flex items-center justify-between border-b-2 border-[#0d5c58] pb-1.5">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded bg-[#0d5c58] text-white flex items-center justify-center font-black text-lg">
+                        <div className="flex h-8 w-8 items-center justify-center rounded bg-[#0d5c58] text-lg font-black text-white">
                             +
                         </div>
                         <div>
-                            <h1 className="text-sm font-extrabold tracking-wide uppercase text-[#0d5c58] leading-tight">
+                            <h1 className="text-sm leading-tight font-extrabold tracking-wide text-[#0d5c58] uppercase">
                                 RUMAH SAKIT SENTOSA MEDIKA
                             </h1>
                             <p className="text-[8.5px] text-slate-600">
-                                Sistem Informasi Manajemen Rumah Sakit (SIMRS) • Divisi Sarana & Prasarana
+                                Sistem Informasi Manajemen Rumah Sakit (SIMRS) •
+                                Divisi Sarana & Prasarana
                             </p>
                         </div>
                     </div>
-                    <div className="text-right text-[8.5px] text-slate-600 leading-tight">
-                        <p><strong>Tanggal Cetak:</strong> {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                        <p><strong>Petugas:</strong> {user?.nama_lengkap || user?.name || 'Budi Santoso'}</p>
+                    <div className="text-right text-[8.5px] leading-tight text-slate-600">
+                        <p>
+                            <strong>Tanggal Cetak:</strong>{' '}
+                            {new Date().toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                            })}
+                        </p>
+                        <p>
+                            <strong>Petugas:</strong>{' '}
+                            {user?.nama_lengkap || user?.name || 'Budi Santoso'}
+                        </p>
                     </div>
                 </div>
 
                 {/* Title */}
-                <div className="text-center mb-2">
-                    <h2 className="text-xs font-black tracking-wide uppercase text-slate-900 leading-tight">
+                <div className="mb-2 text-center">
+                    <h2 className="text-xs leading-tight font-black tracking-wide text-slate-900 uppercase">
                         LAPORAN INVENTARISASI & REKAPITULASI ASET TETAP
                     </h2>
                     <p className="text-[8px] text-slate-500">
-                        Rekapitulasi Fisik, Nilai Buku, dan Status Operasional Aset Rumah Sakit
+                        Rekapitulasi Fisik, Nilai Buku, dan Status Operasional
+                        Aset Rumah Sakit
                     </p>
                 </div>
 
                 {/* KPI Summary Bar */}
-                <div className="grid grid-cols-4 gap-2 mb-2">
-                    <div className="border border-slate-300 bg-slate-50/80 rounded px-2.5 py-1 flex items-center justify-between">
-                        <span className="text-[8.5px] font-bold text-slate-600 uppercase">Total Aset</span>
-                        <span className="text-xs font-extrabold text-slate-900">{kpi.total_aset} Unit</span>
+                <div className="mb-2 grid grid-cols-4 gap-2">
+                    <div className="flex items-center justify-between rounded border border-slate-300 bg-slate-50/80 px-2.5 py-1">
+                        <span className="text-[8.5px] font-bold text-slate-600 uppercase">
+                            Total Aset
+                        </span>
+                        <span className="text-xs font-extrabold text-slate-900">
+                            {kpi.total_aset} Unit
+                        </span>
                     </div>
-                    <div className="border border-slate-300 bg-slate-50/80 rounded px-2.5 py-1 flex items-center justify-between">
-                        <span className="text-[8.5px] font-bold text-slate-600 uppercase">Nilai Buku</span>
-                        <span className="text-xs font-extrabold text-[#0d5c58]">{formatRupiah(kpi.nilai_buku)}</span>
+                    <div className="flex items-center justify-between rounded border border-slate-300 bg-slate-50/80 px-2.5 py-1">
+                        <span className="text-[8.5px] font-bold text-slate-600 uppercase">
+                            Nilai Buku
+                        </span>
+                        <span className="text-xs font-extrabold text-[#0d5c58]">
+                            {formatRupiah(kpi.nilai_buku)}
+                        </span>
                     </div>
-                    <div className="border border-rose-200 bg-rose-50/80 rounded px-2.5 py-1 flex items-center justify-between">
-                        <span className="text-[8.5px] font-bold text-rose-600 uppercase">Aset Rusak</span>
-                        <span className="text-xs font-extrabold text-rose-700">{kpi.rusak} Unit</span>
+                    <div className="flex items-center justify-between rounded border border-rose-200 bg-rose-50/80 px-2.5 py-1">
+                        <span className="text-[8.5px] font-bold text-rose-600 uppercase">
+                            Aset Rusak
+                        </span>
+                        <span className="text-xs font-extrabold text-rose-700">
+                            {kpi.rusak} Unit
+                        </span>
                     </div>
-                    <div className="border border-teal-200 bg-teal-50/80 rounded px-2.5 py-1 flex items-center justify-between">
-                        <span className="text-[8.5px] font-bold text-teal-700 uppercase">Maintenance</span>
-                        <span className="text-xs font-extrabold text-[#0d5c58]">{kpi.maintenance} Unit</span>
+                    <div className="flex items-center justify-between rounded border border-teal-200 bg-teal-50/80 px-2.5 py-1">
+                        <span className="text-[8.5px] font-bold text-teal-700 uppercase">
+                            Maintenance
+                        </span>
+                        <span className="text-xs font-extrabold text-[#0d5c58]">
+                            {kpi.maintenance} Unit
+                        </span>
                     </div>
                 </div>
 
                 {/* Table */}
-                <table className="w-full border-collapse border border-slate-300 text-[8.5px] mb-2">
+                <table className="mb-2 w-full border-collapse border border-slate-300 text-[8.5px]">
                     <thead>
                         <tr className="bg-[#0d5c58] text-white">
-                            <th className="border border-[#0d5c58] p-1 text-center w-6 font-bold">No</th>
-                            <th className="border border-[#0d5c58] p-1 text-left w-20 font-bold">Kode Aset</th>
-                            <th className="border border-[#0d5c58] p-1 text-left font-bold">Nama Aset & Spesifikasi</th>
-                            <th className="border border-[#0d5c58] p-1 text-left w-24 font-bold">Kategori</th>
-                            <th className="border border-[#0d5c58] p-1 text-left w-24 font-bold">Lokasi</th>
-                            <th className="border border-[#0d5c58] p-1 text-center w-16 font-bold">Perolehan</th>
-                            <th className="border border-[#0d5c58] p-1 text-right w-24 font-bold">Nilai Perolehan</th>
-                            <th className="border border-[#0d5c58] p-1 text-right w-24 font-bold">Nilai Buku</th>
-                            <th className="border border-[#0d5c58] p-1 text-center w-18 font-bold">Status</th>
+                            <th className="w-6 border border-[#0d5c58] p-1 text-center font-bold">
+                                No
+                            </th>
+                            <th className="w-20 border border-[#0d5c58] p-1 text-left font-bold">
+                                Kode Aset
+                            </th>
+                            <th className="border border-[#0d5c58] p-1 text-left font-bold">
+                                Nama Aset & Spesifikasi
+                            </th>
+                            <th className="w-24 border border-[#0d5c58] p-1 text-left font-bold">
+                                Kategori
+                            </th>
+                            <th className="w-24 border border-[#0d5c58] p-1 text-left font-bold">
+                                Lokasi
+                            </th>
+                            <th className="w-16 border border-[#0d5c58] p-1 text-center font-bold">
+                                Perolehan
+                            </th>
+                            <th className="w-24 border border-[#0d5c58] p-1 text-right font-bold">
+                                Nilai Perolehan
+                            </th>
+                            <th className="w-24 border border-[#0d5c58] p-1 text-right font-bold">
+                                Nilai Buku
+                            </th>
+                            <th className="w-18 border border-[#0d5c58] p-1 text-center font-bold">
+                                Status
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {dataForReport.map((a, i) => (
-                            <tr key={a.id} className={i % 2 === 1 ? 'bg-slate-50/70' : 'bg-white'}>
-                                <td className="border border-slate-300 p-1 text-center text-slate-500">{i + 1}</td>
-                                <td className="border border-slate-300 p-1 font-bold text-slate-900">{a.kode_aset}</td>
-                                <td className="border border-slate-300 p-1 text-slate-800">
-                                    <span className="font-bold">{a.nama_aset}</span>
-                                    {(a.merk || a.model) && <span className="text-slate-500 ml-1">({[a.merk, a.model].filter(Boolean).join(' / ')})</span>}
+                            <tr
+                                key={a.id}
+                                className={
+                                    i % 2 === 1 ? 'bg-slate-50/70' : 'bg-white'
+                                }
+                            >
+                                <td className="border border-slate-300 p-1 text-center text-slate-500">
+                                    {i + 1}
                                 </td>
-                                <td className="border border-slate-300 p-1 text-slate-700">{a.category?.nama_kategori || '-'}</td>
-                                <td className="border border-slate-300 p-1 text-slate-700">{a.ruangan?.nama_ruangan || a.lokasi || '-'}</td>
-                                <td className="border border-slate-300 p-1 text-center text-slate-600">{formatDateOnly(a.tanggal_perolehan)}</td>
-                                <td className="border border-slate-300 p-1 text-right text-slate-700">{formatRupiah(a.nilai_perolehan)}</td>
-                                <td className="border border-slate-300 p-1 text-right font-bold text-[#0d5c58]">{formatRupiah(a.nilai_buku)}</td>
+                                <td className="border border-slate-300 p-1 font-bold text-slate-900">
+                                    {a.kode_aset}
+                                </td>
+                                <td className="border border-slate-300 p-1 text-slate-800">
+                                    <span className="font-bold">
+                                        {a.nama_aset}
+                                    </span>
+                                    {(a.merk || a.model) && (
+                                        <span className="ml-1 text-slate-500">
+                                            (
+                                            {[a.merk, a.model]
+                                                .filter(Boolean)
+                                                .join(' / ')}
+                                            )
+                                        </span>
+                                    )}
+                                </td>
+                                <td className="border border-slate-300 p-1 text-slate-700">
+                                    {a.category?.nama_kategori || '-'}
+                                </td>
+                                <td className="border border-slate-300 p-1 text-slate-700">
+                                    {a.ruangan?.nama_ruangan || a.lokasi || '-'}
+                                </td>
+                                <td className="border border-slate-300 p-1 text-center text-slate-600">
+                                    {formatDateOnly(a.tanggal_perolehan)}
+                                </td>
+                                <td className="border border-slate-300 p-1 text-right text-slate-700">
+                                    {formatRupiah(a.nilai_perolehan)}
+                                </td>
+                                <td className="border border-slate-300 p-1 text-right font-bold text-[#0d5c58]">
+                                    {formatRupiah(a.nilai_buku)}
+                                </td>
                                 <td className="border border-slate-300 p-1 text-center">
-                                    <span className={`font-bold text-[8px] uppercase px-1.5 py-0.5 rounded-full inline-block ${
-                                        a.status === 'aktif'
-                                            ? 'bg-emerald-100 text-emerald-800'
-                                            : a.status === 'rusak'
-                                              ? 'bg-rose-100 text-rose-800'
-                                              : a.status === 'maintenance'
-                                                ? 'bg-amber-100 text-amber-800'
-                                                : a.status === 'dipinjam'
-                                                  ? 'bg-blue-100 text-blue-800'
-                                                  : 'bg-slate-100 text-slate-700'
-                                    }`}>
+                                    <span
+                                        className={`inline-block rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase ${
+                                            a.status === 'aktif'
+                                                ? 'bg-emerald-100 text-emerald-800'
+                                                : a.status === 'rusak'
+                                                  ? 'bg-rose-100 text-rose-800'
+                                                  : a.status === 'maintenance'
+                                                    ? 'bg-amber-100 text-amber-800'
+                                                    : a.status === 'dipinjam'
+                                                      ? 'bg-blue-100 text-blue-800'
+                                                      : 'bg-slate-100 text-slate-700'
+                                        }`}
+                                    >
                                         {a.status}
                                     </span>
                                 </td>
@@ -776,15 +856,31 @@ export default function Aset({
                         ))}
                     </tbody>
                     <tfoot>
-                        <tr className="bg-slate-100 font-bold border-t-2 border-[#0d5c58]">
-                            <td colSpan={6} className="border border-slate-300 p-1 text-right pr-2 font-bold text-slate-900">
+                        <tr className="border-t-2 border-[#0d5c58] bg-slate-100 font-bold">
+                            <td
+                                colSpan={6}
+                                className="border border-slate-300 p-1 pr-2 text-right font-bold text-slate-900"
+                            >
                                 TOTAL REKAPITULASI ({dataForReport.length} ASET)
                             </td>
                             <td className="border border-slate-300 p-1 text-right font-bold text-slate-900">
-                                {formatRupiah(dataForReport.reduce((acc, a) => acc + (Number(a.nilai_perolehan) || 0), 0))}
+                                {formatRupiah(
+                                    dataForReport.reduce(
+                                        (acc, a) =>
+                                            acc +
+                                            (Number(a.nilai_perolehan) || 0),
+                                        0,
+                                    ),
+                                )}
                             </td>
                             <td className="border border-slate-300 p-1 text-right font-bold text-[#0d5c58]">
-                                {formatRupiah(dataForReport.reduce((acc, a) => acc + (Number(a.nilai_buku) || 0), 0))}
+                                {formatRupiah(
+                                    dataForReport.reduce(
+                                        (acc, a) =>
+                                            acc + (Number(a.nilai_buku) || 0),
+                                        0,
+                                    ),
+                                )}
                             </td>
                             <td className="border border-slate-300 p-1"></td>
                         </tr>
@@ -792,21 +888,27 @@ export default function Aset({
                 </table>
 
                 {/* Signatures */}
-                <div className="flex justify-between items-end text-[9px] pt-1">
-                    <div className="text-center w-48">
-                        <p className="text-slate-600">Petugas Logistik & Aset,</p>
-                        <p className="mt-8 font-bold text-slate-900 border-b border-slate-600 pb-0.5 inline-block min-w-[140px]">
+                <div className="flex items-end justify-between pt-1 text-[9px]">
+                    <div className="w-48 text-center">
+                        <p className="text-slate-600">
+                            Petugas Logistik & Aset,
+                        </p>
+                        <p className="mt-8 inline-block min-w-[140px] border-b border-slate-600 pb-0.5 font-bold text-slate-900">
                             {user?.nama_lengkap || user?.name || 'Budi Santoso'}
                         </p>
                         <p className="text-[8px] text-slate-500">Staff SIMRS</p>
                     </div>
-                    <div className="text-center w-48">
+                    <div className="w-48 text-center">
                         <p className="text-slate-600">Mengetahui,</p>
-                        <p className="text-slate-700 font-medium">Kepala Bagian Sarana & Prasarana</p>
-                        <p className="mt-8 font-bold text-slate-900 border-b border-slate-600 pb-0.5 inline-block min-w-[140px]">
+                        <p className="font-medium text-slate-700">
+                            Kepala Bagian Sarana & Prasarana
+                        </p>
+                        <p className="mt-8 inline-block min-w-[140px] border-b border-slate-600 pb-0.5 font-bold text-slate-900">
                             dr. Hendra Wijaya, Sp.M
                         </p>
-                        <p className="text-[8px] text-slate-500">Direktur Operasional & Fasilitas</p>
+                        <p className="text-[8px] text-slate-500">
+                            Direktur Operasional & Fasilitas
+                        </p>
                     </div>
                 </div>
             </div>

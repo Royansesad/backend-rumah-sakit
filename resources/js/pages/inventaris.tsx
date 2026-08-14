@@ -90,7 +90,7 @@ async function apiCall(url: string, method: string, body?: any) {
         method,
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            Accept: 'application/json',
             'X-XSRF-TOKEN': getCsrfToken(),
         },
         credentials: 'include',
@@ -144,8 +144,10 @@ export default function Inventaris({
 }: InventarisProps) {
     const [search, setSearch] = useState(filters.search || '');
     const [kondisi, setKondisi] = useState(filters.kondisi || 'all');
-    const [kategoriFilter, setKategoriFilter] = useState(filters.kategori || 'all');
-    
+    const [kategoriFilter, setKategoriFilter] = useState(
+        filters.kategori || 'all',
+    );
+
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8;
@@ -155,8 +157,11 @@ export default function Inventaris({
     const [editId, setEditId] = useState<string | null>(null);
     const [form, setForm] = useState(emptyForm());
     const [isSaving, setIsSaving] = useState(false);
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-    
+    const [toast, setToast] = useState<{
+        message: string;
+        type: 'success' | 'error';
+    } | null>(null);
+
     // Stock card / detail
     const [detailItem, setDetailItem] = useState<InventoryItem | null>(null);
     const [movements, setMovements] = useState<Movement[]>([]);
@@ -178,13 +183,25 @@ export default function Inventaris({
         setTimeout(() => setToast(null), 4000);
     };
 
-    const applyFilter = (overrides: Partial<{ search: string; kondisi: string; kategori: string }>) => {
+    const applyFilter = (
+        overrides: Partial<{
+            search: string;
+            kondisi: string;
+            kategori: string;
+        }>,
+    ) => {
         const params: Record<string, string> = {
             search: overrides.search !== undefined ? overrides.search : search,
-            kondisi: overrides.kondisi !== undefined ? overrides.kondisi : kondisi,
-            kategori: overrides.kategori !== undefined ? overrides.kategori : kategoriFilter,
+            kondisi:
+                overrides.kondisi !== undefined ? overrides.kondisi : kondisi,
+            kategori:
+                overrides.kategori !== undefined
+                    ? overrides.kategori
+                    : kategoriFilter,
         };
-        const clean = Object.fromEntries(Object.entries(params).filter(([, v]) => v && v !== 'all'));
+        const clean = Object.fromEntries(
+            Object.entries(params).filter(([, v]) => v && v !== 'all'),
+        );
         setCurrentPage(1);
         router.get('/inventaris', clean, { preserveScroll: true });
     };
@@ -198,13 +215,25 @@ export default function Inventaris({
                 const matchCode = item.kode_barang.toLowerCase().includes(q);
                 if (!matchName && !matchCode) return false;
             }
-            if (kategoriFilter !== 'all' && item.inventory_category_id !== kategoriFilter) {
+            if (
+                kategoriFilter !== 'all' &&
+                item.inventory_category_id !== kategoriFilter
+            ) {
                 return false;
             }
             if (kondisi !== 'all') {
-                const status = item.stok_saat_ini <= 0 ? 'habis' : item.stok_saat_ini <= item.stok_minimum ? 'menipis' : 'aman';
+                const status =
+                    item.stok_saat_ini <= 0
+                        ? 'habis'
+                        : item.stok_saat_ini <= item.stok_minimum
+                          ? 'menipis'
+                          : 'aman';
                 if (kondisi === 'habis' && status !== 'habis') return false;
-                if ((kondisi === 'menipis' || kondisi === 'kritis') && status !== 'menipis') return false;
+                if (
+                    (kondisi === 'menipis' || kondisi === 'kritis') &&
+                    status !== 'menipis'
+                )
+                    return false;
                 if (kondisi === 'aman' && status !== 'aman') return false;
                 if (kondisi === 'expired') {
                     if (!item.masa_berlaku) return false;
@@ -217,13 +246,17 @@ export default function Inventaris({
         });
     }, [items, search, kategoriFilter, kondisi]);
 
-    const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
+    const totalPages = Math.max(
+        1,
+        Math.ceil(filteredItems.length / itemsPerPage),
+    );
     const paginatedItems = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
         return filteredItems.slice(start, start + itemsPerPage);
     }, [filteredItems, currentPage, itemsPerPage]);
 
-    const startIndex = filteredItems.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
+    const startIndex =
+        filteredItems.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
     const endIndex = Math.min(currentPage * itemsPerPage, filteredItems.length);
 
     // CRUD Handlers
@@ -246,7 +279,9 @@ export default function Inventaris({
             harga_jual: Number(item.harga_jual) || 0,
             warehouse_id: item.warehouse_id || '',
             supplier_id: item.supplier_id || '',
-            masa_berlaku: item.masa_berlaku ? item.masa_berlaku.split('T')[0] : '',
+            masa_berlaku: item.masa_berlaku
+                ? item.masa_berlaku.split('T')[0]
+                : '',
             deskripsi: item.deskripsi || '',
         });
         setShowForm(true);
@@ -256,7 +291,9 @@ export default function Inventaris({
         e.preventDefault();
         setIsSaving(true);
         try {
-            const url = editId ? `/api/v1/inventaris/${editId}` : '/api/v1/inventaris';
+            const url = editId
+                ? `/api/v1/inventaris/${editId}`
+                : '/api/v1/inventaris';
             const method = editId ? 'PUT' : 'POST';
             const res = await apiCall(url, method, form);
             if (res.status === 'success') {
@@ -274,9 +311,17 @@ export default function Inventaris({
     };
 
     const handleDelete = async (item: InventoryItem) => {
-        if (!window.confirm(`Hapus barang "${item.nama_barang}" (${item.kode_barang})?`)) return;
+        if (
+            !window.confirm(
+                `Hapus barang "${item.nama_barang}" (${item.kode_barang})?`,
+            )
+        )
+            return;
         try {
-            const res = await apiCall(`/api/v1/inventaris/${item.id}`, 'DELETE');
+            const res = await apiCall(
+                `/api/v1/inventaris/${item.id}`,
+                'DELETE',
+            );
             notify(res.message, res.status === 'success' ? 'success' : 'error');
             if (res.status === 'success') {
                 router.reload();
@@ -321,7 +366,11 @@ export default function Inventaris({
         if (!detailItem) return;
         setIsMutasiSaving(true);
         try {
-            const res = await apiCall(`/api/v1/inventaris/${detailItem.id}/mutasi`, 'POST', mutasiForm);
+            const res = await apiCall(
+                `/api/v1/inventaris/${detailItem.id}/mutasi`,
+                'POST',
+                mutasiForm,
+            );
             if (res.status === 'success') {
                 notify(res.message);
                 setShowMutasi(false);
@@ -338,7 +387,9 @@ export default function Inventaris({
 
     // Print Report (Isolated Professional Hospital Document)
     const handlePrint = () => {
-        let iframe = document.getElementById('print-inventory-frame') as HTMLIFrameElement | null;
+        let iframe = document.getElementById(
+            'print-inventory-frame',
+        ) as HTMLIFrameElement | null;
         if (iframe) {
             document.body.removeChild(iframe);
         }
@@ -355,11 +406,14 @@ export default function Inventaris({
         const doc = iframe.contentWindow?.document || iframe.contentDocument;
         if (!doc) return;
 
-        const kategoriName = kategoriFilter !== 'all'
-            ? kategori.find((k) => k.id === kategoriFilter)?.nama_kategori || kategoriFilter
-            : 'Semua Kategori';
+        const kategoriName =
+            kategoriFilter !== 'all'
+                ? kategori.find((k) => k.id === kategoriFilter)
+                      ?.nama_kategori || kategoriFilter
+                : 'Semua Kategori';
 
-        const kondisiLabel = kondisi === 'all' ? 'Semua Kondisi' : kondisi.toUpperCase();
+        const kondisiLabel =
+            kondisi === 'all' ? 'Semua Kondisi' : kondisi.toUpperCase();
         const now = new Date();
         const currentDate = now.toLocaleDateString('id-ID', {
             weekday: 'long',
@@ -375,17 +429,30 @@ export default function Inventaris({
 
         const totalNilaiFiltered = filteredItems.reduce(
             (acc, it) => acc + Number(it.stok_saat_ini) * Number(it.harga_beli),
-            0
+            0,
         );
-        const totalStokFiltered = filteredItems.reduce((acc, it) => acc + Number(it.stok_saat_ini), 0);
+        const totalStokFiltered = filteredItems.reduce(
+            (acc, it) => acc + Number(it.stok_saat_ini),
+            0,
+        );
 
         const rowsHtml = filteredItems
             .map((item, idx) => {
                 const status = getItemStatus(item);
                 const badgeClass =
-                    status === 'habis' ? 'badge-habis' : status === 'menipis' ? 'badge-menipis' : 'badge-aman';
-                const badgeText = status === 'habis' ? 'HABIS' : status === 'menipis' ? 'MENIPIS' : 'AMAN';
-                const subtotalHpp = Number(item.stok_saat_ini) * Number(item.harga_beli);
+                    status === 'habis'
+                        ? 'badge-habis'
+                        : status === 'menipis'
+                          ? 'badge-menipis'
+                          : 'badge-aman';
+                const badgeText =
+                    status === 'habis'
+                        ? 'HABIS'
+                        : status === 'menipis'
+                          ? 'MENIPIS'
+                          : 'AMAN';
+                const subtotalHpp =
+                    Number(item.stok_saat_ini) * Number(item.harga_beli);
 
                 return `
                 <tr>
@@ -770,7 +837,8 @@ export default function Inventaris({
     const handleExport = () => {
         const queryParams = new URLSearchParams();
         if (search) queryParams.set('search', search);
-        if (kategoriFilter && kategoriFilter !== 'all') queryParams.set('kategori', kategoriFilter);
+        if (kategoriFilter && kategoriFilter !== 'all')
+            queryParams.set('kategori', kategoriFilter);
         if (kondisi && kondisi !== 'all') queryParams.set('kondisi', kondisi);
         window.location.href = `/inventaris/export?${queryParams.toString()}`;
     };
@@ -785,23 +853,23 @@ export default function Inventaris({
     const renderStatusBadge = (status: string) => {
         if (status === 'menipis') {
             return (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#fff8eb] text-[#b45309] border border-[#fde68a]">
-                    <AlertTriangle className="w-3 h-3 text-[#d97706]" />
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-[#fde68a] bg-[#fff8eb] px-2.5 py-1 text-[11px] font-semibold text-[#b45309]">
+                    <AlertTriangle className="h-3 w-3 text-[#d97706]" />
                     Menipis
                 </span>
             );
         }
         if (status === 'habis') {
             return (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#fef2f2] text-[#b91c1c] border border-[#fecaca]">
-                    <AlertCircle className="w-3 h-3 text-[#dc2626]" />
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-[#fecaca] bg-[#fef2f2] px-2.5 py-1 text-[11px] font-semibold text-[#b91c1c]">
+                    <AlertCircle className="h-3 w-3 text-[#dc2626]" />
                     Habis
                 </span>
             );
         }
         return (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#ecfdf5] text-[#047857] border border-[#a7f3d0]">
-                <CheckCircle2 className="w-3 h-3 text-[#059669]" />
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-[#a7f3d0] bg-[#ecfdf5] px-2.5 py-1 text-[11px] font-semibold text-[#047857]">
+                <CheckCircle2 className="h-3 w-3 text-[#059669]" />
                 Aman
             </span>
         );
@@ -823,7 +891,9 @@ export default function Inventaris({
                 {toast && (
                     <div
                         className={`fixed top-5 right-5 z-50 rounded-xl px-4 py-3 text-xs font-semibold text-white shadow-xl transition-all ${
-                            toast.type === 'success' ? 'bg-[#0f766e]' : 'bg-[#e11d48]'
+                            toast.type === 'success'
+                                ? 'bg-[#0f766e]'
+                                : 'bg-[#e11d48]'
                         }`}
                     >
                         {toast.message}
@@ -831,31 +901,37 @@ export default function Inventaris({
                 )}
 
                 {/* 1. Header Card (Exact Match to Design) */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+                    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
                         <div className="space-y-1">
                             {/* Breadcrumb */}
-                            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                                <Link href="/dashboard" className="hover:text-slate-800 transition-colors">
+                            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                <Link
+                                    href="/dashboard"
+                                    className="transition-colors hover:text-slate-800"
+                                >
                                     Dashboard
                                 </Link>
                                 <span>›</span>
-                                <span className="text-slate-800 font-semibold">Inventaris</span>
+                                <span className="font-semibold text-slate-800">
+                                    Inventaris
+                                </span>
                             </div>
 
                             {/* Title & Pill Badge */}
                             <div className="flex items-center gap-3 pt-1">
-                                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                                     Manajemen Inventaris
                                 </h1>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-[#e6f7f5] text-[#0f5c53] border border-[#b2e7e0]">
+                                <span className="inline-flex items-center rounded-md border border-[#b2e7e0] bg-[#e6f7f5] px-2.5 py-0.5 text-[11px] font-semibold text-[#0f5c53]">
                                     SIMRS Inventory
                                 </span>
                             </div>
 
                             {/* Subtitle */}
-                            <p className="text-xs sm:text-sm text-slate-500 font-normal pt-0.5">
-                                Pengelolaan persediaan barang habis pakai, mutasi stok, dan kontrol stok minimum.
+                            <p className="pt-0.5 text-xs font-normal text-slate-500 sm:text-sm">
+                                Pengelolaan persediaan barang habis pakai,
+                                mutasi stok, dan kontrol stok minimum.
                             </p>
 
                             {/* Back to Dashboard Link */}
@@ -870,31 +946,31 @@ export default function Inventaris({
                         </div>
 
                         {/* Top Right Action Buttons */}
-                        <div className="flex items-center gap-2.5 self-start md:self-auto no-print">
+                        <div className="no-print flex items-center gap-2.5 self-start md:self-auto">
                             <button
                                 type="button"
                                 onClick={handlePrint}
-                                className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-xl text-xs border border-slate-300 shadow-xs transition-colors"
+                                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-xs transition-colors hover:bg-slate-50"
                             >
-                                <Printer className="w-3.5 h-3.5 text-slate-500" />
+                                <Printer className="h-3.5 w-3.5 text-slate-500" />
                                 <span>Print</span>
                             </button>
 
                             <button
                                 type="button"
                                 onClick={handleExport}
-                                className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 py-2 rounded-xl text-xs border border-slate-300 shadow-xs transition-colors"
+                                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-xs transition-colors hover:bg-slate-50"
                             >
-                                <Download className="w-3.5 h-3.5 text-slate-500" />
+                                <Download className="h-3.5 w-3.5 text-slate-500" />
                                 <span>Export</span>
                             </button>
 
                             <button
                                 type="button"
                                 onClick={openCreate}
-                                className="inline-flex items-center gap-2 bg-[#115e59] hover:bg-[#0f4a47] text-white font-medium px-4 py-2 rounded-xl text-xs shadow-xs transition-colors"
+                                className="inline-flex items-center gap-2 rounded-xl bg-[#115e59] px-4 py-2 text-xs font-medium text-white shadow-xs transition-colors hover:bg-[#0f4a47]"
                             >
-                                <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                                <Plus className="h-3.5 w-3.5 stroke-[2.5] text-white" />
                                 <span>Tambah Barang</span>
                             </button>
                         </div>
@@ -902,40 +978,41 @@ export default function Inventaris({
                 </div>
 
                 {/* 2. Four KPI Summary Cards (Real Calculations) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {/* TOTAL ITEM */}
-                    <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex justify-between items-start">
+                    <div className="flex items-start justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                         <div>
                             <p className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
                                 TOTAL ITEM
                             </p>
-                            <p className="text-3xl font-extrabold text-slate-900 mt-2">
+                            <p className="mt-2 text-3xl font-extrabold text-slate-900">
                                 {kpi.total_barang.toLocaleString('id-ID')}
                             </p>
-                            <p className="text-xs font-semibold text-teal-700 flex items-center gap-1 mt-3">
-                                <span>↑</span> +{kpi.item_baru_bulan_ini || 12} bulan ini
+                            <p className="mt-3 flex items-center gap-1 text-xs font-semibold text-teal-700">
+                                <span>↑</span> +{kpi.item_baru_bulan_ini || 12}{' '}
+                                bulan ini
                             </p>
                         </div>
-                        <div className="p-2 rounded-xl text-teal-300">
-                            <Boxes className="w-8 h-8 stroke-1.5" />
+                        <div className="rounded-xl p-2 text-teal-300">
+                            <Boxes className="stroke-1.5 h-8 w-8" />
                         </div>
                     </div>
 
                     {/* NILAI TOTAL */}
-                    <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex justify-between items-start">
+                    <div className="flex items-start justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                         <div>
                             <p className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
                                 NILAI TOTAL
                             </p>
-                            <p className="text-3xl font-extrabold text-slate-900 mt-2">
+                            <p className="mt-2 text-3xl font-extrabold text-slate-900">
                                 {formatRupiahCompact(kpi.total_nilai_stok)}
                             </p>
-                            <p className="text-xs text-slate-400 mt-3 font-normal">
+                            <p className="mt-3 text-xs font-normal text-slate-400">
                                 Berdasarkan HPP
                             </p>
                         </div>
-                        <div className="p-2 rounded-xl text-indigo-300">
-                            <Banknote className="w-8 h-8 stroke-1.5" />
+                        <div className="rounded-xl p-2 text-indigo-300">
+                            <Banknote className="stroke-1.5 h-8 w-8" />
                         </div>
                     </div>
 
@@ -945,22 +1022,22 @@ export default function Inventaris({
                             setKondisi('menipis');
                             applyFilter({ kondisi: 'menipis' });
                         }}
-                        className="bg-[#fffbf0] rounded-2xl border border-amber-300 p-5 shadow-xs flex justify-between items-start cursor-pointer hover:border-amber-400 transition-colors"
+                        className="flex cursor-pointer items-start justify-between rounded-2xl border border-amber-300 bg-[#fffbf0] p-5 shadow-xs transition-colors hover:border-amber-400"
                     >
                         <div>
                             <p className="text-[11px] font-bold tracking-wider text-amber-800 uppercase">
                                 STOK RENDAH
                             </p>
-                            <p className="text-3xl font-extrabold text-amber-600 mt-2">
+                            <p className="mt-2 text-3xl font-extrabold text-amber-600">
                                 {kpi.barang_kritis}
                             </p>
-                            <p className="text-xs font-medium text-amber-800 flex items-center gap-1.5 mt-3">
-                                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                            <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-amber-800">
+                                <Clock className="h-3.5 w-3.5 text-amber-600" />
                                 Perlu restock segera
                             </p>
                         </div>
-                        <div className="p-2 rounded-xl text-amber-300">
-                            <AlertTriangle className="w-8 h-8 stroke-1.5" />
+                        <div className="rounded-xl p-2 text-amber-300">
+                            <AlertTriangle className="stroke-1.5 h-8 w-8" />
                         </div>
                     </div>
 
@@ -970,52 +1047,56 @@ export default function Inventaris({
                             setKondisi('expired');
                             applyFilter({ kondisi: 'expired' });
                         }}
-                        className="bg-[#fef2f2] rounded-2xl border border-rose-200 p-5 shadow-xs flex justify-between items-start cursor-pointer hover:border-rose-300 transition-colors"
+                        className="flex cursor-pointer items-start justify-between rounded-2xl border border-rose-200 bg-[#fef2f2] p-5 shadow-xs transition-colors hover:border-rose-300"
                     >
                         <div>
                             <p className="text-[11px] font-bold tracking-wider text-rose-800 uppercase">
                                 PRODUK EXPIRED
                             </p>
-                            <p className="text-3xl font-extrabold text-rose-600 mt-2">
+                            <p className="mt-2 text-3xl font-extrabold text-rose-600">
                                 {kpi.barang_expired || 0}
                             </p>
-                            <p className="text-xs font-medium text-rose-700 flex items-center gap-1.5 mt-3">
-                                <span className="inline-block w-2.5 h-2.5 rounded-full border border-rose-400 bg-rose-200 text-center text-[7px] leading-none font-bold">!</span>
+                            <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-rose-700">
+                                <span className="inline-block h-2.5 w-2.5 rounded-full border border-rose-400 bg-rose-200 text-center text-[7px] leading-none font-bold">
+                                    !
+                                </span>
                                 Tindakan diperlukan
                             </p>
                         </div>
-                        <div className="p-2 rounded-xl text-rose-300">
-                            <AlertCircle className="w-8 h-8 stroke-1.5" />
+                        <div className="rounded-xl p-2 text-rose-300">
+                            <AlertCircle className="stroke-1.5 h-8 w-8" />
                         </div>
                     </div>
                 </div>
 
                 {/* 3. Search & Filter Bar (Single White Card) */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3 no-print">
+                <div className="no-print flex flex-col items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-xs md:flex-row">
                     {/* Search Input */}
-                    <div className="relative flex-1 w-full">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <div className="relative w-full flex-1">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
                             <Search className="h-4 w-4 text-slate-400" />
                         </div>
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && applyFilter({ search })}
+                            onKeyDown={(e) =>
+                                e.key === 'Enter' && applyFilter({ search })
+                            }
                             placeholder="Cari kode / nama barang..."
-                            className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none transition-all"
+                            className="w-full rounded-xl border border-slate-200 py-2 pr-4 pl-10 text-xs font-medium text-slate-800 placeholder-slate-400 transition-all focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                         />
                     </div>
 
                     {/* Filter Dropdowns */}
-                    <div className="flex items-center gap-2.5 w-full md:w-auto">
+                    <div className="flex w-full items-center gap-2.5 md:w-auto">
                         <select
                             value={kategoriFilter}
                             onChange={(e) => {
                                 setKategoriFilter(e.target.value);
                                 applyFilter({ kategori: e.target.value });
                             }}
-                            className="rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 bg-white focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none transition-all cursor-pointer w-full md:w-auto"
+                            className="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 transition-all focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none md:w-auto"
                         >
                             <option value="all">Semua Kategori</option>
                             {kategori.map((k) => (
@@ -1031,7 +1112,7 @@ export default function Inventaris({
                                 setKondisi(e.target.value);
                                 applyFilter({ kondisi: e.target.value });
                             }}
-                            className="rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 bg-white focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none transition-all cursor-pointer w-full md:w-auto"
+                            className="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 transition-all focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none md:w-auto"
                         >
                             <option value="all">Semua Kondisi</option>
                             <option value="aman">Aman</option>
@@ -1043,9 +1124,9 @@ export default function Inventaris({
                 </div>
 
                 {/* 4. Main Inventory Table Card */}
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
                     {/* Header inside Card */}
-                    <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center justify-between border-b border-slate-100 p-4">
                         <h3 className="text-sm font-bold text-slate-800">
                             Daftar Barang ({filteredItems.length})
                         </h3>
@@ -1057,16 +1138,18 @@ export default function Inventaris({
                     {/* Table */}
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs">
-                            <thead className="border-b border-slate-200 bg-[#f8fafc] text-slate-600 font-semibold">
+                            <thead className="border-b border-slate-200 bg-[#f8fafc] font-semibold text-slate-600">
                                 <tr>
-                                    <th className="py-3 px-4">Kode / Barang</th>
-                                    <th className="py-3 px-4">Kategori</th>
-                                    <th className="py-3 px-4">Gudang</th>
-                                    <th className="py-3 px-4">Stok</th>
-                                    <th className="py-3 px-4">Harga Beli</th>
-                                    <th className="py-3 px-4">Harga Jual</th>
-                                    <th className="py-3 px-4">Status</th>
-                                    <th className="py-3 px-4 text-right no-print">Aksi</th>
+                                    <th className="px-4 py-3">Kode / Barang</th>
+                                    <th className="px-4 py-3">Kategori</th>
+                                    <th className="px-4 py-3">Gudang</th>
+                                    <th className="px-4 py-3">Stok</th>
+                                    <th className="px-4 py-3">Harga Beli</th>
+                                    <th className="px-4 py-3">Harga Jual</th>
+                                    <th className="px-4 py-3">Status</th>
+                                    <th className="no-print px-4 py-3 text-right">
+                                        Aksi
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -1074,68 +1157,80 @@ export default function Inventaris({
                                     paginatedItems.map((item) => {
                                         const status = getItemStatus(item);
                                         const min = item.stok_minimum || 1;
-                                        const ratio = item.stok_saat_ini / (min * 1.5);
-                                        const progressPercent = Math.min(100, Math.max(8, ratio * 100));
+                                        const ratio =
+                                            item.stok_saat_ini / (min * 1.5);
+                                        const progressPercent = Math.min(
+                                            100,
+                                            Math.max(8, ratio * 100),
+                                        );
 
                                         return (
                                             <tr
                                                 key={item.id}
                                                 onClick={() => openDetail(item)}
-                                                className="cursor-pointer hover:bg-[#f0faf7]/50 transition-colors"
+                                                className="cursor-pointer transition-colors hover:bg-[#f0faf7]/50"
                                             >
                                                 {/* Kode / Barang */}
-                                                <td className="py-3.5 px-4">
-                                                    <div className="font-bold text-slate-900 text-xs">
+                                                <td className="px-4 py-3.5">
+                                                    <div className="text-xs font-bold text-slate-900">
                                                         {item.nama_barang}
                                                     </div>
-                                                    <div className="text-[10px] text-slate-400 font-mono tracking-tight mt-0.5">
+                                                    <div className="mt-0.5 font-mono text-[10px] tracking-tight text-slate-400">
                                                         {item.kode_barang}
                                                     </div>
                                                 </td>
 
                                                 {/* Kategori */}
-                                                <td className="py-3.5 px-4 text-slate-600 font-normal">
-                                                    {item.category?.nama_kategori || '-'}
+                                                <td className="px-4 py-3.5 font-normal text-slate-600">
+                                                    {item.category
+                                                        ?.nama_kategori || '-'}
                                                 </td>
 
                                                 {/* Gudang */}
-                                                <td className="py-3.5 px-4 text-slate-600 font-normal">
-                                                    {item.warehouse?.nama_gudang || '-'}
+                                                <td className="px-4 py-3.5 font-normal text-slate-600">
+                                                    {item.warehouse
+                                                        ?.nama_gudang || '-'}
                                                 </td>
 
                                                 {/* Stok with Visual Bar */}
-                                                <td className="py-3.5 px-4">
+                                                <td className="px-4 py-3.5">
                                                     <div className="flex items-baseline gap-1.5">
                                                         <span
-                                                            className={`font-extrabold text-xs ${
-                                                                status === 'habis'
+                                                            className={`text-xs font-extrabold ${
+                                                                status ===
+                                                                'habis'
                                                                     ? 'text-rose-600'
-                                                                    : status === 'menipis'
-                                                                    ? 'text-amber-600'
-                                                                    : 'text-slate-900'
+                                                                    : status ===
+                                                                        'menipis'
+                                                                      ? 'text-amber-600'
+                                                                      : 'text-slate-900'
                                                             }`}
                                                         >
                                                             {item.stok_saat_ini}
                                                         </span>
-                                                        <span className="text-[11px] text-slate-500 font-normal">
+                                                        <span className="text-[11px] font-normal text-slate-500">
                                                             {item.satuan}
                                                         </span>
-                                                        <span className="text-[10px] text-slate-400 font-normal ml-2">
-                                                            Min: {item.stok_minimum}
+                                                        <span className="ml-2 text-[10px] font-normal text-slate-400">
+                                                            Min:{' '}
+                                                            {item.stok_minimum}
                                                         </span>
                                                     </div>
-                                                    <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1.5">
+                                                    <div className="mt-1.5 h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
                                                         <div
                                                             className={`h-full rounded-full transition-all ${
-                                                                status === 'habis'
-                                                                    ? 'bg-rose-500 w-1'
-                                                                    : status === 'menipis'
-                                                                    ? 'bg-amber-500'
-                                                                    : 'bg-[#115e59]'
+                                                                status ===
+                                                                'habis'
+                                                                    ? 'w-1 bg-rose-500'
+                                                                    : status ===
+                                                                        'menipis'
+                                                                      ? 'bg-amber-500'
+                                                                      : 'bg-[#115e59]'
                                                             }`}
                                                             style={{
                                                                 width:
-                                                                    status === 'habis'
+                                                                    status ===
+                                                                    'habis'
                                                                         ? '4px'
                                                                         : `${progressPercent}%`,
                                                             }}
@@ -1144,52 +1239,67 @@ export default function Inventaris({
                                                 </td>
 
                                                 {/* Harga Beli */}
-                                                <td className="py-3.5 px-4 text-slate-700 font-medium">
-                                                    {formatRupiah(item.harga_beli)}
+                                                <td className="px-4 py-3.5 font-medium text-slate-700">
+                                                    {formatRupiah(
+                                                        item.harga_beli,
+                                                    )}
                                                 </td>
 
                                                 {/* Harga Jual */}
-                                                <td className="py-3.5 px-4 text-slate-700 font-medium">
-                                                    {item.harga_jual && Number(item.harga_jual) > 0
-                                                        ? formatRupiah(item.harga_jual)
+                                                <td className="px-4 py-3.5 font-medium text-slate-700">
+                                                    {item.harga_jual &&
+                                                    Number(item.harga_jual) > 0
+                                                        ? formatRupiah(
+                                                              item.harga_jual,
+                                                          )
                                                         : '-'}
                                                 </td>
 
                                                 {/* Status Badge */}
-                                                <td className="py-3.5 px-4">
+                                                <td className="px-4 py-3.5">
                                                     {renderStatusBadge(status)}
                                                 </td>
 
                                                 {/* Actions */}
                                                 <td
-                                                    className="py-3.5 px-4 text-right whitespace-nowrap no-print"
-                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="no-print px-4 py-3.5 text-right whitespace-nowrap"
+                                                    onClick={(e) =>
+                                                        e.stopPropagation()
+                                                    }
                                                 >
                                                     <div className="flex items-center justify-end gap-1.5">
                                                         <button
                                                             type="button"
-                                                            onClick={() => openMutasi(item)}
-                                                            className="rounded-md bg-[#e0f2fe] text-[#0369a1] px-2.5 py-1 text-[11px] font-semibold hover:bg-[#bae6fd] transition-colors shadow-2xs"
+                                                            onClick={() =>
+                                                                openMutasi(item)
+                                                            }
+                                                            className="rounded-md bg-[#e0f2fe] px-2.5 py-1 text-[11px] font-semibold text-[#0369a1] shadow-2xs transition-colors hover:bg-[#bae6fd]"
                                                         >
                                                             Mutasi
                                                         </button>
 
                                                         <button
                                                             type="button"
-                                                            onClick={() => openEdit(item)}
-                                                            className="p-1 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                                                            onClick={() =>
+                                                                openEdit(item)
+                                                            }
+                                                            className="rounded-md p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
                                                             title="Edit Barang"
                                                         >
-                                                            <Pencil className="w-3.5 h-3.5 stroke-[2]" />
+                                                            <Pencil className="h-3.5 w-3.5 stroke-[2]" />
                                                         </button>
 
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleDelete(item)}
-                                                            className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    item,
+                                                                )
+                                                            }
+                                                            className="rounded-md p-1 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
                                                             title="Hapus Barang"
                                                         >
-                                                            <Trash2 className="w-3.5 h-3.5 stroke-[2]" />
+                                                            <Trash2 className="h-3.5 w-3.5 stroke-[2]" />
                                                         </button>
                                                     </div>
                                                 </td>
@@ -1198,8 +1308,12 @@ export default function Inventaris({
                                     })
                                 ) : (
                                     <tr>
-                                        <td colSpan={8} className="py-12 text-center text-slate-400 font-medium">
-                                            Tidak ada barang inventaris yang sesuai kriteria pencarian.
+                                        <td
+                                            colSpan={8}
+                                            className="py-12 text-center font-medium text-slate-400"
+                                        >
+                                            Tidak ada barang inventaris yang
+                                            sesuai kriteria pencarian.
                                         </td>
                                     </tr>
                                 )}
@@ -1208,27 +1322,33 @@ export default function Inventaris({
                     </div>
 
                     {/* Table Footer with Pagination (Exact to Design) */}
-                    <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 no-print">
+                    <div className="no-print flex flex-col items-center justify-between gap-3 border-t border-slate-100 p-4 text-xs text-slate-500 sm:flex-row">
                         <div>
-                            Menampilkan {startIndex}-{endIndex} dari {filteredItems.length} data
+                            Menampilkan {startIndex}-{endIndex} dari{' '}
+                            {filteredItems.length} data
                         </div>
 
                         <div className="flex items-center gap-1">
                             <button
                                 type="button"
                                 disabled={currentPage === 1}
-                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                onClick={() =>
+                                    setCurrentPage((p) => Math.max(1, p - 1))
+                                }
+                                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:pointer-events-none disabled:opacity-30"
                             >
-                                <ChevronLeft className="w-4 h-4" />
+                                <ChevronLeft className="h-4 w-4" />
                             </button>
 
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                            {Array.from(
+                                { length: totalPages },
+                                (_, i) => i + 1,
+                            ).map((pageNum) => (
                                 <button
                                     key={pageNum}
                                     type="button"
                                     onClick={() => setCurrentPage(pageNum)}
-                                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
                                         currentPage === pageNum
                                             ? 'bg-[#e6f7f5] text-[#0f5c53]'
                                             : 'text-slate-600 hover:bg-slate-100'
@@ -1240,11 +1360,18 @@ export default function Inventaris({
 
                             <button
                                 type="button"
-                                disabled={currentPage === totalPages || totalPages === 0}
-                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                disabled={
+                                    currentPage === totalPages ||
+                                    totalPages === 0
+                                }
+                                onClick={() =>
+                                    setCurrentPage((p) =>
+                                        Math.min(totalPages, p + 1),
+                                    )
+                                }
+                                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:pointer-events-none disabled:opacity-30"
                             >
-                                <ChevronRight className="w-4 h-4" />
+                                <ChevronRight className="h-4 w-4" />
                             </button>
                         </div>
                     </div>
@@ -1253,45 +1380,64 @@ export default function Inventaris({
                 {/* Modal Tambah / Edit Barang */}
                 {showForm && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
-                        <div className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+                        <div className="max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
                             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                                 <h3 className="text-base font-bold text-slate-900">
-                                    {editId ? 'Edit Data Barang' : 'Tambah Barang Baru'}
+                                    {editId
+                                        ? 'Edit Data Barang'
+                                        : 'Tambah Barang Baru'}
                                 </h3>
                                 <button
                                     type="button"
                                     onClick={() => setShowForm(false)}
-                                    className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                                    className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
 
-                            <form onSubmit={handleSave} className="space-y-3.5 text-xs">
+                            <form
+                                onSubmit={handleSave}
+                                className="space-y-3.5 text-xs"
+                            >
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block font-semibold text-slate-700 mb-1">
+                                        <label className="mb-1 block font-semibold text-slate-700">
                                             Kode Barang *
                                         </label>
                                         <input
                                             required
                                             value={form.kode_barang}
-                                            onChange={(e) => setForm({ ...form, kode_barang: e.target.value.toUpperCase() })}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    kode_barang:
+                                                        e.target.value.toUpperCase(),
+                                                })
+                                            }
                                             placeholder="INV-MED-0001"
                                             className="w-full rounded-xl border border-slate-200 px-3 py-2 font-mono font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block font-semibold text-slate-700 mb-1">
+                                        <label className="mb-1 block font-semibold text-slate-700">
                                             Kategori *
                                         </label>
                                         <select
                                             required
                                             value={form.inventory_category_id}
-                                            onChange={(e) => setForm({ ...form, inventory_category_id: e.target.value })}
-                                            className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none cursor-pointer"
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    inventory_category_id:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            className="w-full cursor-pointer rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                         >
-                                            <option value="">-- Pilih Kategori --</option>
+                                            <option value="">
+                                                -- Pilih Kategori --
+                                            </option>
                                             {kategori.map((k) => (
                                                 <option key={k.id} value={k.id}>
                                                     {k.nama_kategori}
@@ -1302,13 +1448,18 @@ export default function Inventaris({
                                 </div>
 
                                 <div>
-                                    <label className="block font-semibold text-slate-700 mb-1">
+                                    <label className="mb-1 block font-semibold text-slate-700">
                                         Nama Barang *
                                     </label>
                                     <input
                                         required
                                         value={form.nama_barang}
-                                        onChange={(e) => setForm({ ...form, nama_barang: e.target.value })}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                nama_barang: e.target.value,
+                                            })
+                                        }
                                         placeholder="Contoh: Alcohol Swab 70%"
                                         className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                     />
@@ -1316,38 +1467,63 @@ export default function Inventaris({
 
                                 <div className="grid grid-cols-3 gap-3">
                                     <div>
-                                        <label className="block font-semibold text-slate-700 mb-1">
+                                        <label className="mb-1 block font-semibold text-slate-700">
                                             Satuan
                                         </label>
                                         <input
                                             value={form.satuan}
-                                            onChange={(e) => setForm({ ...form, satuan: e.target.value })}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    satuan: e.target.value,
+                                                })
+                                            }
                                             placeholder="box / botol / pcs"
                                             className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block font-semibold text-slate-700 mb-1">
+                                        <label className="mb-1 block font-semibold text-slate-700">
                                             Stok Minimum
                                         </label>
                                         <input
                                             type="number"
                                             min={0}
                                             value={form.stok_minimum}
-                                            onChange={(e) => setForm({ ...form, stok_minimum: parseInt(e.target.value, 10) || 0 })}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    stok_minimum:
+                                                        parseInt(
+                                                            e.target.value,
+                                                            10,
+                                                        ) || 0,
+                                                })
+                                            }
                                             className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block font-semibold text-slate-700 mb-1">
-                                            {editId ? 'Stok Saat Ini' : 'Stok Awal'}
+                                        <label className="mb-1 block font-semibold text-slate-700">
+                                            {editId
+                                                ? 'Stok Saat Ini'
+                                                : 'Stok Awal'}
                                         </label>
                                         <input
                                             type="number"
                                             min={0}
                                             disabled={!!editId}
                                             value={form.stok_awal}
-                                            onChange={(e) => setForm({ ...form, stok_awal: parseInt(e.target.value, 10) || 0 })}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    stok_awal:
+                                                        parseInt(
+                                                            e.target.value,
+                                                            10,
+                                                        ) || 0,
+                                                })
+                                            }
                                             className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                                         />
                                     </div>
@@ -1355,26 +1531,42 @@ export default function Inventaris({
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block font-semibold text-slate-700 mb-1">
+                                        <label className="mb-1 block font-semibold text-slate-700">
                                             Harga Beli / HPP (Rp)
                                         </label>
                                         <input
                                             type="number"
                                             min={0}
                                             value={form.harga_beli}
-                                            onChange={(e) => setForm({ ...form, harga_beli: parseFloat(e.target.value) || 0 })}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    harga_beli:
+                                                        parseFloat(
+                                                            e.target.value,
+                                                        ) || 0,
+                                                })
+                                            }
                                             className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block font-semibold text-slate-700 mb-1">
+                                        <label className="mb-1 block font-semibold text-slate-700">
                                             Harga Jual (Rp)
                                         </label>
                                         <input
                                             type="number"
                                             min={0}
                                             value={form.harga_jual}
-                                            onChange={(e) => setForm({ ...form, harga_jual: parseFloat(e.target.value) || 0 })}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    harga_jual:
+                                                        parseFloat(
+                                                            e.target.value,
+                                                        ) || 0,
+                                                })
+                                            }
                                             className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                         />
                                     </div>
@@ -1382,15 +1574,23 @@ export default function Inventaris({
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block font-semibold text-slate-700 mb-1">
+                                        <label className="mb-1 block font-semibold text-slate-700">
                                             Gudang Penyimpanan
                                         </label>
                                         <select
                                             value={form.warehouse_id}
-                                            onChange={(e) => setForm({ ...form, warehouse_id: e.target.value })}
-                                            className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none cursor-pointer"
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    warehouse_id:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            className="w-full cursor-pointer rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                         >
-                                            <option value="">-- Pilih Gudang --</option>
+                                            <option value="">
+                                                -- Pilih Gudang --
+                                            </option>
                                             {gudang.map((g) => (
                                                 <option key={g.id} value={g.id}>
                                                     {g.nama_gudang}
@@ -1399,15 +1599,22 @@ export default function Inventaris({
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block font-semibold text-slate-700 mb-1">
+                                        <label className="mb-1 block font-semibold text-slate-700">
                                             Supplier / PBF
                                         </label>
                                         <select
                                             value={form.supplier_id}
-                                            onChange={(e) => setForm({ ...form, supplier_id: e.target.value })}
-                                            className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none cursor-pointer"
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    supplier_id: e.target.value,
+                                                })
+                                            }
+                                            className="w-full cursor-pointer rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                         >
-                                            <option value="">-- Pilih Supplier --</option>
+                                            <option value="">
+                                                -- Pilih Supplier --
+                                            </option>
                                             {supplier.map((s) => (
                                                 <option key={s.id} value={s.id}>
                                                     {s.nama_supplier}
@@ -1418,25 +1625,35 @@ export default function Inventaris({
                                 </div>
 
                                 <div>
-                                    <label className="block font-semibold text-slate-700 mb-1">
+                                    <label className="mb-1 block font-semibold text-slate-700">
                                         Masa Berlaku / Expired Date
                                     </label>
                                     <input
                                         type="date"
                                         value={form.masa_berlaku}
-                                        onChange={(e) => setForm({ ...form, masa_berlaku: e.target.value })}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                masa_berlaku: e.target.value,
+                                            })
+                                        }
                                         className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block font-semibold text-slate-700 mb-1">
+                                    <label className="mb-1 block font-semibold text-slate-700">
                                         Deskripsi / Spesifikasi
                                     </label>
                                     <textarea
                                         rows={2}
                                         value={form.deskripsi}
-                                        onChange={(e) => setForm({ ...form, deskripsi: e.target.value })}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                deskripsi: e.target.value,
+                                            })
+                                        }
                                         placeholder="Keterangan tambahan spesifikasi barang..."
                                         className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                     />
@@ -1446,16 +1663,20 @@ export default function Inventaris({
                                     <button
                                         type="button"
                                         onClick={() => setShowForm(false)}
-                                        className="rounded-xl border border-slate-200 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                                        className="rounded-xl border border-slate-200 px-4 py-2 font-medium text-slate-700 transition-colors hover:bg-slate-50"
                                     >
                                         Batal
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={isSaving}
-                                        className="rounded-xl bg-[#115e59] hover:bg-[#0f4a47] px-5 py-2 font-semibold text-white shadow-xs transition-colors disabled:opacity-50"
+                                        className="rounded-xl bg-[#115e59] px-5 py-2 font-semibold text-white shadow-xs transition-colors hover:bg-[#0f4a47] disabled:opacity-50"
                                     >
-                                        {isSaving ? 'Menyimpan...' : editId ? 'Simpan Perubahan' : 'Tambah Barang'}
+                                        {isSaving
+                                            ? 'Menyimpan...'
+                                            : editId
+                                              ? 'Simpan Perubahan'
+                                              : 'Tambah Barang'}
                                     </button>
                                 </div>
                             </form>
@@ -1466,90 +1687,135 @@ export default function Inventaris({
                 {/* 7. Modal Detail & Kartu Stok (Stock Ledger) */}
                 {detailItem && !showMutasi && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
-                        <div className="w-full max-w-3xl bg-white rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+                        <div className="max-h-[90vh] w-full max-w-3xl space-y-4 overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
                             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h3 className="text-base font-bold text-slate-900">
-                                            Kartu Stok — {detailItem.nama_barang}
+                                            Kartu Stok —{' '}
+                                            {detailItem.nama_barang}
                                         </h3>
-                                        <span className="font-mono text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                                        <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-600">
                                             {detailItem.kode_barang}
                                         </span>
                                     </div>
-                                    <p className="text-xs text-slate-500 mt-1">
-                                        Kategori: <b className="text-slate-700">{detailItem.category?.nama_kategori || '-'}</b> • Gudang: <b className="text-slate-700">{detailItem.warehouse?.nama_gudang || '-'}</b> • Stok Saat Ini:{' '}
-                                        <b className="text-[#115e59]">{detailItem.stok_saat_ini} {detailItem.satuan}</b> (Min: {detailItem.stok_minimum})
+                                    <p className="mt-1 text-xs text-slate-500">
+                                        Kategori:{' '}
+                                        <b className="text-slate-700">
+                                            {detailItem.category
+                                                ?.nama_kategori || '-'}
+                                        </b>{' '}
+                                        • Gudang:{' '}
+                                        <b className="text-slate-700">
+                                            {detailItem.warehouse
+                                                ?.nama_gudang || '-'}
+                                        </b>{' '}
+                                        • Stok Saat Ini:{' '}
+                                        <b className="text-[#115e59]">
+                                            {detailItem.stok_saat_ini}{' '}
+                                            {detailItem.satuan}
+                                        </b>{' '}
+                                        (Min: {detailItem.stok_minimum})
                                     </p>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={() => setDetailItem(null)}
-                                    className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                                    className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
 
                             {/* Ledger Table */}
-                            <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                            <div className="overflow-x-auto rounded-xl border border-slate-200">
                                 <table className="w-full text-left text-xs">
-                                    <thead className="border-b border-slate-200 bg-[#f8fafc] text-slate-600 font-semibold">
+                                    <thead className="border-b border-slate-200 bg-[#f8fafc] font-semibold text-slate-600">
                                         <tr>
-                                            <th className="p-3">Waktu Transaksi</th>
+                                            <th className="p-3">
+                                                Waktu Transaksi
+                                            </th>
                                             <th className="p-3">Tipe Mutasi</th>
-                                            <th className="p-3">Jumlah (Qty)</th>
+                                            <th className="p-3">
+                                                Jumlah (Qty)
+                                            </th>
                                             <th className="p-3">Saldo Akhir</th>
-                                            <th className="p-3">No. Referensi</th>
-                                            <th className="p-3">Keterangan / Operator</th>
+                                            <th className="p-3">
+                                                No. Referensi
+                                            </th>
+                                            <th className="p-3">
+                                                Keterangan / Operator
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
                                         {isLoadingMovements ? (
                                             <tr>
-                                                <td colSpan={6} className="p-6 text-center text-slate-400">
+                                                <td
+                                                    colSpan={6}
+                                                    className="p-6 text-center text-slate-400"
+                                                >
                                                     Memuat riwayat kartu stok...
                                                 </td>
                                             </tr>
                                         ) : movements.length > 0 ? (
                                             movements.map((m) => (
-                                                <tr key={m.id} className="hover:bg-slate-50">
-                                                    <td className="p-3 text-slate-600 font-mono text-[11px]">
-                                                        {new Date(m.created_at).toLocaleString('id-ID')}
+                                                <tr
+                                                    key={m.id}
+                                                    className="hover:bg-slate-50"
+                                                >
+                                                    <td className="p-3 font-mono text-[11px] text-slate-600">
+                                                        {new Date(
+                                                            m.created_at,
+                                                        ).toLocaleString(
+                                                            'id-ID',
+                                                        )}
                                                     </td>
                                                     <td className="p-3">
                                                         <span
-                                                            className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${
+                                                            className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${
                                                                 m.qty >= 0
                                                                     ? 'bg-emerald-100 text-emerald-800'
                                                                     : 'bg-rose-100 text-rose-800'
                                                             }`}
                                                         >
-                                                            {mutasiTipeLabel[m.tipe] || m.tipe}
+                                                            {mutasiTipeLabel[
+                                                                m.tipe
+                                                            ] || m.tipe}
                                                         </span>
                                                     </td>
                                                     <td
                                                         className={`p-3 font-bold ${
-                                                            m.qty >= 0 ? 'text-emerald-700' : 'text-rose-700'
+                                                            m.qty >= 0
+                                                                ? 'text-emerald-700'
+                                                                : 'text-rose-700'
                                                         }`}
                                                     >
-                                                        {m.qty >= 0 ? `+${m.qty}` : m.qty}
+                                                        {m.qty >= 0
+                                                            ? `+${m.qty}`
+                                                            : m.qty}
                                                     </td>
                                                     <td className="p-3 font-extrabold text-slate-900">
                                                         {m.stok_setelah}
                                                     </td>
-                                                    <td className="p-3 text-slate-600 font-mono text-[11px]">
+                                                    <td className="p-3 font-mono text-[11px] text-slate-600">
                                                         {m.referensi || '-'}
                                                     </td>
-                                                    <td className="p-3 text-slate-500 text-[11px]">
-                                                        {m.keterangan || m.operator_role || '-'}
+                                                    <td className="p-3 text-[11px] text-slate-500">
+                                                        {m.keterangan ||
+                                                            m.operator_role ||
+                                                            '-'}
                                                     </td>
                                                 </tr>
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan={6} className="p-8 text-center text-slate-400">
-                                                    Belum ada transaksi mutasi untuk barang ini.
+                                                <td
+                                                    colSpan={6}
+                                                    className="p-8 text-center text-slate-400"
+                                                >
+                                                    Belum ada transaksi mutasi
+                                                    untuk barang ini.
                                                 </td>
                                             </tr>
                                         )}
@@ -1559,7 +1825,8 @@ export default function Inventaris({
 
                             <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                                 <span className="text-[11px] text-slate-400">
-                                    Total Mutasi Terdata: {movements.length} transaksi
+                                    Total Mutasi Terdata: {movements.length}{' '}
+                                    transaksi
                                 </span>
                                 <div className="flex gap-2">
                                     <button
@@ -1572,7 +1839,7 @@ export default function Inventaris({
                                     <button
                                         type="button"
                                         onClick={() => openMutasi(detailItem)}
-                                        className="rounded-xl bg-[#115e59] hover:bg-[#0f4a47] px-4 py-2 text-xs font-semibold text-white shadow-xs"
+                                        className="rounded-xl bg-[#115e59] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#0f4a47]"
                                     >
                                         + Catat Mutasi
                                     </button>
@@ -1585,52 +1852,68 @@ export default function Inventaris({
                 {/* 8. Modal Catat Mutasi Stok */}
                 {showMutasi && detailItem && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
-                        <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl space-y-4">
+                        <div className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-2xl">
                             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                                 <div>
                                     <h3 className="text-base font-bold text-slate-900">
                                         Mutasi Stok Barang
                                     </h3>
-                                    <p className="text-xs text-slate-500 font-medium">{detailItem.nama_barang}</p>
+                                    <p className="text-xs font-medium text-slate-500">
+                                        {detailItem.nama_barang}
+                                    </p>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={() => setShowMutasi(false)}
-                                    className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                                    className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
 
-                            <div className="rounded-xl bg-[#e6f7f5] border border-[#b2e7e0] p-3 text-xs flex justify-between items-center">
+                            <div className="flex items-center justify-between rounded-xl border border-[#b2e7e0] bg-[#e6f7f5] p-3 text-xs">
                                 <div>
-                                    Stok Saat Ini: <b className="text-[#0f5c53]">{detailItem.stok_saat_ini} {detailItem.satuan}</b>
+                                    Stok Saat Ini:{' '}
+                                    <b className="text-[#0f5c53]">
+                                        {detailItem.stok_saat_ini}{' '}
+                                        {detailItem.satuan}
+                                    </b>
                                 </div>
                                 <div className="text-slate-500">
                                     Min: <b>{detailItem.stok_minimum}</b>
                                 </div>
                             </div>
 
-                            <form onSubmit={handleMutasi} className="space-y-3.5 text-xs">
+                            <form
+                                onSubmit={handleMutasi}
+                                className="space-y-3.5 text-xs"
+                            >
                                 <div>
-                                    <label className="block font-semibold text-slate-700 mb-1">
+                                    <label className="mb-1 block font-semibold text-slate-700">
                                         Tipe Mutasi *
                                     </label>
                                     <select
                                         value={mutasiForm.tipe}
-                                        onChange={(e) => setMutasiForm({ ...mutasiForm, tipe: e.target.value })}
-                                        className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none cursor-pointer"
+                                        onChange={(e) =>
+                                            setMutasiForm({
+                                                ...mutasiForm,
+                                                tipe: e.target.value,
+                                            })
+                                        }
+                                        className="w-full cursor-pointer rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                     >
-                                        {Object.entries(mutasiTipeLabel).map(([key, label]) => (
-                                            <option key={key} value={key}>
-                                                {label}
-                                            </option>
-                                        ))}
+                                        {Object.entries(mutasiTipeLabel).map(
+                                            ([key, label]) => (
+                                                <option key={key} value={key}>
+                                                    {label}
+                                                </option>
+                                            ),
+                                        )}
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label className="block font-semibold text-slate-700 mb-1">
+                                    <label className="mb-1 block font-semibold text-slate-700">
                                         Jumlah (Qty) *
                                     </label>
                                     <input
@@ -1638,21 +1921,37 @@ export default function Inventaris({
                                         type="number"
                                         min={1}
                                         value={mutasiForm.qty}
-                                        onChange={(e) => setMutasiForm({ ...mutasiForm, qty: parseInt(e.target.value, 10) || 1 })}
+                                        onChange={(e) =>
+                                            setMutasiForm({
+                                                ...mutasiForm,
+                                                qty:
+                                                    parseInt(
+                                                        e.target.value,
+                                                        10,
+                                                    ) || 1,
+                                            })
+                                        }
                                         className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block font-semibold text-slate-700 mb-1">
+                                    <label className="mb-1 block font-semibold text-slate-700">
                                         Gudang Terkait
                                     </label>
                                     <select
                                         value={mutasiForm.warehouse_id}
-                                        onChange={(e) => setMutasiForm({ ...mutasiForm, warehouse_id: e.target.value })}
-                                        className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none cursor-pointer"
+                                        onChange={(e) =>
+                                            setMutasiForm({
+                                                ...mutasiForm,
+                                                warehouse_id: e.target.value,
+                                            })
+                                        }
+                                        className="w-full cursor-pointer rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                     >
-                                        <option value="">-- Pilih Gudang (Opsional) --</option>
+                                        <option value="">
+                                            -- Pilih Gudang (Opsional) --
+                                        </option>
                                         {gudang.map((g) => (
                                             <option key={g.id} value={g.id}>
                                                 {g.nama_gudang}
@@ -1662,24 +1961,34 @@ export default function Inventaris({
                                 </div>
 
                                 <div>
-                                    <label className="block font-semibold text-slate-700 mb-1">
+                                    <label className="mb-1 block font-semibold text-slate-700">
                                         No. Referensi (PO / Resep / Pasien)
                                     </label>
                                     <input
                                         value={mutasiForm.referensi}
-                                        onChange={(e) => setMutasiForm({ ...mutasiForm, referensi: e.target.value })}
+                                        onChange={(e) =>
+                                            setMutasiForm({
+                                                ...mutasiForm,
+                                                referensi: e.target.value,
+                                            })
+                                        }
                                         placeholder="Contoh: PO-2026-0042 / RSP-0019"
                                         className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block font-semibold text-slate-700 mb-1">
+                                    <label className="mb-1 block font-semibold text-slate-700">
                                         Keterangan
                                     </label>
                                     <input
                                         value={mutasiForm.keterangan}
-                                        onChange={(e) => setMutasiForm({ ...mutasiForm, keterangan: e.target.value })}
+                                        onChange={(e) =>
+                                            setMutasiForm({
+                                                ...mutasiForm,
+                                                keterangan: e.target.value,
+                                            })
+                                        }
                                         placeholder="Alasan penyesuaian stok / keterangan mutasi"
                                         className="w-full rounded-xl border border-slate-200 px-3 py-2 font-medium focus:border-[#115e59] focus:ring-1 focus:ring-[#115e59] focus:outline-none"
                                     />
@@ -1689,16 +1998,18 @@ export default function Inventaris({
                                     <button
                                         type="button"
                                         onClick={() => setShowMutasi(false)}
-                                        className="rounded-xl border border-slate-200 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                                        className="rounded-xl border border-slate-200 px-4 py-2 font-medium text-slate-700 transition-colors hover:bg-slate-50"
                                     >
                                         Batal
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={isMutasiSaving}
-                                        className="rounded-xl bg-[#115e59] hover:bg-[#0f4a47] px-5 py-2 font-semibold text-white shadow-xs transition-colors disabled:opacity-50"
+                                        className="rounded-xl bg-[#115e59] px-5 py-2 font-semibold text-white shadow-xs transition-colors hover:bg-[#0f4a47] disabled:opacity-50"
                                     >
-                                        {isMutasiSaving ? 'Memproses...' : 'Proses Mutasi'}
+                                        {isMutasiSaving
+                                            ? 'Memproses...'
+                                            : 'Proses Mutasi'}
                                     </button>
                                 </div>
                             </form>

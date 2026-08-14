@@ -29,7 +29,7 @@ export default function RequestAccess() {
     };
 
     return (
-        <div className="flex h-screen max-h-screen w-full flex-col items-center justify-center bg-[#f8f7f4] px-3 py-2 font-sans text-gray-900 overflow-hidden selection:bg-[#174e48] selection:text-white sm:px-4 sm:py-3">
+        <div className="flex h-screen max-h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#f8f7f4] px-3 py-2 font-sans text-gray-900 selection:bg-[#174e48] selection:text-white sm:px-4 sm:py-3">
             {/* Top Brand Logo */}
             <div className="mb-2 flex items-center justify-center gap-2 sm:mb-2.5">
                 <div className="flex h-5 w-5 items-center justify-center rounded bg-[#174e48] text-white shadow-xs">
@@ -62,10 +62,13 @@ export default function RequestAccess() {
                             Permintaan Berhasil Dikirim!
                         </h3>
                         <p className="mt-1 text-[10.5px] leading-relaxed text-gray-600 sm:text-xs">
-                            Terima kasih, data pengajuan akses akun staf Anda telah
-                            diteruskan ke <strong>Tim Administrator IT RS Sentosa Medika</strong>.
-                            Kami akan memverifikasi data dan menghubungi Anda melalui
-                            WhatsApp / Email dalam 1x24 jam kerja.
+                            Terima kasih, data pengajuan akses akun staf Anda
+                            telah diteruskan ke{' '}
+                            <strong>
+                                Tim Administrator IT RS Sentosa Medika
+                            </strong>
+                            . Kami akan memverifikasi data dan menghubungi Anda
+                            melalui WhatsApp / Email dalam 1x24 jam kerja.
                         </p>
 
                         <div className="mt-3 flex flex-col gap-1.5">
@@ -90,12 +93,15 @@ export default function RequestAccess() {
                     <>
                         {/* Information Banner */}
                         <div className="mt-1.5 rounded-md bg-[#e6f3f1] p-2 text-[10.5px] leading-snug text-gray-600 sm:mt-2 sm:text-xs">
-                            Akun staf internal dibuat oleh Administrator Sistem. Jika
-                            Anda staf baru dan belum memiliki akun, silakan hubungi
-                            bagian IT/Admin melalui form di bawah ini.
+                            Akun staf internal dibuat oleh Administrator Sistem.
+                            Jika Anda staf baru dan belum memiliki akun, silakan
+                            hubungi bagian IT/Admin melalui form di bawah ini.
                         </div>
 
-                        <form onSubmit={handleSubmit} className="mt-2 space-y-1.5 sm:mt-2.5 sm:space-y-2">
+                        <form
+                            onSubmit={handleSubmit}
+                            className="mt-2 space-y-1.5 sm:mt-2.5 sm:space-y-2"
+                        >
                             {/* Nama Lengkap */}
                             <div>
                                 <label className="mb-0.5 block text-[10.5px] font-semibold text-gray-700 sm:text-xs">
@@ -179,7 +185,7 @@ export default function RequestAccess() {
                                             Administrator IT & SIMRS
                                         </option>
                                     </select>
-                                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
+                                    <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
                                 </div>
                                 {errors.role && (
                                     <p className="mt-0.5 text-[9.5px] text-red-500">

@@ -30,6 +30,7 @@ return new class extends Migration
             $table->text('keluhan_utama');
             $table->string('icd10_code', 10)->nullable();
             $table->text('diagnosis_deskripsi')->nullable();
+            $table->enum('status_diagnosa', ['aktif', 'sembuh', 'kronis', 'kontrol'])->default('aktif');
             $table->text('catatan_dokter')->nullable();
 
             // File Upload
